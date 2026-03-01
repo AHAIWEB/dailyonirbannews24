@@ -306,7 +306,7 @@ export default function QuickPost() {
           )}
 
           {/* Bookmarklet Section */}
-          <div className="bg-card rounded shadow-sm p-6">
+          <div className="bg-card rounded shadow-sm p-6 mb-4">
             <h2 className="text-sm font-bold text-foreground mb-3 border-b-2 border-primary pb-2">
               ⚡ বুকমার্কলেট — যেকোনো সাইট থেকে শেয়ার করুন
             </h2>
@@ -325,6 +325,50 @@ export default function QuickPost() {
                 📰 বাংলাখবরে পোস্ট
               </a>
               <span className="text-[11px] text-muted-foreground">← এটি ড্র্যাগ করে বুকমার্ক বারে রাখুন</span>
+            </div>
+          </div>
+
+          {/* Quick Post Guide */}
+          <div className="bg-card rounded shadow-sm p-6">
+            <h2 className="text-sm font-bold text-foreground mb-4 border-b-2 border-primary pb-2">
+              📖 কুইক পোস্ট ব্যবহার গাইড
+            </h2>
+            <div className="space-y-4 text-sm text-foreground leading-relaxed">
+              <div className="flex gap-3">
+                <span className="bg-primary text-primary-foreground w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold shrink-0">১</span>
+                <div>
+                  <h4 className="font-bold mb-1">URL দিন ও ফেচ করুন</h4>
+                  <p className="text-xs text-muted-foreground">যেকোনো নিউজ সাইটের আর্টিকেল লিংক উপরের বক্সে পেস্ট করুন এবং "ফেচ করুন" বাটনে ক্লিক করুন। সিস্টেম স্বয়ংক্রিয়ভাবে শিরোনাম, ছবি এবং কন্টেন্টের প্রথম অর্ধাংশ নিয়ে আসবে।</p>
+                </div>
+              </div>
+              <div className="flex gap-3">
+                <span className="bg-primary text-primary-foreground w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold shrink-0">২</span>
+                <div>
+                  <h4 className="font-bold mb-1">প্রিভিউ দেখুন</h4>
+                  <p className="text-xs text-muted-foreground">ফেচ করার পরে কন্টেন্টের প্রিভিউ দেখানো হবে — ছবি, শিরোনাম, অর্ধেক কন্টেন্ট এবং "সম্পূর্ণ আর্টিকেল পড়ুন" সোর্স লিংক। চেক করুন সবকিছু ঠিক আছে কিনা।</p>
+                </div>
+              </div>
+              <div className="flex gap-3">
+                <span className="bg-primary text-primary-foreground w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold shrink-0">৩</span>
+                <div>
+                  <h4 className="font-bold mb-1">ক্যাটাগরি / লেবেল নির্বাচন</h4>
+                  <p className="text-xs text-muted-foreground">পোস্টের জন্য প্রাসঙ্গিক ক্যাটাগরি বা লেবেল সিলেক্ট করুন (জাতীয়, আন্তর্জাতিক, খেলাধুলা ইত্যাদি)। কাস্টম লেবেলও যোগ করতে পারবেন।</p>
+                </div>
+              </div>
+              <div className="flex gap-3">
+                <span className="bg-primary text-primary-foreground w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold shrink-0">৪</span>
+                <div>
+                  <h4 className="font-bold mb-1">Blogger-এ পোস্ট করুন</h4>
+                  <p className="text-xs text-muted-foreground">"Blogger-এ পোস্ট করুন" বাটনে ক্লিক করলে Blogger এডিটর খুলবে — শিরোনাম, কন্টেন্ট, সোর্স লিংক ও লেবেল সব অটো-ফিল হয়ে যাবে। শুধু পাবলিশ করুন!</p>
+                </div>
+              </div>
+              <div className="flex gap-3">
+                <span className="bg-primary text-primary-foreground w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold shrink-0">৫</span>
+                <div>
+                  <h4 className="font-bold mb-1">বুকমার্কলেট (দ্রুত শর্টকাট)</h4>
+                  <p className="text-xs text-muted-foreground">উপরের "📰 বাংলাখবরে পোস্ট" বাটনটি ড্র্যাগ করে ব্রাউজারের বুকমার্ক বারে রাখুন। এরপর যেকোনো ওয়েবসাইটে থাকা অবস্থায় বুকমার্কলেটে ক্লিক করলে সরাসরি এই টুলে URL চলে আসবে।</p>
+                </div>
+              </div>
             </div>
           </div>
         </div>
