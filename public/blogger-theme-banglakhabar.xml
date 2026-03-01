@@ -9,8 +9,6 @@
 
 <!-- Fonts -->
 <link href='https://fonts.googleapis.com/css2?family=Noto+Sans+Bengali:wght@300;400;500;600;700;800;900&amp;family=Tiro+Bangla:ital@0;1&amp;display=swap' rel='stylesheet'/>
-<!-- Lucide Icons -->
-<link href='https://cdn.jsdelivr.net/npm/lucide-static@latest/font/lucide.min.css' rel='stylesheet'/>
 
 <b:skin><![CDATA[
 /* ===== VARIABLES ===== */
@@ -596,27 +594,8 @@ h1,h2,h3,h4,h5,h6 { font-family: 'Noto Sans Bengali', sans-serif; }
   color: rgba(255,255,255,.5);
 }
 
-/* ===== URL PREVIEW ===== */
-.url-preview-input { display: flex; gap: 8px; margin-bottom: 16px; }
-.url-preview-input input {
-  flex: 1; background: var(--muted); border: 1px solid var(--border);
-  border-radius: 4px; padding: 8px 12px; font-size: 13px; font-family: inherit;
-}
-.url-preview-input input:focus { outline: none; border-color: var(--primary); }
-.url-preview-input button {
-  background: var(--primary); color: var(--primary-fg);
-  border: none; padding: 8px 16px; border-radius: 4px;
-  font-size: 12px; font-weight: 600; cursor: pointer;
-}
-.url-preview-card { border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
-.url-preview-card img.preview-img { width: 100%; aspect-ratio: 16/9; object-fit: cover; }
-.url-preview-card .preview-body { padding: 16px; }
-.url-preview-card .source { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
-.url-preview-card .source img { width: 16px; height: 16px; border-radius: 2px; }
-.url-preview-card .source span { font-size: 11px; color: var(--muted-fg); font-weight: 500; text-transform: uppercase; letter-spacing: 1px; }
-.url-preview-card h4 { font-size: 14px; font-weight: 700; line-height: 1.6; }
-.url-preview-card h4:hover { color: var(--primary); }
-.url-preview-card p { font-size: 12px; color: var(--muted-fg); margin-top: 6px; line-height: 1.6; }
+/* Widget wrapper in dashboard */
+.widget-content { margin-bottom: 0; }
 ]]></b:skin>
 
 </head>
@@ -630,9 +609,6 @@ h1,h2,h3,h4,h5,h6 { font-family: 'Noto Sans Bengali', sans-serif; }
         <div class='logo-sm'>বা</div>
       </a>
       <span style='color:#fff;font-weight:700;font-size:14px;'>বাংলাখবর</span>
-      <div class='flex hidden' id='stickyNavLinks' style='display:none;'>
-        <!-- Desktop sticky links populated by JS -->
-      </div>
     </div>
     <div class='flex items-center gap-2'>
       <button class='mobile-menu-btn' onclick='toggleMobileMenu()' style='color:#fff;font-size:20px;'>☰</button>
@@ -664,73 +640,104 @@ h1,h2,h3,h4,h5,h6 { font-family: 'Noto Sans Bengali', sans-serif; }
   </nav>
 </div>
 
-<!-- ===== HEADER ===== -->
-<header>
-  <!-- Top bar -->
-  <div class='top-bar'>
-    <div class='container flex items-center justify-between'>
-      <span>📧 info@banglakhabar.com | ☎ +৮৮০-১৭০০-০০০০০০</span>
-      <span>👤 লগইন | 🔔 নোটিফিকেশন</span>
-    </div>
-  </div>
-
-  <!-- Date bar -->
-  <div class='date-bar'>
-    <div class='container flex flex-wrap items-center gap-3'>
-      <strong>আজ রবিবার |</strong>
-      <span>০১ মার্চ ২০২৬ ইংরেজি</span>
-      <span class='bangla-date'>১৬ ফাল্গুন, ১৪৩২, বসন্তকাল</span>
-      <span class='hijri-date'>১২ রমজান ১৪৪৭ হিজরি</span>
-    </div>
-  </div>
-
-  <!-- Logo -->
-  <div class='header-logo'>
-    <div class='container flex items-center justify-between'>
-      <a class='flex items-center gap-3' expr:href='data:blog.homepageUrl'>
-        <div class='logo-icon'>বা</div>
-        <div class='logo-text'>
-          <h1>বাংলা<span>খবর</span></h1>
-          <p>সত্যের সন্ধানে নিরন্তর</p>
+<!-- ===== HEADER SECTION ===== -->
+<b:section class='header-section' id='header-section' showaddelement='yes'>
+  <b:widget id='Header1' locked='false' title='হেডার' type='HTML' version='2' visible='true'>
+    <b:includable id='main'>
+      <header>
+        <!-- Top bar -->
+        <div class='top-bar'>
+          <div class='container flex items-center justify-between'>
+            <span>📧 info@banglakhabar.com | ☎ +৮৮০-১৭০০-০০০০০০</span>
+            <span>👤 লগইন | 🔔 নোটিফিকেশন</span>
+          </div>
         </div>
-      </a>
-      <div class='ad-banner'>বিজ্ঞাপন — ৪৬৮×৬০</div>
-      <button class='mobile-menu-btn' onclick='toggleMobileMenu()'>☰</button>
-    </div>
-  </div>
 
-  <!-- Main navigation -->
-  <div class='main-nav'>
-    <div class='container flex items-center'>
-      <a class='nav-all-btn' href='#'>☰ সকল বিভাগ</a>
-      <a href='/search/label/জাতীয়'>জাতীয়</a>
-      <a href='/search/label/রাজনীতি'>রাজনীতি</a>
-      <a href='/search/label/আন্তর্জাতিক'>আন্তর্জাতিক</a>
-      <a href='/search/label/অর্থনীতি'>অর্থনীতি</a>
-      <a href='/search/label/বিনোদন'>বিনোদন</a>
-      <a href='/search/label/খেলাধুলা'>খেলাধুলা</a>
-      <a href='/search/label/প্রযুক্তি'>প্রযুক্তি</a>
-      <a href='/search/label/শিক্ষা'>শিক্ষা</a>
-      <a href='/search/label/স্বাস্থ্য'>স্বাস্থ্য</a>
-      <a href='/search/label/লাইফস্টাইল'>লাইফস্টাইল</a>
-      <a href='/search/label/মত-দ্বিমত'>মত-দ্বিমত</a>
-      <a href='/search/label/ভিডিও'>ভিডিও</a>
-    </div>
-  </div>
-</header>
+        <!-- Date bar -->
+        <div class='date-bar'>
+          <div class='container flex flex-wrap items-center gap-3'>
+            <strong>আজ রবিবার |</strong>
+            <span>০১ মার্চ ২০২৬ ইংরেজি</span>
+            <span class='bangla-date'>১৬ ফাল্গুন, ১৪৩২, বসন্তকাল</span>
+            <span class='hijri-date'>১২ রমজান ১৪৪৭ হিজরি</span>
+          </div>
+        </div>
 
-<!-- ===== BREAKING NEWS ===== -->
-<div class='container' style='margin-top:8px;'>
-  <div class='breaking-bar'>
-    <div class='breaking-label'><div class='dot'/> ব্রেকিং</div>
-    <div class='ticker-wrap'>
-      <div class='ticker-content' id='breakingTicker'>
-        <!-- Breaking news items loaded via label feed -->
+        <!-- Logo -->
+        <div class='header-logo'>
+          <div class='container flex items-center justify-between'>
+            <a class='flex items-center gap-3' expr:href='data:blog.homepageUrl'>
+              <div class='logo-icon'>বা</div>
+              <div class='logo-text'>
+                <h1>বাংলা<span>খবর</span></h1>
+                <p>সত্যের সন্ধানে নিরন্তর</p>
+              </div>
+            </a>
+            <div class='ad-banner'>বিজ্ঞাপন — ৪৬৮×৬০</div>
+            <button class='mobile-menu-btn' onclick='toggleMobileMenu()'>☰</button>
+          </div>
+        </div>
+
+        <!-- Main navigation -->
+        <div class='main-nav'>
+          <div class='container flex items-center'>
+            <a class='nav-all-btn' href='#'>☰ সকল বিভাগ</a>
+            <a href='/search/label/জাতীয়'>জাতীয়</a>
+            <a href='/search/label/রাজনীতি'>রাজনীতি</a>
+            <a href='/search/label/আন্তর্জাতিক'>আন্তর্জাতিক</a>
+            <a href='/search/label/অর্থনীতি'>অর্থনীতি</a>
+            <a href='/search/label/বিনোদন'>বিনোদন</a>
+            <a href='/search/label/খেলাধুলা'>খেলাধুলা</a>
+            <a href='/search/label/প্রযুক্তি'>প্রযুক্তি</a>
+            <a href='/search/label/শিক্ষা'>শিক্ষা</a>
+            <a href='/search/label/স্বাস্থ্য'>স্বাস্থ্য</a>
+            <a href='/search/label/লাইফস্টাইল'>লাইফস্টাইল</a>
+            <a href='/search/label/মত-দ্বিমত'>মত-দ্বিমত</a>
+            <a href='/search/label/ভিডিও'>ভিডিও</a>
+          </div>
+        </div>
+      </header>
+    </b:includable>
+  </b:widget>
+</b:section>
+
+<!-- ===== BREAKING NEWS SECTION ===== -->
+<b:section class='breaking-section' id='breaking-section' showaddelement='yes'>
+  <b:widget id='BreakingNews1' locked='false' title='ব্রেকিং নিউজ' type='HTML' version='2' visible='true'>
+    <b:includable id='main'>
+      <div class='container' style='margin-top:8px;'>
+        <div class='breaking-bar'>
+          <div class='breaking-label'><div class='dot'/> ব্রেকিং</div>
+          <div class='ticker-wrap'>
+            <div class='ticker-content' id='breakingTicker'>
+              <!-- Auto-loaded via JS -->
+            </div>
+          </div>
+          <a class='breaking-latest' href='/search/label/সর্বশেষ'>সর্বশেষ ❯</a>
+        </div>
       </div>
-    </div>
-    <a class='breaking-latest' href='/search/label/সর্বশেষ'>সর্বশেষ ❯</a>
-  </div>
-</div>
+      <script>
+      //<![CDATA[
+      (function(){
+        var s=document.createElement('script');
+        s.src='/feeds/posts/default/-/ব্রেকিং?alt=json-in-script&max-results=5&callback=_bkBreaking';
+        document.body.appendChild(s);
+      })();
+      function _bkBreaking(d){
+        if(!d.feed||!d.feed.entry)return;
+        var h='';
+        d.feed.entry.forEach(function(e){
+          var u='#';
+          for(var i=0;i<e.link.length;i++){if(e.link[i].rel==='alternate'){u=e.link[i].href;break;}}
+          h+='<a href="'+u+'" style="white-space:nowrap;padding:0 20px;">'+e.title.$t+' ●</a>';
+        });
+        document.getElementById('breakingTicker').innerHTML=h+h;
+      }
+      //]]>
+      </script>
+    </b:includable>
+  </b:widget>
+</b:section>
 
 <!-- ===== MAIN CONTENT ===== -->
 <div class='container'>
@@ -738,94 +745,69 @@ h1,h2,h3,h4,h5,h6 { font-family: 'Noto Sans Bengali', sans-serif; }
 
     <!-- ===== LEFT SIDEBAR ===== -->
     <aside>
-      <!-- Tab Widget: পিপল / একটু থামুন -->
-      <div class='card sidebar-tabs' style='margin-bottom:16px;'>
-        <div class='tab-header'>
-          <button class='tab-btn active' onclick='switchTab(this, &quot;left-tab-1&quot;)'>পিপল</button>
-          <button class='tab-btn' onclick='switchTab(this, &quot;left-tab-2&quot;)'>একটু থামুন</button>
-        </div>
-        <div class='tab-content' id='left-tab-1'>
-          <div id='leftTab1Content'><!-- Loaded via feed --></div>
-        </div>
-        <div class='tab-content' id='left-tab-2' style='display:none;'>
-          <div id='leftTab2Content'><!-- Loaded via feed --></div>
-        </div>
-      </div>
+      <b:section class='left-sidebar' id='left-sidebar' showaddelement='yes'>
 
-      <!-- Widget: ভাইরাল -->
-      <div class='card sidebar-widget'>
-        <div class='widget-header'>❝ ভাইরাল ❞</div>
-        <div id='viralWidget'><!-- Loaded via feed --></div>
-      </div>
+        <!-- পিপল / একটু থামুন ট্যাব -->
+        <b:widget id='LeftTabs1' locked='false' title='পিপল / একটু থামুন' type='HTML' version='2' visible='true'>
+          <b:includable id='main'>
+            <div class='card sidebar-tabs' style='margin-bottom:16px;'>
+              <div class='tab-header'>
+                <button class='tab-btn active' onclick='switchTab(this,"lt1")'>পিপল</button>
+                <button class='tab-btn' onclick='switchTab(this,"lt2")'>একটু থামুন</button>
+              </div>
+              <div class='tab-content' id='lt1'><div id='lt1c'></div></div>
+              <div class='tab-content' id='lt2' style='display:none;'><div id='lt2c'></div></div>
+            </div>
+            <script>
+            //<![CDATA[
+            (function(){
+              var s1=document.createElement('script');
+              s1.src='/feeds/posts/default/-/পিপল?alt=json-in-script&max-results=7&callback=_bkLt1';
+              document.body.appendChild(s1);
+              var s2=document.createElement('script');
+              s2.src='/feeds/posts/default/-/একটু থামুন?alt=json-in-script&max-results=7&callback=_bkLt2';
+              document.body.appendChild(s2);
+            })();
+            function _bkLt1(d){_renderSideTab('lt1c',d);}
+            function _bkLt2(d){_renderSideTab('lt2c',d);}
+            //]]>
+            </script>
+          </b:includable>
+        </b:widget>
+
+        <!-- ভাইরাল উইজেট -->
+        <b:widget id='LeftViral1' locked='false' title='ভাইরাল' type='HTML' version='2' visible='true'>
+          <b:includable id='main'>
+            <div class='card sidebar-widget' style='margin-bottom:16px;'>
+              <div class='widget-header'>❝ ভাইরাল ❞</div>
+              <div id='viralWidget'></div>
+            </div>
+            <script>
+            //<![CDATA[
+            (function(){
+              var s=document.createElement('script');
+              s.src='/feeds/posts/default/-/ভাইরাল?alt=json-in-script&max-results=1&callback=_bkViral';
+              document.body.appendChild(s);
+            })();
+            function _bkViral(d){_renderSideWidget('viralWidget',d);}
+            //]]>
+            </script>
+          </b:includable>
+        </b:widget>
+
+      </b:section>
     </aside>
 
     <!-- ===== MAIN AREA ===== -->
     <main>
 
-      <b:section class='main' id='main' showaddelement='no'>
+      <b:section class='main-content' id='main' showaddelement='yes'>
         <b:widget id='Blog1' locked='true' title='Blog Posts' type='Blog' version='2' visible='true'>
           <b:includable id='main'>
 
             <!-- HOME PAGE -->
             <b:if cond='data:blog.homepageUrl == data:blog.url'>
-
-              <!-- শীর্ষ সংবাদ -->
-              <div class='section-label'><span>শীর্ষ সংবাদ</span><a class='more' href='/search/label/শীর্ষ সংবাদ'>আরও ❯</a></div>
-              <div id='topNewsSection'><!-- Loaded via label feed JS --></div>
-
-              <!-- কারসরল স্লাইড -->
-              <div class='section-label' style='margin-top:24px;'><span>কারসরল স্লাইড</span></div>
-              <div class='card carousel-wrap' id='carouselSection'>
-                <button class='carousel-btn prev' onclick='carouselPrev()'>❮</button>
-                <div class='carousel-track' id='carouselTrack'><!-- Loaded via feed --></div>
-                <button class='carousel-btn next' onclick='carouselNext()'>❯</button>
-              </div>
-
-              <!-- হাইলাইটস -->
-              <div class='section-label' style='margin-top:24px;'><span>হাইলাইটস</span><a class='more' href='/search/label/হাইলাইটস'>আরও ❯</a></div>
-              <div id='highlightsSection'><!-- Loaded via feed --></div>
-
-              <!-- জাতীয় -->
-              <div class='section-label' style='margin-top:24px;'><span>জাতীয়</span><a class='more' href='/search/label/জাতীয়'>আরও ❯</a></div>
-              <div class='grid-2' id='nationalSection'><!-- Loaded via feed --></div>
-
-              <!-- রাজনীতি -->
-              <div class='section-label' style='margin-top:24px;'><span>রাজনীতি</span><a class='more' href='/search/label/রাজনীতি'>আরও ❯</a></div>
-              <div id='politicsSection'><!-- Loaded via feed --></div>
-
-              <!-- আন্তর্জাতিক -->
-              <div class='section-label' style='margin-top:24px;'><span>আন্তর্জাতিক</span><a class='more' href='/search/label/আন্তর্জাতিক'>আরও ❯</a></div>
-              <div id='internationalSection'><!-- Loaded via feed --></div>
-
-              <!-- বিনোদন -->
-              <div class='section-label' style='margin-top:24px;'><span>বিনোদন</span><a class='more' href='/search/label/বিনোদন'>আরও ❯</a></div>
-              <div class='ent-grid' id='entertainmentSection'><!-- Loaded via feed --></div>
-
-              <!-- দেশ বাংলা -->
-              <div class='section-label' style='margin-top:24px;'><span>দেশ বাংলা</span></div>
-              <div class='dropdown-bar flex gap-2'>
-                <select id='divisionSelect'><option>বিভাগ</option><option>ঢাকা</option><option>চট্টগ্রাম</option><option>রাজশাহী</option><option>খুলনা</option><option>বরিশাল</option><option>সিলেট</option><option>রংপুর</option><option>ময়মনসিংহ</option></select>
-                <select id='districtSelect'><option>জেলা</option><option>ঢাকা</option><option>গাজীপুর</option><option>নারায়ণগঞ্জ</option><option>মানিকগঞ্জ</option><option>মুন্সীগঞ্জ</option></select>
-                <select id='upazilaSelect'><option>উপজেলা</option><option>সাভার</option><option>ধামরাই</option><option>কেরানীগঞ্জ</option><option>নবাবগঞ্জ</option></select>
-              </div>
-              <div class='grid-2' id='deshBanglaSection'><!-- Loaded via feed --></div>
-
-              <!-- লাইফস্টাইল -->
-              <div class='section-label' style='margin-top:24px;'><span>লাইফস্টাইল</span><a class='more' href='/search/label/লাইফস্টাইল'>আরও ❯</a></div>
-              <div id='lifestyleSection'><!-- Loaded via feed --></div>
-
-              <!-- স্বাস্থ্যসেবা -->
-              <div class='section-label' style='margin-top:24px;'><span>স্বাস্থ্যসেবা</span><a class='more' href='/search/label/স্বাস্থ্যসেবা'>আরও ❯</a></div>
-              <div id='healthSection'><!-- Loaded via feed --></div>
-
-              <!-- মত-দ্বিমত -->
-              <div class='section-label' style='margin-top:24px;'><span>মত-দ্বিমত</span></div>
-              <div class='opinion-grid' id='opinionSection'><!-- Loaded via feed --></div>
-
-              <!-- ভিডিও -->
-              <div class='section-label' style='margin-top:24px;'><span>ভিডিও</span><a class='more' href='/search/label/ভিডিও'>আরও ❯</a></div>
-              <div class='grid-4' id='videoSection'><!-- Loaded via feed --></div>
-
+              <!-- Sections are loaded by HTML widgets below -->
             </b:if>
 
             <!-- POST PAGE -->
@@ -899,9 +881,7 @@ h1,h2,h3,h4,h5,h6 { font-family: 'Noto Sans Bengali', sans-serif; }
                 <!-- Related Posts -->
                 <div class='card' style='padding:16px 24px; margin-top:16px;'>
                   <h3 style='font-size:14px;font-weight:700;margin-bottom:16px;border-bottom:2px solid var(--primary);padding-bottom:8px;'>সম্পর্কিত সংবাদ</h3>
-                  <div class='related-grid' id='relatedPosts'>
-                    <!-- Loaded via JS using post labels -->
-                  </div>
+                  <div class='related-grid' id='relatedPosts'></div>
                 </div>
 
               </b:loop>
@@ -969,83 +949,438 @@ h1,h2,h3,h4,h5,h6 { font-family: 'Noto Sans Bengali', sans-serif; }
         </b:widget>
       </b:section>
 
+      <!-- HOME PAGE LABEL SECTIONS (each as separate widget) -->
+      <b:section class='home-sections' id='home-sections' showaddelement='yes'>
+
+        <!-- শীর্ষ সংবাদ -->
+        <b:widget id='TopNews1' locked='false' title='শীর্ষ সংবাদ' type='HTML' version='2' visible='true'>
+          <b:includable id='main'>
+            <div class='section-label'><span>শীর্ষ সংবাদ</span><a class='more' href='/search/label/শীর্ষ সংবাদ'>আরও ❯</a></div>
+            <div id='topNewsSection'></div>
+            <script>
+            //<![CDATA[
+            (function(){
+              var s=document.createElement('script');
+              s.src='/feeds/posts/default/-/শীর্ষ সংবাদ?alt=json-in-script&max-results=3&callback=_bkTopNews';
+              document.body.appendChild(s);
+            })();
+            function _bkTopNews(d){
+              if(!d.feed||!d.feed.entry)return;
+              var entries=d.feed.entry;
+              var h='<div class="grid-top">';
+              var e=entries[0];
+              h+='<a href="'+_gu(e)+'" class="card post-card top-main" style="display:block;">';
+              h+='<div class="overflow-hidden aspect-video"><img class="post-img" src="'+_gi(e)+'" alt="'+e.title.$t+'" style="width:100%;height:100%;object-fit:cover;"/></div>';
+              h+='<div style="padding:16px;"><span class="post-label">শীর্ষ সংবাদ</span>';
+              h+='<h2>'+e.title.$t+'</h2>';
+              h+='<p style="font-size:13px;color:var(--muted-fg);margin-top:8px;" class="line-clamp-2">'+_ge(e,120)+'</p>';
+              h+='</div></a>';
+              h+='<div>';
+              for(var i=1;i<Math.min(entries.length,3);i++){
+                var s=entries[i];
+                h+='<a href="'+_gu(s)+'" class="card post-card top-side" style="display:block;margin-bottom:16px;">';
+                h+='<div class="overflow-hidden aspect-video"><img class="post-img" src="'+_gi(s)+'" alt="'+s.title.$t+'" style="width:100%;height:100%;object-fit:cover;"/></div>';
+                h+='<div style="padding:12px;"><h3 class="line-clamp-2">'+s.title.$t+'</h3></div></a>';
+              }
+              h+='</div></div>';
+              document.getElementById('topNewsSection').innerHTML=h;
+            }
+            //]]>
+            </script>
+          </b:includable>
+        </b:widget>
+
+        <!-- কারসরল স্লাইড -->
+        <b:widget id='Carousel1' locked='false' title='কারসরল স্লাইড' type='HTML' version='2' visible='true'>
+          <b:includable id='main'>
+            <div class='section-label' style='margin-top:24px;'><span>কারসরল স্লাইড</span></div>
+            <div class='card carousel-wrap' id='carouselSection'>
+              <button class='carousel-btn prev' onclick='carouselPrev()'>❮</button>
+              <div class='carousel-track' id='carouselTrack'></div>
+              <button class='carousel-btn next' onclick='carouselNext()'>❯</button>
+            </div>
+            <script>
+            //<![CDATA[
+            (function(){
+              var s=document.createElement('script');
+              s.src='/feeds/posts/default/-/স্লাইড?alt=json-in-script&max-results=8&callback=_bkCarousel';
+              document.body.appendChild(s);
+            })();
+            function _bkCarousel(d){
+              if(!d.feed||!d.feed.entry)return;
+              var h='';
+              d.feed.entry.forEach(function(e){
+                h+='<a href="'+_gu(e)+'" class="carousel-item post-card">';
+                h+='<img class="post-img" src="'+_gi(e)+'" alt="'+e.title.$t+'"/>';
+                h+='<h3 class="line-clamp-2">'+e.title.$t+'</h3></a>';
+              });
+              document.getElementById('carouselTrack').innerHTML=h;
+            }
+            var _cPos=0;
+            function carouselNext(){
+              var t=document.getElementById('carouselTrack');
+              if(!t)return;
+              var items=t.querySelectorAll('.carousel-item');
+              var mx=Math.max(0,items.length-4);
+              _cPos=Math.min(_cPos+1,mx);
+              t.style.transform='translateX(-'+(_cPos*25)+'%)';
+              t.style.transition='transform .5s';
+            }
+            function carouselPrev(){
+              var t=document.getElementById('carouselTrack');
+              if(!t)return;
+              _cPos=Math.max(0,_cPos-1);
+              t.style.transform='translateX(-'+(_cPos*25)+'%)';
+              t.style.transition='transform .5s';
+            }
+            setInterval(function(){carouselNext();if(_cPos>=4)_cPos=-1;},4000);
+            //]]>
+            </script>
+          </b:includable>
+        </b:widget>
+
+        <!-- হাইলাইটস -->
+        <b:widget id='Highlights1' locked='false' title='হাইলাইটস' type='HTML' version='2' visible='true'>
+          <b:includable id='main'>
+            <div class='section-label' style='margin-top:24px;'><span>হাইলাইটস</span><a class='more' href='/search/label/হাইলাইটস'>আরও ❯</a></div>
+            <div id='highlightsSection'></div>
+            <script>
+            //<![CDATA[
+            (function(){
+              var s=document.createElement('script');
+              s.src='/feeds/posts/default/-/হাইলাইটস?alt=json-in-script&max-results=6&callback=_bkHighlights';
+              document.body.appendChild(s);
+            })();
+            function _bkHighlights(d){_renderHighlight('highlightsSection',d);}
+            //]]>
+            </script>
+          </b:includable>
+        </b:widget>
+
+        <!-- জাতীয় -->
+        <b:widget id='National1' locked='false' title='জাতীয়' type='HTML' version='2' visible='true'>
+          <b:includable id='main'>
+            <div class='section-label' style='margin-top:24px;'><span>জাতীয়</span><a class='more' href='/search/label/জাতীয়'>আরও ❯</a></div>
+            <div class='grid-2' id='nationalSection'></div>
+            <script>
+            //<![CDATA[
+            (function(){
+              var s=document.createElement('script');
+              s.src='/feeds/posts/default/-/জাতীয়?alt=json-in-script&max-results=4&callback=_bkNational';
+              document.body.appendChild(s);
+            })();
+            function _bkNational(d){_renderGrid('nationalSection',d,'aspect-video');}
+            //]]>
+            </script>
+          </b:includable>
+        </b:widget>
+
+        <!-- রাজনীতি -->
+        <b:widget id='Politics1' locked='false' title='রাজনীতি' type='HTML' version='2' visible='true'>
+          <b:includable id='main'>
+            <div class='section-label' style='margin-top:24px;'><span>রাজনীতি</span><a class='more' href='/search/label/রাজনীতি'>আরও ❯</a></div>
+            <div id='politicsSection'></div>
+            <script>
+            //<![CDATA[
+            (function(){
+              var s=document.createElement('script');
+              s.src='/feeds/posts/default/-/রাজনীতি?alt=json-in-script&max-results=4&callback=_bkPolitics';
+              document.body.appendChild(s);
+            })();
+            function _bkPolitics(d){_renderList('politicsSection',d);}
+            //]]>
+            </script>
+          </b:includable>
+        </b:widget>
+
+        <!-- আন্তর্জাতিক -->
+        <b:widget id='International1' locked='false' title='আন্তর্জাতিক' type='HTML' version='2' visible='true'>
+          <b:includable id='main'>
+            <div class='section-label' style='margin-top:24px;'><span>আন্তর্জাতিক</span><a class='more' href='/search/label/আন্তর্জাতিক'>আরও ❯</a></div>
+            <div id='internationalSection'></div>
+            <script>
+            //<![CDATA[
+            (function(){
+              var s=document.createElement('script');
+              s.src='/feeds/posts/default/-/আন্তর্জাতিক?alt=json-in-script&max-results=5&callback=_bkInternational';
+              document.body.appendChild(s);
+            })();
+            function _bkInternational(d){_renderHighlight('internationalSection',d);}
+            //]]>
+            </script>
+          </b:includable>
+        </b:widget>
+
+        <!-- বিনোদন -->
+        <b:widget id='Entertainment1' locked='false' title='বিনোদন' type='HTML' version='2' visible='true'>
+          <b:includable id='main'>
+            <div class='section-label' style='margin-top:24px;'><span>বিনোদন</span><a class='more' href='/search/label/বিনোদন'>আরও ❯</a></div>
+            <div class='ent-grid' id='entertainmentSection'></div>
+            <script>
+            //<![CDATA[
+            (function(){
+              var s=document.createElement('script');
+              s.src='/feeds/posts/default/-/বিনোদন?alt=json-in-script&max-results=6&callback=_bkEntertainment';
+              document.body.appendChild(s);
+            })();
+            function _bkEntertainment(d){_renderGrid('entertainmentSection',d,'aspect-portrait');}
+            //]]>
+            </script>
+          </b:includable>
+        </b:widget>
+
+        <!-- দেশ বাংলা -->
+        <b:widget id='DeshBangla1' locked='false' title='দেশ বাংলা' type='HTML' version='2' visible='true'>
+          <b:includable id='main'>
+            <div class='section-label' style='margin-top:24px;'><span>দেশ বাংলা</span></div>
+            <div class='dropdown-bar flex gap-2'>
+              <select id='divisionSelect'><option>বিভাগ</option><option>ঢাকা</option><option>চট্টগ্রাম</option><option>রাজশাহী</option><option>খুলনা</option><option>বরিশাল</option><option>সিলেট</option><option>রংপুর</option><option>ময়মনসিংহ</option></select>
+              <select id='districtSelect'><option>জেলা</option><option>ঢাকা</option><option>গাজীপুর</option><option>নারায়ণগঞ্জ</option><option>মানিকগঞ্জ</option><option>মুন্সীগঞ্জ</option></select>
+              <select id='upazilaSelect'><option>উপজেলা</option><option>সাভার</option><option>ধামরাই</option><option>কেরানীগঞ্জ</option><option>নবাবগঞ্জ</option></select>
+            </div>
+            <div class='grid-2' id='deshBanglaSection'></div>
+            <script>
+            //<![CDATA[
+            (function(){
+              var s=document.createElement('script');
+              s.src='/feeds/posts/default/-/দেশ বাংলা?alt=json-in-script&max-results=4&callback=_bkDeshBangla';
+              document.body.appendChild(s);
+            })();
+            function _bkDeshBangla(d){_renderGrid('deshBanglaSection',d,'aspect-video');}
+            //]]>
+            </script>
+          </b:includable>
+        </b:widget>
+
+        <!-- লাইফস্টাইল -->
+        <b:widget id='Lifestyle1' locked='false' title='লাইফস্টাইল' type='HTML' version='2' visible='true'>
+          <b:includable id='main'>
+            <div class='section-label' style='margin-top:24px;'><span>লাইফস্টাইল</span><a class='more' href='/search/label/লাইফস্টাইল'>আরও ❯</a></div>
+            <div id='lifestyleSection'></div>
+            <script>
+            //<![CDATA[
+            (function(){
+              var s=document.createElement('script');
+              s.src='/feeds/posts/default/-/লাইফস্টাইল?alt=json-in-script&max-results=6&callback=_bkLifestyle';
+              document.body.appendChild(s);
+            })();
+            function _bkLifestyle(d){_renderHighlight('lifestyleSection',d);}
+            //]]>
+            </script>
+          </b:includable>
+        </b:widget>
+
+        <!-- স্বাস্থ্যসেবা -->
+        <b:widget id='Health1' locked='false' title='স্বাস্থ্যসেবা' type='HTML' version='2' visible='true'>
+          <b:includable id='main'>
+            <div class='section-label' style='margin-top:24px;'><span>স্বাস্থ্যসেবা</span><a class='more' href='/search/label/স্বাস্থ্যসেবা'>আরও ❯</a></div>
+            <div id='healthSection'></div>
+            <script>
+            //<![CDATA[
+            (function(){
+              var s=document.createElement('script');
+              s.src='/feeds/posts/default/-/স্বাস্থ্যসেবা?alt=json-in-script&max-results=4&callback=_bkHealth';
+              document.body.appendChild(s);
+            })();
+            function _bkHealth(d){_renderList('healthSection',d);}
+            //]]>
+            </script>
+          </b:includable>
+        </b:widget>
+
+        <!-- মত-দ্বিমত -->
+        <b:widget id='Opinion1' locked='false' title='মত-দ্বিমত' type='HTML' version='2' visible='true'>
+          <b:includable id='main'>
+            <div class='section-label' style='margin-top:24px;'><span>মত-দ্বিমত</span></div>
+            <div class='opinion-grid' id='opinionSection'></div>
+            <script>
+            //<![CDATA[
+            (function(){
+              var s=document.createElement('script');
+              s.src='/feeds/posts/default/-/মত-দ্বিমত?alt=json-in-script&max-results=4&callback=_bkOpinion';
+              document.body.appendChild(s);
+            })();
+            function _bkOpinion(d){
+              if(!d.feed||!d.feed.entry)return;
+              var h='';
+              d.feed.entry.forEach(function(e){
+                var ai=(e.author&&e.author[0]&&e.author[0].gd$image&&e.author[0].gd$image.src!=='https://img1.blogblog.com/img/b16-rounded.gif')?e.author[0].gd$image.src:'https://via.placeholder.com/64';
+                var an=e.author&&e.author[0]?e.author[0].name.$t:'Unknown';
+                h+='<a href="'+_gu(e)+'" class="card post-card opinion-card" style="display:block;">';
+                h+='<img class="author-img" src="'+ai+'" alt="'+an+'"/>';
+                h+='<h4 class="author-name">'+an+'</h4>';
+                h+='<h3 style="font-size:12px;line-height:1.6;color:var(--muted-fg);margin-top:8px;"><span class="quote-mark">'+e.title.$t+'</span></h3>';
+                h+='</a>';
+              });
+              document.getElementById('opinionSection').innerHTML=h;
+            }
+            //]]>
+            </script>
+          </b:includable>
+        </b:widget>
+
+        <!-- ভিডিও -->
+        <b:widget id='Video1' locked='false' title='ভিডিও' type='HTML' version='2' visible='true'>
+          <b:includable id='main'>
+            <div class='section-label' style='margin-top:24px;'><span>ভিডিও</span><a class='more' href='/search/label/ভিডিও'>আরও ❯</a></div>
+            <div class='grid-4' id='videoSection'></div>
+            <script>
+            //<![CDATA[
+            (function(){
+              var s=document.createElement('script');
+              s.src='/feeds/posts/default/-/ভিডিও?alt=json-in-script&max-results=4&callback=_bkVideo';
+              document.body.appendChild(s);
+            })();
+            function _bkVideo(d){
+              if(!d.feed||!d.feed.entry)return;
+              var h='';
+              d.feed.entry.forEach(function(e){
+                h+='<a href="'+_gu(e)+'" class="card post-card" style="display:block;position:relative;">';
+                h+='<div class="overflow-hidden aspect-video" style="position:relative;"><img class="post-img" src="'+_gi(e)+'" alt="'+e.title.$t+'" style="width:100%;height:100%;object-fit:cover;"/>';
+                h+='<div class="video-overlay"><div class="play-btn">▶</div></div></div>';
+                h+='<div style="padding:8px;"><h3 style="font-size:12px;font-weight:700;line-height:1.6;" class="line-clamp-2">'+e.title.$t+'</h3></div></a>';
+              });
+              document.getElementById('videoSection').innerHTML=h;
+            }
+            //]]>
+            </script>
+          </b:includable>
+        </b:widget>
+
+      </b:section>
     </main>
 
     <!-- ===== RIGHT SIDEBAR ===== -->
     <aside>
-      <!-- Tab Widget: আলোচিত / স্পট লাইট -->
-      <div class='card sidebar-tabs' style='margin-bottom:16px;'>
-        <div class='tab-header'>
-          <button class='tab-btn active' onclick='switchTab(this, &quot;right-tab-1&quot;)'>আলোচিত</button>
-          <button class='tab-btn' onclick='switchTab(this, &quot;right-tab-2&quot;)'>স্পট লাইট</button>
-        </div>
-        <div class='tab-content' id='right-tab-1'>
-          <div id='rightTab1Content'><!-- Loaded via feed --></div>
-        </div>
-        <div class='tab-content' id='right-tab-2' style='display:none;'>
-          <div id='rightTab2Content'><!-- Loaded via feed --></div>
-        </div>
-      </div>
+      <b:section class='right-sidebar' id='right-sidebar' showaddelement='yes'>
 
-      <!-- Tab Widget: জনপ্রিয় -->
-      <div class='card sidebar-tabs' style='margin-bottom:16px;'>
-        <div style='background:var(--secondary);color:var(--secondary-fg);padding:8px 12px;font-size:13px;font-weight:700;'>জনপ্রিয়</div>
-        <div id='popularContent'><!-- Loaded via feed --></div>
-      </div>
+        <!-- আলোচিত / স্পট লাইট -->
+        <b:widget id='RightTabs1' locked='false' title='আলোচিত / স্পট লাইট' type='HTML' version='2' visible='true'>
+          <b:includable id='main'>
+            <div class='card sidebar-tabs' style='margin-bottom:16px;'>
+              <div class='tab-header'>
+                <button class='tab-btn active' onclick='switchTab(this,"rt1")'>আলোচিত</button>
+                <button class='tab-btn' onclick='switchTab(this,"rt2")'>স্পট লাইট</button>
+              </div>
+              <div class='tab-content' id='rt1'><div id='rt1c'></div></div>
+              <div class='tab-content' id='rt2' style='display:none;'><div id='rt2c'></div></div>
+            </div>
+            <script>
+            //<![CDATA[
+            (function(){
+              var s1=document.createElement('script');
+              s1.src='/feeds/posts/default/-/আলোচিত?alt=json-in-script&max-results=7&callback=_bkRt1';
+              document.body.appendChild(s1);
+              var s2=document.createElement('script');
+              s2.src='/feeds/posts/default/-/স্পট লাইট?alt=json-in-script&max-results=7&callback=_bkRt2';
+              document.body.appendChild(s2);
+            })();
+            function _bkRt1(d){_renderSideTab('rt1c',d);}
+            function _bkRt2(d){_renderSideTab('rt2c',d);}
+            //]]>
+            </script>
+          </b:includable>
+        </b:widget>
 
-      <!-- Widget: জটিল -->
-      <div class='card sidebar-widget' style='margin-bottom:16px;'>
-        <div class='widget-header'>❝ জটিল ❞</div>
-        <div id='jotilWidget'><!-- Loaded via feed --></div>
-      </div>
+        <!-- জনপ্রিয় -->
+        <b:widget id='Popular1' locked='false' title='জনপ্রিয়' type='HTML' version='2' visible='true'>
+          <b:includable id='main'>
+            <div class='card sidebar-tabs' style='margin-bottom:16px;'>
+              <div style='background:var(--secondary);color:var(--secondary-fg);padding:8px 12px;font-size:13px;font-weight:700;'>জনপ্রিয়</div>
+              <div id='popularContent'></div>
+            </div>
+            <script>
+            //<![CDATA[
+            (function(){
+              var s=document.createElement('script');
+              s.src='/feeds/posts/default/-/জনপ্রিয়?alt=json-in-script&max-results=7&callback=_bkPopular';
+              document.body.appendChild(s);
+            })();
+            function _bkPopular(d){_renderSideTab('popularContent',d);}
+            //]]>
+            </script>
+          </b:includable>
+        </b:widget>
 
-      <!-- Ad -->
-      <div class='ad-box'>বিজ্ঞাপন — ৩০০×২৫০</div>
+        <!-- জটিল -->
+        <b:widget id='RightJotil1' locked='false' title='জটিল' type='HTML' version='2' visible='true'>
+          <b:includable id='main'>
+            <div class='card sidebar-widget' style='margin-bottom:16px;'>
+              <div class='widget-header'>❝ জটিল ❞</div>
+              <div id='jotilWidget'></div>
+            </div>
+            <script>
+            //<![CDATA[
+            (function(){
+              var s=document.createElement('script');
+              s.src='/feeds/posts/default/-/জটিল?alt=json-in-script&max-results=1&callback=_bkJotil';
+              document.body.appendChild(s);
+            })();
+            function _bkJotil(d){_renderSideWidget('jotilWidget',d);}
+            //]]>
+            </script>
+          </b:includable>
+        </b:widget>
+
+        <!-- বিজ্ঞাপন -->
+        <b:widget id='RightAd1' locked='false' title='বিজ্ঞাপন ৩০০×২৫০' type='HTML' version='2' visible='true'>
+          <b:includable id='main'>
+            <div class='ad-box'>বিজ্ঞাপন — ৩০০×২৫০</div>
+          </b:includable>
+        </b:widget>
+
+      </b:section>
     </aside>
 
   </div>
 </div>
 
-<!-- ===== FOOTER ===== -->
-<div class='footer'>
-  <div class='container'>
-    <div class='footer-grid'>
-      <div>
-        <h3>আমাদের সম্পর্কে</h3>
-        <p style='font-size:12px;color:rgba(255,255,255,.6);line-height:1.8;'>বাংলাখবর একটি নির্ভরযোগ্য সংবাদ মাধ্যম। সত্য ও নিরপেক্ষ সংবাদ পরিবেশনই আমাদের লক্ষ্য।</p>
-      </div>
-      <div>
-        <h3>বিভাগসমূহ</h3>
-        <div style='display:flex;flex-direction:column;gap:6px;'>
-          <a href='/search/label/জাতীয়'>জাতীয়</a>
-          <a href='/search/label/রাজনীতি'>রাজনীতি</a>
-          <a href='/search/label/আন্তর্জাতিক'>আন্তর্জাতিক</a>
-          <a href='/search/label/অর্থনীতি'>অর্থনীতি</a>
-          <a href='/search/label/বিনোদন'>বিনোদন</a>
-          <a href='/search/label/খেলাধুলা'>খেলাধুলা</a>
+<!-- ===== FOOTER SECTION ===== -->
+<b:section class='footer-section' id='footer-section' showaddelement='yes'>
+  <b:widget id='Footer1' locked='false' title='ফুটার' type='HTML' version='2' visible='true'>
+    <b:includable id='main'>
+      <div class='footer'>
+        <div class='container'>
+          <div class='footer-grid'>
+            <div>
+              <h3>আমাদের সম্পর্কে</h3>
+              <p style='font-size:12px;color:rgba(255,255,255,.6);line-height:1.8;'>বাংলাখবর একটি নির্ভরযোগ্য সংবাদ মাধ্যম। সত্য ও নিরপেক্ষ সংবাদ পরিবেশনই আমাদের লক্ষ্য।</p>
+            </div>
+            <div>
+              <h3>বিভাগসমূহ</h3>
+              <div style='display:flex;flex-direction:column;gap:6px;'>
+                <a href='/search/label/জাতীয়'>জাতীয়</a>
+                <a href='/search/label/রাজনীতি'>রাজনীতি</a>
+                <a href='/search/label/আন্তর্জাতিক'>আন্তর্জাতিক</a>
+                <a href='/search/label/অর্থনীতি'>অর্থনীতি</a>
+                <a href='/search/label/বিনোদন'>বিনোদন</a>
+                <a href='/search/label/খেলাধুলা'>খেলাধুলা</a>
+              </div>
+            </div>
+            <div>
+              <h3>গুরুত্বপূর্ণ লিংক</h3>
+              <div style='display:flex;flex-direction:column;gap:6px;'>
+                <a href='#'>বিজ্ঞাপন</a>
+                <a href='#'>গোপনীয়তা নীতি</a>
+                <a href='#'>শর্তাবলী</a>
+                <a href='#'>যোগাযোগ</a>
+              </div>
+            </div>
+            <div>
+              <h3>যোগাযোগ</h3>
+              <p style='font-size:12px;color:rgba(255,255,255,.6);line-height:1.8;'>📧 info@banglakhabar.com<br/>☎ +৮৮০-১৭০০-০০০০০০<br/>📍 ঢাকা, বাংলাদেশ</p>
+            </div>
+          </div>
+          <div class='footer-bottom'>
+            © ২০২৬ বাংলাখবর। সর্বস্বত্ব সংরক্ষিত।
+          </div>
         </div>
       </div>
-      <div>
-        <h3>গুরুত্বপূর্ণ লিংক</h3>
-        <div style='display:flex;flex-direction:column;gap:6px;'>
-          <a href='#'>বিজ্ঞাপন</a>
-          <a href='#'>গোপনীয়তা নীতি</a>
-          <a href='#'>শর্তাবলী</a>
-          <a href='#'>যোগাযোগ</a>
-        </div>
-      </div>
-      <div>
-        <h3>যোগাযোগ</h3>
-        <p style='font-size:12px;color:rgba(255,255,255,.6);line-height:1.8;'>📧 info@banglakhabar.com<br/>☎ +৮৮০-১৭০০-০০০০০০<br/>📍 ঢাকা, বাংলাদেশ</p>
-      </div>
-    </div>
-    <div class='footer-bottom'>
-      © ২০২৬ বাংলাখবর। সর্বস্বত্ব সংরক্ষিত।
-    </div>
-  </div>
-</div>
+    </b:includable>
+  </b:widget>
+</b:section>
 
-<!-- ===== JAVASCRIPT ===== -->
+<!-- ===== GLOBAL JAVASCRIPT ===== -->
 <script>
 //<![CDATA[
 
@@ -1079,292 +1414,124 @@ function switchTab(btn, tabId) {
   document.getElementById(tabId).style.display = 'block';
 }
 
-// ===== Feed Loader =====
-function loadFeed(label, count, callback) {
-  var url = '/feeds/posts/default/-/' + encodeURIComponent(label) + '?alt=json&max-results=' + count;
-  var script = document.createElement('script');
-  window['__feed_' + label.replace(/[^a-zA-Z]/g, '_')] = callback;
-  script.src = url + '&callback=__feed_' + label.replace(/[^a-zA-Z]/g, '_');
-  document.body.appendChild(script);
-}
-
-function getPostImage(entry) {
+// ===== Helper Functions =====
+function _gi(entry) {
   if (entry.media$thumbnail) return entry.media$thumbnail.url.replace(/\/s[0-9]+(-c)?\//, '/s600/');
   var content = entry.content ? entry.content.$t : '';
   var match = content.match(/<img[^>]+src=["']([^"']+)["']/);
   return match ? match[1] : 'https://via.placeholder.com/600x400?text=No+Image';
 }
 
-function getPostUrl(entry) {
+function _gu(entry) {
   for (var i = 0; i < entry.link.length; i++) {
     if (entry.link[i].rel === 'alternate') return entry.link[i].href;
   }
   return '#';
 }
 
-function getPostExcerpt(entry, len) {
+function _ge(entry, len) {
   var text = entry.summary ? entry.summary.$t : (entry.content ? entry.content.$t.replace(/<[^>]+>/g, '') : '');
   return text.substring(0, len || 100) + '...';
 }
 
-function getAuthorImage(entry) {
-  return (entry.author && entry.author[0] && entry.author[0].gd$image && entry.author[0].gd$image.src !== 'https://img1.blogblog.com/img/b16-rounded.gif')
-    ? entry.author[0].gd$image.src : 'https://via.placeholder.com/40';
-}
-
-function getAuthorName(entry) {
-  return entry.author && entry.author[0] ? entry.author[0].name.$t : 'Unknown';
-}
-
-// ===== Render: Top News (1 big + 2 side) =====
-function renderTopNews(data) {
-  if (!data.feed || !data.feed.entry) return;
-  var entries = data.feed.entry;
-  var html = '<div class="grid-top">';
-  // Main
-  var e = entries[0];
-  html += '<a href="' + getPostUrl(e) + '" class="card post-card top-main" style="display:block;">';
-  html += '<div class="overflow-hidden aspect-video"><img class="post-img" src="' + getPostImage(e) + '" alt="' + e.title.$t + '" style="width:100%;height:100%;object-fit:cover;"/></div>';
-  html += '<div style="padding:16px;"><span class="post-label">শীর্ষ সংবাদ</span>';
-  html += '<h2>' + e.title.$t + '</h2>';
-  html += '<p style="font-size:13px;color:var(--muted-fg);margin-top:8px;" class="line-clamp-2">' + getPostExcerpt(e, 120) + '</p>';
-  html += '</div></a>';
-  // Side
-  html += '<div>';
-  for (var i = 1; i < Math.min(entries.length, 3); i++) {
-    var s = entries[i];
-    html += '<a href="' + getPostUrl(s) + '" class="card post-card top-side" style="display:block;margin-bottom:16px;">';
-    html += '<div class="overflow-hidden aspect-video"><img class="post-img" src="' + getPostImage(s) + '" alt="' + s.title.$t + '" style="width:100%;height:100%;object-fit:cover;"/></div>';
-    html += '<div style="padding:12px;"><h3 class="line-clamp-2">' + s.title.$t + '</h3>';
-    html += '</div></a>';
-  }
-  html += '</div></div>';
-  document.getElementById('topNewsSection').innerHTML = html;
-}
-
-// ===== Render: Grid Cards =====
-function renderGrid(containerId, data, aspectClass) {
-  if (!data.feed || !data.feed.entry) return;
-  var html = '';
-  data.feed.entry.forEach(function(e) {
-    html += '<a href="' + getPostUrl(e) + '" class="card post-card" style="display:block;">';
-    html += '<div class="overflow-hidden ' + (aspectClass || 'aspect-video') + '"><img class="post-img" src="' + getPostImage(e) + '" alt="' + e.title.$t + '" style="width:100%;height:100%;object-fit:cover;"/></div>';
-    html += '<div style="padding:8px;"><h3 style="font-size:12px;font-weight:700;line-height:1.6;" class="line-clamp-2">' + e.title.$t + '</h3></div>';
-    html += '</a>';
-  });
-  document.getElementById(containerId).innerHTML = html;
-}
-
-// ===== Render: Carousel =====
-function renderCarousel(data) {
-  if (!data.feed || !data.feed.entry) return;
-  var html = '';
-  data.feed.entry.forEach(function(e) {
-    html += '<a href="' + getPostUrl(e) + '" class="carousel-item post-card">';
-    html += '<img class="post-img" src="' + getPostImage(e) + '" alt="' + e.title.$t + '"/>';
-    html += '<h3 class="line-clamp-2">' + e.title.$t + '</h3>';
-    html += '</a>';
-  });
-  document.getElementById('carouselTrack').innerHTML = html;
-}
-
-// Carousel navigation
-var carouselPos = 0;
-function carouselNext() {
-  var track = document.getElementById('carouselTrack');
-  var items = track.querySelectorAll('.carousel-item');
-  var maxPos = Math.max(0, items.length - 4);
-  carouselPos = Math.min(carouselPos + 1, maxPos);
-  track.style.transform = 'translateX(-' + (carouselPos * 25) + '%)';
-  track.style.transition = 'transform .5s';
-}
-function carouselPrev() {
-  var track = document.getElementById('carouselTrack');
-  carouselPos = Math.max(0, carouselPos - 1);
-  track.style.transform = 'translateX(-' + (carouselPos * 25) + '%)';
-  track.style.transition = 'transform .5s';
-}
-// Auto-slide
-setInterval(function() { carouselNext(); if(carouselPos >= 4) carouselPos = -1; }, 4000);
-
 // ===== Render: Highlight =====
-function renderHighlight(containerId, data) {
-  if (!data.feed || !data.feed.entry) return;
-  var entries = data.feed.entry;
-  var html = '<div class="highlight-grid">';
+function _renderHighlight(containerId, d) {
+  if (!d.feed || !d.feed.entry) return;
+  var entries = d.feed.entry;
+  var h = '<div class="highlight-grid">';
   var e = entries[0];
-  html += '<a href="' + getPostUrl(e) + '" class="card post-card" style="display:block;">';
-  html += '<div class="overflow-hidden aspect-video"><img class="post-img" src="' + getPostImage(e) + '" alt="' + e.title.$t + '" style="width:100%;height:100%;object-fit:cover;"/></div>';
-  html += '<div style="padding:16px;"><h3 style="font-size:16px;font-weight:700;line-height:1.6;">' + e.title.$t + '</h3>';
-  html += '<p style="font-size:13px;color:var(--muted-fg);margin-top:4px;" class="line-clamp-2">' + getPostExcerpt(e, 100) + '</p></div></a>';
-  html += '<div class="highlight-side">';
+  h += '<a href="' + _gu(e) + '" class="card post-card" style="display:block;">';
+  h += '<div class="overflow-hidden aspect-video"><img class="post-img" src="' + _gi(e) + '" alt="' + e.title.$t + '" style="width:100%;height:100%;object-fit:cover;"/></div>';
+  h += '<div style="padding:16px;"><h3 style="font-size:16px;font-weight:700;line-height:1.6;">' + e.title.$t + '</h3>';
+  h += '<p style="font-size:13px;color:var(--muted-fg);margin-top:4px;" class="line-clamp-2">' + _ge(e, 100) + '</p></div></a>';
+  h += '<div class="highlight-side">';
   for (var i = 1; i < entries.length; i++) {
     var s = entries[i];
-    html += '<a href="' + getPostUrl(s) + '" class="side-item post-card">';
-    html += '<img src="' + getPostImage(s) + '" alt="' + s.title.$t + '"/>';
-    html += '<h4 class="line-clamp-3">' + s.title.$t + '</h4></a>';
+    h += '<a href="' + _gu(s) + '" class="side-item post-card">';
+    h += '<img src="' + _gi(s) + '" alt="' + s.title.$t + '"/>';
+    h += '<h4 class="line-clamp-3">' + s.title.$t + '</h4></a>';
   }
-  html += '</div></div>';
-  document.getElementById(containerId).innerHTML = html;
+  h += '</div></div>';
+  document.getElementById(containerId).innerHTML = h;
+}
+
+// ===== Render: Grid =====
+function _renderGrid(containerId, d, aspectClass) {
+  if (!d.feed || !d.feed.entry) return;
+  var h = '';
+  d.feed.entry.forEach(function(e) {
+    h += '<a href="' + _gu(e) + '" class="card post-card" style="display:block;">';
+    h += '<div class="overflow-hidden ' + (aspectClass || 'aspect-video') + '"><img class="post-img" src="' + _gi(e) + '" alt="' + e.title.$t + '" style="width:100%;height:100%;object-fit:cover;"/></div>';
+    h += '<div style="padding:8px;"><h3 style="font-size:12px;font-weight:700;line-height:1.6;" class="line-clamp-2">' + e.title.$t + '</h3></div></a>';
+  });
+  document.getElementById(containerId).innerHTML = h;
 }
 
 // ===== Render: List =====
-function renderList(containerId, data) {
-  if (!data.feed || !data.feed.entry) return;
-  var entries = data.feed.entry;
-  var html = '';
+function _renderList(containerId, d) {
+  if (!d.feed || !d.feed.entry) return;
+  var entries = d.feed.entry;
+  var h = '';
   var e = entries[0];
-  html += '<a href="' + getPostUrl(e) + '" class="card post-card" style="display:block;margin-bottom:12px;">';
-  html += '<div class="overflow-hidden aspect-video"><img class="post-img" src="' + getPostImage(e) + '" alt="' + e.title.$t + '" style="width:100%;height:100%;object-fit:cover;"/></div>';
-  html += '<div style="padding:16px;"><h3 style="font-size:16px;font-weight:700;line-height:1.6;">' + e.title.$t + '</h3>';
-  html += '<p style="font-size:13px;color:var(--muted-fg);margin-top:4px;" class="line-clamp-2">' + getPostExcerpt(e, 100) + '</p></div></a>';
+  h += '<a href="' + _gu(e) + '" class="card post-card" style="display:block;margin-bottom:12px;">';
+  h += '<div class="overflow-hidden aspect-video"><img class="post-img" src="' + _gi(e) + '" alt="' + e.title.$t + '" style="width:100%;height:100%;object-fit:cover;"/></div>';
+  h += '<div style="padding:16px;"><h3 style="font-size:16px;font-weight:700;line-height:1.6;">' + e.title.$t + '</h3>';
+  h += '<p style="font-size:13px;color:var(--muted-fg);margin-top:4px;" class="line-clamp-2">' + _ge(e, 100) + '</p></div></a>';
   for (var i = 1; i < entries.length; i++) {
     var s = entries[i];
-    html += '<a href="' + getPostUrl(s) + '" class="list-item post-card">';
-    html += '<img src="' + getPostImage(s) + '" alt="' + s.title.$t + '"/>';
-    html += '<div><h4 class="line-clamp-2">' + s.title.$t + '</h4></div></a>';
+    h += '<a href="' + _gu(s) + '" class="list-item post-card">';
+    h += '<img src="' + _gi(s) + '" alt="' + s.title.$t + '"/>';
+    h += '<div><h4 class="line-clamp-2">' + s.title.$t + '</h4></div></a>';
   }
-  document.getElementById(containerId).innerHTML = html;
-}
-
-// ===== Render: Opinion =====
-function renderOpinion(data) {
-  if (!data.feed || !data.feed.entry) return;
-  var html = '';
-  data.feed.entry.forEach(function(e) {
-    html += '<a href="' + getPostUrl(e) + '" class="card post-card opinion-card" style="display:block;">';
-    html += '<img class="author-img" src="' + getAuthorImage(e) + '" alt="' + getAuthorName(e) + '"/>';
-    html += '<h4 class="author-name">' + getAuthorName(e) + '</h4>';
-    html += '<h3 style="font-size:12px;line-height:1.6;color:var(--muted-fg);margin-top:8px;"><span class="quote-mark">' + e.title.$t + '</span></h3>';
-    html += '</a>';
-  });
-  document.getElementById('opinionSection').innerHTML = html;
-}
-
-// ===== Render: Video =====
-function renderVideo(data) {
-  if (!data.feed || !data.feed.entry) return;
-  var html = '';
-  data.feed.entry.forEach(function(e) {
-    html += '<a href="' + getPostUrl(e) + '" class="card post-card" style="display:block;position:relative;">';
-    html += '<div class="overflow-hidden aspect-video" style="position:relative;"><img class="post-img" src="' + getPostImage(e) + '" alt="' + e.title.$t + '" style="width:100%;height:100%;object-fit:cover;"/>';
-    html += '<div class="video-overlay"><div class="play-btn">▶</div></div></div>';
-    html += '<div style="padding:8px;"><h3 style="font-size:12px;font-weight:700;line-height:1.6;" class="line-clamp-2">' + e.title.$t + '</h3></div>';
-    html += '</a>';
-  });
-  document.getElementById('videoSection').innerHTML = html;
+  document.getElementById(containerId).innerHTML = h;
 }
 
 // ===== Render: Sidebar Tabs =====
-function renderSidebarTab(containerId, data) {
-  if (!data.feed || !data.feed.entry) return;
-  var banglaNum = ['০','১','২','৩','৪','৫','৬','৭','৮','৯'];
-  var html = '';
-  data.feed.entry.forEach(function(e, i) {
-    html += '<a href="' + getPostUrl(e) + '" class="tab-item">';
-    html += '<span class="num">' + (banglaNum[i+1] || (i+1)) + '</span>';
-    html += '<img src="' + getPostImage(e) + '" alt="' + e.title.$t + '"/>';
-    html += '<h4 class="line-clamp-2">' + e.title.$t + '</h4>';
-    html += '</a>';
+function _renderSideTab(containerId, d) {
+  if (!d.feed || !d.feed.entry) return;
+  var bn = ['০','১','২','৩','৪','৫','৬','৭','৮','৯'];
+  var h = '';
+  d.feed.entry.forEach(function(e, i) {
+    h += '<a href="' + _gu(e) + '" class="tab-item">';
+    h += '<span class="num">' + (bn[i + 1] || (i + 1)) + '</span>';
+    h += '<img src="' + _gi(e) + '" alt="' + e.title.$t + '"/>';
+    h += '<h4 class="line-clamp-2">' + e.title.$t + '</h4></a>';
   });
-  document.getElementById(containerId).innerHTML = html;
+  document.getElementById(containerId).innerHTML = h;
 }
 
 // ===== Render: Sidebar Widget =====
-function renderSidebarWidget(containerId, data) {
-  if (!data.feed || !data.feed.entry || !data.feed.entry[0]) return;
-  var e = data.feed.entry[0];
-  var html = '<a href="' + getPostUrl(e) + '" style="display:block;">';
-  html += '<div class="overflow-hidden"><img src="' + getPostImage(e) + '" alt="' + e.title.$t + '" style="width:100%;height:auto;"/></div>';
-  html += '<div class="widget-body"><h3 class="line-clamp-2">' + e.title.$t + '</h3>';
-  html += '<p class="line-clamp-2">' + getPostExcerpt(e, 80) + '</p></div></a>';
-  document.getElementById(containerId).innerHTML = html;
+function _renderSideWidget(containerId, d) {
+  if (!d.feed || !d.feed.entry || !d.feed.entry[0]) return;
+  var e = d.feed.entry[0];
+  var h = '<a href="' + _gu(e) + '" style="display:block;">';
+  h += '<div class="overflow-hidden"><img src="' + _gi(e) + '" alt="' + e.title.$t + '" style="width:100%;height:auto;"/></div>';
+  h += '<div class="widget-body"><h3 class="line-clamp-2">' + e.title.$t + '</h3>';
+  h += '<p class="line-clamp-2">' + _ge(e, 80) + '</p></div></a>';
+  document.getElementById(containerId).innerHTML = h;
 }
 
-// ===== Render: Breaking News =====
-function renderBreaking(data) {
-  if (!data.feed || !data.feed.entry) return;
-  var html = '';
-  data.feed.entry.forEach(function(e) {
-    html += '<a href="' + getPostUrl(e) + '" style="white-space:nowrap;padding:0 20px;">' + e.title.$t + ' ●</a>';
-  });
-  document.getElementById('breakingTicker').innerHTML = html + html;
-}
-
-// ===== Render: Related Posts =====
-function renderRelated(data) {
-  if (!data.feed || !data.feed.entry) return;
-  var html = '';
-  data.feed.entry.slice(0, 4).forEach(function(e) {
-    html += '<a href="' + getPostUrl(e) + '" class="related-item post-card">';
-    html += '<img src="' + getPostImage(e) + '" alt="' + e.title.$t + '"/>';
-    html += '<div><h4 class="line-clamp-3">' + e.title.$t + '</h4></div></a>';
-  });
-  document.getElementById('relatedPosts').innerHTML = html;
-}
-
-// ===== LOAD ALL FEEDS =====
-// Breaking
-loadFeed('ব্রেকিং', 5, renderBreaking);
-
-// Top News
-loadFeed('শীর্ষ সংবাদ', 3, renderTopNews);
-
-// Carousel
-loadFeed('স্লাইড', 8, renderCarousel);
-
-// Highlights
-loadFeed('হাইলাইটস', 6, function(d) { renderHighlight('highlightsSection', d); });
-
-// National
-loadFeed('জাতীয়', 4, function(d) { renderGrid('nationalSection', d); });
-
-// Politics
-loadFeed('রাজনীতি', 4, function(d) { renderList('politicsSection', d); });
-
-// International
-loadFeed('আন্তর্জাতিক', 5, function(d) { renderHighlight('internationalSection', d); });
-
-// Entertainment
-loadFeed('বিনোদন', 6, function(d) { renderGrid('entertainmentSection', d, 'aspect-portrait'); });
-
-// Desh Bangla
-loadFeed('দেশ বাংলা', 4, function(d) { renderGrid('deshBanglaSection', d); });
-
-// Lifestyle
-loadFeed('লাইফস্টাইল', 6, function(d) { renderHighlight('lifestyleSection', d); });
-
-// Health
-loadFeed('স্বাস্থ্যসেবা', 4, function(d) { renderList('healthSection', d); });
-
-// Opinion
-loadFeed('মত-দ্বিমত', 4, renderOpinion);
-
-// Video
-loadFeed('ভিডিও', 4, renderVideo);
-
-// Left sidebar
-loadFeed('পিপল', 7, function(d) { renderSidebarTab('leftTab1Content', d); });
-loadFeed('একটু থামুন', 7, function(d) { renderSidebarTab('leftTab2Content', d); });
-loadFeed('ভাইরাল', 1, function(d) { renderSidebarWidget('viralWidget', d); });
-
-// Right sidebar
-loadFeed('আলোচিত', 7, function(d) { renderSidebarTab('rightTab1Content', d); });
-loadFeed('স্পট লাইট', 7, function(d) { renderSidebarTab('rightTab2Content', d); });
-loadFeed('জনপ্রিয়', 7, function(d) { renderSidebarTab('popularContent', d); });
-loadFeed('জটিল', 1, function(d) { renderSidebarWidget('jotilWidget', d); });
-
-// Related posts on post page
+// ===== Related Posts (Post Page) =====
 (function() {
-  var meta = document.querySelector('meta[property="article:tag"]');
-  if (meta) loadFeed(meta.content, 4, renderRelated);
-  else {
-    var labels = document.querySelectorAll('.post-label-tag');
-    if (labels.length > 0) {
-      loadFeed(labels[0].textContent.trim(), 4, renderRelated);
-    }
+  var labels = document.querySelectorAll('.post-label-tag');
+  if (labels.length > 0) {
+    var lbl = labels[0].textContent.trim();
+    var s = document.createElement('script');
+    s.src = '/feeds/posts/default/-/' + encodeURIComponent(lbl) + '?alt=json-in-script&max-results=4&callback=_bkRelated';
+    document.body.appendChild(s);
   }
 })();
+function _bkRelated(d) {
+  if (!d.feed || !d.feed.entry) return;
+  var h = '';
+  d.feed.entry.slice(0, 4).forEach(function(e) {
+    h += '<a href="' + _gu(e) + '" class="related-item post-card">';
+    h += '<img src="' + _gi(e) + '" alt="' + e.title.$t + '"/>';
+    h += '<div><h4 class="line-clamp-3">' + e.title.$t + '</h4></div></a>';
+  });
+  var el = document.getElementById('relatedPosts');
+  if (el) el.innerHTML = h;
+}
 
 //]]>
 </script>
