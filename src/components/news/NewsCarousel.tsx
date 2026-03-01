@@ -2,6 +2,7 @@ import { generatePosts } from "@/data/mockData";
 import SectionLabel from "./SectionLabel";
 import { useState, useEffect } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import { Link } from "react-router-dom";
 
 export default function NewsCarousel() {
   const posts = generatePosts("স্লাইড", 8);
@@ -38,19 +39,18 @@ export default function NewsCarousel() {
             style={{ transform: `translateX(-${current * (100 / visible)}%)` }}
           >
             {posts.map((post) => (
-              <div key={post.id} className="flex-shrink-0 post-card" style={{ width: `calc(${100 / visible}% - 9px)` }}>
+              <Link to={`/post/${post.id}`} key={post.id} className="flex-shrink-0 post-card" style={{ width: `calc(${100 / visible}% - 9px)` }}>
                 <div className="overflow-hidden rounded aspect-[4/3]">
                   <img src={post.image} alt={post.title} className="w-full h-full object-cover post-image" />
                 </div>
-                <h3 className="text-xs font-semibold mt-2 leading-relaxed text-foreground hover:text-primary transition-colors cursor-pointer line-clamp-2">
+                <h3 className="text-xs font-semibold mt-2 leading-relaxed text-foreground hover:text-primary transition-colors line-clamp-2">
                   {post.title}
                 </h3>
-              </div>
+              </Link>
             ))}
           </div>
         </div>
 
-        {/* Dots */}
         <div className="flex justify-center gap-1.5 mt-3">
           {Array.from({ length: posts.length - visible + 1 }, (_, i) => (
             <button
