@@ -1,0 +1,1373 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html>
+<html xmlns='http://www.w3.org/1999/xhtml' xmlns:b='http://www.google.com/2005/gml/b' xmlns:data='http://www.google.com/2005/gml/data' xmlns:expr='http://www.google.com/2005/gml/expr'>
+<head>
+<meta charset='UTF-8'/>
+<meta content='width=device-width, initial-scale=1' name='viewport'/>
+<b:include data='blog' name='all-head-content'/>
+<title><data:blog.pageTitle/></title>
+
+<!-- Fonts -->
+<link href='https://fonts.googleapis.com/css2?family=Noto+Sans+Bengali:wght@300;400;500;600;700;800;900&amp;family=Tiro+Bangla:ital@0;1&amp;display=swap' rel='stylesheet'/>
+<!-- Lucide Icons -->
+<link href='https://cdn.jsdelivr.net/npm/lucide-static@latest/font/lucide.min.css' rel='stylesheet'/>
+
+<b:skin><![CDATA[
+/* ===== VARIABLES ===== */
+:root {
+  --bg: #f5f5f5;
+  --fg: #1a1d24;
+  --card: #ffffff;
+  --primary: #c02040;
+  --primary-fg: #ffffff;
+  --secondary: #2a2f3a;
+  --secondary-fg: #ffffff;
+  --muted: #e8e9ec;
+  --muted-fg: #6b6f7a;
+  --accent: #e8960d;
+  --border: #dddfe3;
+  --news-blue: #2673b5;
+  --news-green: #27875c;
+  --news-highlight: #ffc400;
+  --radius: 6px;
+}
+
+/* ===== RESET & BASE ===== */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: 'Noto Sans Bengali', 'Tiro Bangla', sans-serif;
+  background: var(--bg);
+  color: var(--fg);
+  line-height: 1.7;
+  font-size: 14px;
+}
+a { text-decoration: none; color: inherit; }
+img { max-width: 100%; height: auto; display: block; }
+h1,h2,h3,h4,h5,h6 { font-family: 'Noto Sans Bengali', sans-serif; }
+
+/* ===== UTILITY ===== */
+.container { max-width: 1200px; margin: 0 auto; padding: 0 12px; }
+.flex { display: flex; }
+.flex-wrap { flex-wrap: wrap; }
+.items-center { align-items: center; }
+.justify-between { justify-content: space-between; }
+.justify-center { justify-content: center; }
+.gap-2 { gap: 8px; }
+.gap-3 { gap: 12px; }
+.gap-4 { gap: 16px; }
+.hidden { display: none; }
+.block { display: block; }
+.text-center { text-align: center; }
+.truncate { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.line-clamp-2 { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.line-clamp-3 { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+.rounded { border-radius: var(--radius); }
+.rounded-full { border-radius: 9999px; }
+.shadow-sm { box-shadow: 0 1px 3px rgba(0,0,0,.08); }
+.overflow-hidden { overflow: hidden; }
+.shrink-0 { flex-shrink: 0; }
+
+/* ===== LAYOUT ===== */
+.main-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+  margin-top: 16px;
+}
+@media(min-width: 1024px) {
+  .main-grid {
+    grid-template-columns: 160px 1fr 260px;
+  }
+}
+
+/* ===== CARD ===== */
+.card {
+  background: var(--card);
+  border-radius: var(--radius);
+  box-shadow: 0 1px 3px rgba(0,0,0,.08);
+  overflow: hidden;
+}
+
+/* ===== TOP BAR ===== */
+.top-bar {
+  background: var(--secondary);
+  color: var(--secondary-fg);
+  font-size: 11px;
+  padding: 4px 0;
+}
+@media(max-width: 767px) { .top-bar { display: none; } }
+
+/* ===== DATE BAR ===== */
+.date-bar {
+  background: var(--card);
+  border-bottom: 1px solid var(--border);
+  padding: 8px 0;
+  font-size: 13px;
+}
+.date-bar .bangla-date { color: var(--news-green); font-weight: 500; }
+.date-bar .hijri-date { color: var(--news-blue); font-weight: 500; }
+@media(max-width: 767px) { .date-bar { display: none; } }
+
+/* ===== HEADER / LOGO ===== */
+.header-logo {
+  background: var(--card);
+  border-bottom: 1px solid var(--border);
+  padding: 12px 0;
+}
+.logo-icon {
+  width: 48px; height: 48px;
+  background: var(--primary);
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--primary-fg);
+  font-weight: 900; font-size: 22px;
+}
+.logo-text h1 {
+  font-size: 28px; font-weight: 900; line-height: 1.1;
+}
+.logo-text h1 span { color: var(--primary); }
+.logo-text p {
+  font-size: 9px; color: var(--muted-fg);
+  letter-spacing: 3px;
+}
+.ad-banner {
+  width: 468px; height: 60px;
+  background: var(--muted);
+  border-radius: var(--radius);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px; color: var(--muted-fg);
+}
+@media(max-width: 1023px) { .ad-banner { display: none; } }
+
+/* ===== NAVIGATION ===== */
+.main-nav {
+  background: var(--primary);
+}
+@media(max-width: 1023px) { .main-nav { display: none; } }
+.main-nav a {
+  color: var(--primary-fg);
+  font-size: 13px; font-weight: 500;
+  padding: 10px 12px;
+  transition: background .2s;
+  border-right: 1px solid rgba(255,255,255,.1);
+}
+.main-nav a:hover { background: rgba(255,255,255,.1); }
+.nav-all-btn {
+  background: var(--secondary) !important;
+  font-weight: 600 !important;
+}
+
+/* Sticky nav */
+.sticky-nav {
+  position: fixed; top: -60px; left: 0; right: 0;
+  z-index: 100;
+  background: var(--primary);
+  box-shadow: 0 4px 12px rgba(0,0,0,.2);
+  transition: top .3s;
+  padding: 8px 0;
+}
+.sticky-nav.visible { top: 0; }
+.sticky-nav .logo-sm {
+  width: 32px; height: 32px;
+  background: rgba(255,255,255,.2);
+  border-radius: 6px;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--primary-fg); font-weight: 900; font-size: 14px;
+}
+.sticky-nav a {
+  color: var(--primary-fg); font-size: 12px; font-weight: 500;
+  padding: 8px 10px; transition: background .2s;
+}
+.sticky-nav a:hover { background: rgba(255,255,255,.1); }
+
+/* Mobile hamburger */
+.mobile-menu-btn {
+  display: none;
+  background: none; border: none;
+  font-size: 24px; cursor: pointer; color: var(--fg);
+  padding: 8px;
+}
+@media(max-width: 1023px) { .mobile-menu-btn { display: block; } }
+
+/* Mobile drawer */
+.mobile-drawer-overlay {
+  position: fixed; inset: 0; z-index: 200;
+  background: rgba(0,0,0,.4); backdrop-filter: blur(4px);
+  display: none;
+}
+.mobile-drawer-overlay.open { display: block; }
+.mobile-drawer {
+  position: fixed; top: 0; right: -280px; width: 280px;
+  max-width: 85vw; height: 100%;
+  background: var(--card);
+  z-index: 201;
+  box-shadow: -4px 0 20px rgba(0,0,0,.2);
+  transition: right .3s;
+  display: flex; flex-direction: column;
+}
+.mobile-drawer.open { right: 0; }
+.mobile-drawer .drawer-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 16px; border-bottom: 1px solid var(--border);
+  font-weight: 700;
+}
+.mobile-drawer .drawer-close {
+  background: none; border: none; font-size: 20px; cursor: pointer;
+  padding: 4px; border-radius: 4px;
+}
+.mobile-drawer .drawer-close:hover { background: var(--muted); }
+.mobile-drawer nav { flex: 1; overflow-y: auto; padding: 8px 0; }
+.mobile-drawer nav a {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 12px 16px; font-size: 14px;
+  border-bottom: 1px solid rgba(0,0,0,.05);
+  transition: background .2s;
+}
+.mobile-drawer nav a:hover { background: var(--muted); }
+
+/* ===== BREAKING NEWS ===== */
+.breaking-bar {
+  background: var(--secondary);
+  margin-top: 4px;
+  border-radius: var(--radius);
+  overflow: hidden;
+  display: flex; align-items: stretch;
+}
+.breaking-label {
+  background: var(--primary);
+  color: var(--primary-fg);
+  font-size: 12px; font-weight: 700;
+  padding: 8px 16px;
+  white-space: nowrap;
+  display: flex; align-items: center; gap: 6px;
+}
+.breaking-label .dot {
+  width: 8px; height: 8px;
+  background: var(--primary-fg);
+  border-radius: 50%;
+  animation: pulse 1.5s infinite;
+}
+@keyframes pulse {
+  0%,100% { opacity: 1; }
+  50% { opacity: .3; }
+}
+.ticker-wrap {
+  flex: 1; overflow: hidden;
+  display: flex; align-items: center;
+}
+.ticker-content {
+  display: flex; gap: 40px;
+  animation: ticker 25s linear infinite;
+  white-space: nowrap;
+  color: var(--secondary-fg);
+  font-size: 12px;
+}
+.ticker-content:hover { animation-play-state: paused; }
+@keyframes ticker {
+  0% { transform: translateX(100%); }
+  100% { transform: translateX(-100%); }
+}
+.breaking-latest {
+  background: var(--accent);
+  color: var(--fg);
+  font-size: 11px; font-weight: 600;
+  padding: 8px 12px;
+  white-space: nowrap;
+}
+
+/* ===== SECTION LABEL ===== */
+.section-label {
+  display: flex; align-items: center; gap: 0;
+  margin-bottom: 12px;
+  border-bottom: 2px solid var(--border);
+  padding-bottom: 0;
+}
+.section-label span {
+  background: var(--primary);
+  color: var(--primary-fg);
+  font-size: 13px; font-weight: 700;
+  padding: 6px 16px;
+  position: relative;
+}
+.section-label span::after {
+  content: '';
+  position: absolute; top: 0; right: -12px;
+  width: 0; height: 0;
+  border-top: 16px solid transparent;
+  border-bottom: 16px solid transparent;
+  border-left: 12px solid var(--primary);
+}
+.section-label .more {
+  margin-left: auto;
+  font-size: 11px; color: var(--primary);
+  font-weight: 600;
+}
+
+/* ===== POST CARDS ===== */
+.post-card {
+  transition: all .3s;
+}
+.post-card:hover {
+  box-shadow: 0 8px 20px rgba(0,0,0,.1);
+  transform: translateY(-2px);
+}
+.post-card:hover .post-img { transform: scale(1.05); }
+.post-img { transition: transform .5s; }
+.aspect-video { aspect-ratio: 16/9; }
+.aspect-portrait { aspect-ratio: 4/5; }
+.aspect-43 { aspect-ratio: 4/3; }
+
+/* ===== GRID LAYOUTS ===== */
+.grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+.grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+.grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+.grid-top { display: grid; grid-template-columns: 2fr 1fr; gap: 16px; }
+@media(max-width: 767px) {
+  .grid-3, .grid-4 { grid-template-columns: repeat(2, 1fr); }
+  .grid-top { grid-template-columns: 1fr; }
+}
+
+/* Top News */
+.top-main .post-label {
+  display: inline-block;
+  background: var(--primary); color: var(--primary-fg);
+  font-size: 10px; font-weight: 600;
+  padding: 2px 8px; border-radius: 2px;
+}
+.top-main h2 {
+  font-size: 20px; font-weight: 800;
+  margin-top: 8px; line-height: 1.6;
+}
+.top-main h2:hover { color: var(--primary); }
+.top-side h3 { font-size: 13px; font-weight: 700; line-height: 1.6; }
+.top-side h3:hover { color: var(--primary); }
+
+/* Highlight layout */
+.highlight-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 16px; }
+@media(max-width: 767px) { .highlight-grid { grid-template-columns: 1fr; } }
+.highlight-side .side-item {
+  display: flex; gap: 12px;
+  padding: 8px; background: var(--card);
+  border-radius: var(--radius);
+  margin-bottom: 8px;
+  box-shadow: 0 1px 3px rgba(0,0,0,.05);
+}
+.highlight-side .side-item img { width: 80px; height: 64px; object-fit: cover; border-radius: 4px; flex-shrink: 0; }
+.highlight-side .side-item h4 { font-size: 12px; font-weight: 600; line-height: 1.6; }
+.highlight-side .side-item h4:hover { color: var(--primary); }
+
+/* List layout */
+.list-item {
+  display: flex; gap: 12px;
+  padding: 8px; background: var(--card);
+  border-radius: var(--radius);
+  box-shadow: 0 1px 3px rgba(0,0,0,.05);
+  margin-bottom: 8px;
+}
+.list-item img { width: 96px; height: 72px; object-fit: cover; border-radius: 4px; flex-shrink: 0; }
+.list-item h4 { font-size: 13px; font-weight: 600; line-height: 1.6; }
+.list-item h4:hover { color: var(--primary); }
+
+/* ===== CAROUSEL ===== */
+.carousel-wrap { position: relative; padding: 12px; }
+.carousel-track {
+  display: flex; gap: 12px;
+  overflow: hidden;
+}
+.carousel-item { flex: 0 0 calc(25% - 9px); }
+@media(max-width: 767px) { .carousel-item { flex: 0 0 calc(50% - 6px); } }
+.carousel-item img { aspect-ratio: 4/3; object-fit: cover; border-radius: 4px; width: 100%; }
+.carousel-item h3 { font-size: 12px; font-weight: 600; margin-top: 8px; line-height: 1.6; }
+.carousel-item h3:hover { color: var(--primary); }
+.carousel-btn {
+  position: absolute; top: 50%; transform: translateY(-50%);
+  width: 32px; height: 32px; border-radius: 50%;
+  background: var(--secondary); color: var(--secondary-fg);
+  border: none; cursor: pointer; font-size: 16px;
+  opacity: .8; z-index: 5;
+}
+.carousel-btn:hover { opacity: 1; }
+.carousel-btn.prev { left: 4px; }
+.carousel-btn.next { right: 4px; }
+
+/* ===== ENTERTAINMENT ===== */
+.ent-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+@media(max-width: 600px) { .ent-grid { grid-template-columns: repeat(2, 1fr); } }
+.ent-grid .ent-item img { aspect-ratio: 4/5; object-fit: cover; width: 100%; }
+
+/* ===== LIFESTYLE ===== */
+.lifestyle-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
+@media(max-width: 767px) { .lifestyle-grid { grid-template-columns: 1fr; } }
+.lifestyle-featured img { aspect-ratio: 4/5; object-fit: cover; width: 100%; }
+
+/* ===== OPINION ===== */
+.opinion-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+@media(max-width: 767px) { .opinion-grid { grid-template-columns: repeat(2, 1fr); } }
+.opinion-card { text-align: center; padding: 16px; }
+.opinion-card .author-img {
+  width: 64px; height: 64px;
+  border-radius: 50%; object-fit: cover;
+  border: 2px solid var(--primary);
+  margin: 0 auto 12px;
+}
+.opinion-card .author-name { font-size: 12px; font-weight: 700; }
+.opinion-card .author-title { font-size: 10px; color: var(--primary); font-weight: 500; }
+.quote-mark::before { content: '\201C'; font-size: 28px; font-weight: 700; color: var(--primary); margin-right: 4px; }
+.quote-mark::after { content: '\201D'; font-size: 28px; font-weight: 700; color: var(--primary); margin-left: 4px; }
+
+/* ===== VIDEO ===== */
+.video-overlay {
+  position: absolute; inset: 0;
+  background: rgba(0,0,0,.4);
+  display: flex; align-items: center; justify-content: center;
+}
+.play-btn {
+  width: 40px; height: 40px;
+  background: var(--primary); border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--primary-fg); font-size: 18px;
+}
+
+/* ===== DESH BANGLA DROPDOWNS ===== */
+.dropdown-bar { margin-bottom: 16px; }
+.dropdown-bar select {
+  appearance: none;
+  background: var(--muted);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 6px 28px 6px 12px;
+  font-size: 12px; font-family: inherit;
+  cursor: pointer;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236b6f7a' stroke-width='2'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 8px center;
+}
+
+/* ===== SIDEBAR ===== */
+.sidebar-tabs .tab-header {
+  display: flex; border-bottom: 1px solid var(--border);
+}
+.sidebar-tabs .tab-btn {
+  flex: 1; padding: 10px; font-size: 12px; font-weight: 600;
+  background: var(--muted); color: var(--muted-fg);
+  border: none; cursor: pointer; transition: all .2s;
+}
+.sidebar-tabs .tab-btn.active {
+  background: var(--card);
+  color: var(--primary);
+  border-bottom: 2px solid var(--primary);
+}
+.sidebar-tabs .tab-item {
+  display: flex; gap: 8px; padding: 8px 12px;
+  border-bottom: 1px solid rgba(0,0,0,.04);
+}
+.sidebar-tabs .tab-item .num {
+  font-size: 18px; font-weight: 900;
+  color: rgba(192,32,64,.2); flex-shrink: 0; min-width: 20px;
+}
+.sidebar-tabs .tab-item img { width: 64px; height: 48px; object-fit: cover; border-radius: 4px; flex-shrink: 0; }
+.sidebar-tabs .tab-item h4 { font-size: 11px; font-weight: 600; line-height: 1.6; }
+.sidebar-tabs .tab-item:hover h4 { color: var(--primary); }
+
+.sidebar-widget .widget-header {
+  background: var(--primary); color: var(--primary-fg);
+  padding: 8px 12px; font-size: 13px; font-weight: 700;
+}
+.sidebar-widget img { width: 100%; height: auto; }
+.sidebar-widget img:hover { transform: scale(1.05); transition: .5s; }
+.sidebar-widget .widget-body { padding: 12px; }
+.sidebar-widget h3 { font-size: 13px; font-weight: 700; line-height: 1.6; }
+.sidebar-widget h3:hover { color: var(--primary); }
+.sidebar-widget p { font-size: 12px; color: var(--muted-fg); margin-top: 4px; }
+
+.ad-box {
+  background: var(--muted); border-radius: var(--radius);
+  display: flex; align-items: center; justify-content: center;
+  height: 250px; font-size: 11px; color: var(--muted-fg);
+}
+
+/* ===== POST PAGE ===== */
+.breadcrumb {
+  background: var(--card); border-bottom: 1px solid var(--border);
+  padding: 8px 0; font-size: 12px; color: var(--muted-fg);
+}
+.breadcrumb a:hover { color: var(--primary); }
+
+.post-header .post-label-tag {
+  display: inline-block; background: var(--primary); color: var(--primary-fg);
+  font-size: 10px; font-weight: 600; padding: 2px 8px; border-radius: 2px;
+}
+.post-header h1 {
+  font-size: 24px; font-weight: 900; line-height: 1.6; margin-top: 12px;
+}
+.post-meta { display: flex; flex-wrap: wrap; gap: 12px; font-size: 12px; color: var(--muted-fg); padding: 12px 0; border-bottom: 1px solid var(--border); }
+.post-meta .author-info { display: flex; align-items: center; gap: 8px; }
+.post-meta .author-info img { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; }
+
+.share-buttons { display: flex; gap: 8px; margin: 12px 0; }
+.share-btn {
+  width: 32px; height: 32px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  border: none; cursor: pointer; color: #fff; font-size: 14px;
+}
+.share-btn.fb { background: var(--news-blue); }
+.share-btn.tw { background: var(--secondary); }
+.share-btn.wa { background: var(--news-green); }
+.share-btn.print { background: var(--muted); color: var(--muted-fg); }
+
+.post-body { line-height: 2; }
+.post-body p { margin-bottom: 16px; font-size: 15px; }
+.post-body h2 { font-size: 18px; font-weight: 700; margin: 24px 0 12px; padding-bottom: 8px; border-bottom: 1px solid var(--border); }
+.post-body ul { list-style: disc; padding-right: 24px; margin-bottom: 16px; }
+.post-body li { font-size: 14px; margin-bottom: 4px; }
+.post-body blockquote {
+  border-right: 4px solid var(--primary);
+  background: var(--muted);
+  padding: 12px 16px;
+  border-radius: 4px 0 0 4px;
+  font-style: italic;
+  font-size: 14px;
+  margin: 24px 0;
+}
+
+.tags-bar { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 24px; padding-top: 16px; border-top: 1px solid var(--border); }
+.tag {
+  font-size: 11px; background: var(--muted); color: var(--muted-fg);
+  padding: 4px 10px; border-radius: 4px;
+  transition: all .2s;
+}
+.tag:hover { background: var(--primary); color: var(--primary-fg); }
+
+/* Author box */
+.author-box { display: flex; gap: 16px; }
+.author-box img { width: 80px; height: 80px; border-radius: 50%; object-fit: cover; border: 2px solid var(--primary); flex-shrink: 0; }
+.author-box h4 { font-weight: 700; }
+.author-box .title { font-size: 12px; color: var(--primary); font-weight: 500; }
+.author-box .bio { font-size: 12px; color: var(--muted-fg); margin-top: 8px; line-height: 1.6; }
+
+/* Comments */
+.comment-form textarea {
+  width: 100%; border: 1px solid var(--border); border-radius: 4px;
+  padding: 12px; font-size: 14px; font-family: inherit;
+  resize: none; background: var(--card);
+}
+.comment-form textarea:focus { outline: none; border-color: var(--primary); }
+.comment-form .submit-btn {
+  background: var(--primary); color: var(--primary-fg);
+  border: none; padding: 8px 16px; border-radius: 4px;
+  font-size: 12px; font-weight: 600; cursor: pointer;
+  margin-top: 8px; float: left;
+}
+.comment-item { display: flex; gap: 12px; padding: 16px 0; border-bottom: 1px solid var(--border); }
+.comment-item img { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; flex-shrink: 0; }
+.comment-item .name { font-size: 14px; font-weight: 600; }
+.comment-item .date { font-size: 10px; color: var(--muted-fg); }
+.comment-item .text { font-size: 14px; line-height: 1.6; margin-top: 4px; }
+.comment-actions { display: flex; gap: 16px; margin-top: 8px; }
+.comment-actions button {
+  background: none; border: none; font-size: 12px;
+  color: var(--muted-fg); cursor: pointer;
+  display: flex; align-items: center; gap: 4px;
+}
+.comment-actions button:hover { color: var(--primary); }
+
+/* Related posts */
+.related-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
+@media(max-width: 600px) { .related-grid { grid-template-columns: 1fr; } }
+.related-item { display: flex; gap: 12px; }
+.related-item img { width: 112px; height: 80px; object-fit: cover; border-radius: 4px; flex-shrink: 0; }
+.related-item h4 { font-size: 12px; font-weight: 700; line-height: 1.6; }
+.related-item h4:hover { color: var(--primary); }
+
+/* ===== FOOTER ===== */
+.footer {
+  background: var(--secondary); color: var(--secondary-fg);
+  margin-top: 32px; padding: 32px 0 16px;
+}
+.footer h3 { font-size: 14px; font-weight: 700; margin-bottom: 12px; border-bottom: 2px solid var(--primary); padding-bottom: 8px; display: inline-block; }
+.footer a { color: rgba(255,255,255,.7); font-size: 12px; transition: color .2s; }
+.footer a:hover { color: var(--primary); }
+.footer-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 32px; }
+@media(max-width: 767px) { .footer-grid { grid-template-columns: repeat(2, 1fr); } }
+.footer-bottom {
+  border-top: 1px solid rgba(255,255,255,.1);
+  margin-top: 24px; padding-top: 16px;
+  text-align: center; font-size: 12px;
+  color: rgba(255,255,255,.5);
+}
+
+/* ===== URL PREVIEW ===== */
+.url-preview-input { display: flex; gap: 8px; margin-bottom: 16px; }
+.url-preview-input input {
+  flex: 1; background: var(--muted); border: 1px solid var(--border);
+  border-radius: 4px; padding: 8px 12px; font-size: 13px; font-family: inherit;
+}
+.url-preview-input input:focus { outline: none; border-color: var(--primary); }
+.url-preview-input button {
+  background: var(--primary); color: var(--primary-fg);
+  border: none; padding: 8px 16px; border-radius: 4px;
+  font-size: 12px; font-weight: 600; cursor: pointer;
+}
+.url-preview-card { border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
+.url-preview-card img.preview-img { width: 100%; aspect-ratio: 16/9; object-fit: cover; }
+.url-preview-card .preview-body { padding: 16px; }
+.url-preview-card .source { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+.url-preview-card .source img { width: 16px; height: 16px; border-radius: 2px; }
+.url-preview-card .source span { font-size: 11px; color: var(--muted-fg); font-weight: 500; text-transform: uppercase; letter-spacing: 1px; }
+.url-preview-card h4 { font-size: 14px; font-weight: 700; line-height: 1.6; }
+.url-preview-card h4:hover { color: var(--primary); }
+.url-preview-card p { font-size: 12px; color: var(--muted-fg); margin-top: 6px; line-height: 1.6; }
+]]></b:skin>
+
+</head>
+<body>
+
+<!-- ===== STICKY NAV ===== -->
+<div class='sticky-nav' id='stickyNav'>
+  <div class='container flex items-center justify-between'>
+    <div class='flex items-center gap-3'>
+      <a expr:href='data:blog.homepageUrl'>
+        <div class='logo-sm'>বা</div>
+      </a>
+      <span style='color:#fff;font-weight:700;font-size:14px;'>বাংলাখবর</span>
+      <div class='flex hidden' id='stickyNavLinks' style='display:none;'>
+        <!-- Desktop sticky links populated by JS -->
+      </div>
+    </div>
+    <div class='flex items-center gap-2'>
+      <button class='mobile-menu-btn' onclick='toggleMobileMenu()' style='color:#fff;font-size:20px;'>☰</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== MOBILE DRAWER ===== -->
+<div class='mobile-drawer-overlay' id='mobileOverlay' onclick='toggleMobileMenu()'/>
+<div class='mobile-drawer' id='mobileDrawer'>
+  <div class='drawer-header'>
+    <span>মেনু</span>
+    <button class='drawer-close' onclick='toggleMobileMenu()'>✕</button>
+  </div>
+  <nav>
+    <a expr:href='data:blog.homepageUrl'>🏠 হোম</a>
+    <a href='/search/label/জাতীয়'>জাতীয় ›</a>
+    <a href='/search/label/রাজনীতি'>রাজনীতি ›</a>
+    <a href='/search/label/আন্তর্জাতিক'>আন্তর্জাতিক ›</a>
+    <a href='/search/label/অর্থনীতি'>অর্থনীতি ›</a>
+    <a href='/search/label/বিনোদন'>বিনোদন ›</a>
+    <a href='/search/label/খেলাধুলা'>খেলাধুলা ›</a>
+    <a href='/search/label/প্রযুক্তি'>প্রযুক্তি ›</a>
+    <a href='/search/label/শিক্ষা'>শিক্ষা ›</a>
+    <a href='/search/label/স্বাস্থ্য'>স্বাস্থ্য ›</a>
+    <a href='/search/label/লাইফস্টাইল'>লাইফস্টাইল ›</a>
+    <a href='/search/label/মত-দ্বিমত'>মত-দ্বিমত ›</a>
+    <a href='/search/label/ভিডিও'>ভিডিও ›</a>
+  </nav>
+</div>
+
+<!-- ===== HEADER ===== -->
+<header>
+  <!-- Top bar -->
+  <div class='top-bar'>
+    <div class='container flex items-center justify-between'>
+      <span>📧 info@banglakhabar.com | ☎ +৮৮০-১৭০০-০০০০০০</span>
+      <span>👤 লগইন | 🔔 নোটিফিকেশন</span>
+    </div>
+  </div>
+
+  <!-- Date bar -->
+  <div class='date-bar'>
+    <div class='container flex flex-wrap items-center gap-3'>
+      <strong>আজ রবিবার |</strong>
+      <span>০১ মার্চ ২০২৬ ইংরেজি</span>
+      <span class='bangla-date'>১৬ ফাল্গুন, ১৪৩২, বসন্তকাল</span>
+      <span class='hijri-date'>১২ রমজান ১৪৪৭ হিজরি</span>
+    </div>
+  </div>
+
+  <!-- Logo -->
+  <div class='header-logo'>
+    <div class='container flex items-center justify-between'>
+      <a class='flex items-center gap-3' expr:href='data:blog.homepageUrl'>
+        <div class='logo-icon'>বা</div>
+        <div class='logo-text'>
+          <h1>বাংলা<span>খবর</span></h1>
+          <p>সত্যের সন্ধানে নিরন্তর</p>
+        </div>
+      </a>
+      <div class='ad-banner'>বিজ্ঞাপন — ৪৬৮×৬০</div>
+      <button class='mobile-menu-btn' onclick='toggleMobileMenu()'>☰</button>
+    </div>
+  </div>
+
+  <!-- Main navigation -->
+  <div class='main-nav'>
+    <div class='container flex items-center'>
+      <a class='nav-all-btn' href='#'>☰ সকল বিভাগ</a>
+      <a href='/search/label/জাতীয়'>জাতীয়</a>
+      <a href='/search/label/রাজনীতি'>রাজনীতি</a>
+      <a href='/search/label/আন্তর্জাতিক'>আন্তর্জাতিক</a>
+      <a href='/search/label/অর্থনীতি'>অর্থনীতি</a>
+      <a href='/search/label/বিনোদন'>বিনোদন</a>
+      <a href='/search/label/খেলাধুলা'>খেলাধুলা</a>
+      <a href='/search/label/প্রযুক্তি'>প্রযুক্তি</a>
+      <a href='/search/label/শিক্ষা'>শিক্ষা</a>
+      <a href='/search/label/স্বাস্থ্য'>স্বাস্থ্য</a>
+      <a href='/search/label/লাইফস্টাইল'>লাইফস্টাইল</a>
+      <a href='/search/label/মত-দ্বিমত'>মত-দ্বিমত</a>
+      <a href='/search/label/ভিডিও'>ভিডিও</a>
+    </div>
+  </div>
+</header>
+
+<!-- ===== BREAKING NEWS ===== -->
+<div class='container' style='margin-top:8px;'>
+  <div class='breaking-bar'>
+    <div class='breaking-label'><div class='dot'/> ব্রেকিং</div>
+    <div class='ticker-wrap'>
+      <div class='ticker-content' id='breakingTicker'>
+        <!-- Breaking news items loaded via label feed -->
+      </div>
+    </div>
+    <a class='breaking-latest' href='/search/label/সর্বশেষ'>সর্বশেষ ❯</a>
+  </div>
+</div>
+
+<!-- ===== MAIN CONTENT ===== -->
+<div class='container'>
+  <div class='main-grid'>
+
+    <!-- ===== LEFT SIDEBAR ===== -->
+    <aside>
+      <!-- Tab Widget: পিপল / একটু থামুন -->
+      <div class='card sidebar-tabs' style='margin-bottom:16px;'>
+        <div class='tab-header'>
+          <button class='tab-btn active' onclick='switchTab(this, &quot;left-tab-1&quot;)'>পিপল</button>
+          <button class='tab-btn' onclick='switchTab(this, &quot;left-tab-2&quot;)'>একটু থামুন</button>
+        </div>
+        <div class='tab-content' id='left-tab-1'>
+          <div id='leftTab1Content'><!-- Loaded via feed --></div>
+        </div>
+        <div class='tab-content' id='left-tab-2' style='display:none;'>
+          <div id='leftTab2Content'><!-- Loaded via feed --></div>
+        </div>
+      </div>
+
+      <!-- Widget: ভাইরাল -->
+      <div class='card sidebar-widget'>
+        <div class='widget-header'>❝ ভাইরাল ❞</div>
+        <div id='viralWidget'><!-- Loaded via feed --></div>
+      </div>
+    </aside>
+
+    <!-- ===== MAIN AREA ===== -->
+    <main>
+
+      <b:section class='main' id='main' showaddelement='no'>
+        <b:widget id='Blog1' locked='true' title='Blog Posts' type='Blog' version='2' visible='true'>
+          <b:includable id='main'>
+
+            <!-- HOME PAGE -->
+            <b:if cond='data:blog.homepageUrl == data:blog.url'>
+
+              <!-- শীর্ষ সংবাদ -->
+              <div class='section-label'><span>শীর্ষ সংবাদ</span><a class='more' href='/search/label/শীর্ষ সংবাদ'>আরও ❯</a></div>
+              <div id='topNewsSection'><!-- Loaded via label feed JS --></div>
+
+              <!-- কারসরল স্লাইড -->
+              <div class='section-label' style='margin-top:24px;'><span>কারসরল স্লাইড</span></div>
+              <div class='card carousel-wrap' id='carouselSection'>
+                <button class='carousel-btn prev' onclick='carouselPrev()'>❮</button>
+                <div class='carousel-track' id='carouselTrack'><!-- Loaded via feed --></div>
+                <button class='carousel-btn next' onclick='carouselNext()'>❯</button>
+              </div>
+
+              <!-- হাইলাইটস -->
+              <div class='section-label' style='margin-top:24px;'><span>হাইলাইটস</span><a class='more' href='/search/label/হাইলাইটস'>আরও ❯</a></div>
+              <div id='highlightsSection'><!-- Loaded via feed --></div>
+
+              <!-- জাতীয় -->
+              <div class='section-label' style='margin-top:24px;'><span>জাতীয়</span><a class='more' href='/search/label/জাতীয়'>আরও ❯</a></div>
+              <div class='grid-2' id='nationalSection'><!-- Loaded via feed --></div>
+
+              <!-- রাজনীতি -->
+              <div class='section-label' style='margin-top:24px;'><span>রাজনীতি</span><a class='more' href='/search/label/রাজনীতি'>আরও ❯</a></div>
+              <div id='politicsSection'><!-- Loaded via feed --></div>
+
+              <!-- আন্তর্জাতিক -->
+              <div class='section-label' style='margin-top:24px;'><span>আন্তর্জাতিক</span><a class='more' href='/search/label/আন্তর্জাতিক'>আরও ❯</a></div>
+              <div id='internationalSection'><!-- Loaded via feed --></div>
+
+              <!-- বিনোদন -->
+              <div class='section-label' style='margin-top:24px;'><span>বিনোদন</span><a class='more' href='/search/label/বিনোদন'>আরও ❯</a></div>
+              <div class='ent-grid' id='entertainmentSection'><!-- Loaded via feed --></div>
+
+              <!-- দেশ বাংলা -->
+              <div class='section-label' style='margin-top:24px;'><span>দেশ বাংলা</span></div>
+              <div class='dropdown-bar flex gap-2'>
+                <select id='divisionSelect'><option>বিভাগ</option><option>ঢাকা</option><option>চট্টগ্রাম</option><option>রাজশাহী</option><option>খুলনা</option><option>বরিশাল</option><option>সিলেট</option><option>রংপুর</option><option>ময়মনসিংহ</option></select>
+                <select id='districtSelect'><option>জেলা</option><option>ঢাকা</option><option>গাজীপুর</option><option>নারায়ণগঞ্জ</option><option>মানিকগঞ্জ</option><option>মুন্সীগঞ্জ</option></select>
+                <select id='upazilaSelect'><option>উপজেলা</option><option>সাভার</option><option>ধামরাই</option><option>কেরানীগঞ্জ</option><option>নবাবগঞ্জ</option></select>
+              </div>
+              <div class='grid-2' id='deshBanglaSection'><!-- Loaded via feed --></div>
+
+              <!-- লাইফস্টাইল -->
+              <div class='section-label' style='margin-top:24px;'><span>লাইফস্টাইল</span><a class='more' href='/search/label/লাইফস্টাইল'>আরও ❯</a></div>
+              <div id='lifestyleSection'><!-- Loaded via feed --></div>
+
+              <!-- স্বাস্থ্যসেবা -->
+              <div class='section-label' style='margin-top:24px;'><span>স্বাস্থ্যসেবা</span><a class='more' href='/search/label/স্বাস্থ্যসেবা'>আরও ❯</a></div>
+              <div id='healthSection'><!-- Loaded via feed --></div>
+
+              <!-- মত-দ্বিমত -->
+              <div class='section-label' style='margin-top:24px;'><span>মত-দ্বিমত</span></div>
+              <div class='opinion-grid' id='opinionSection'><!-- Loaded via feed --></div>
+
+              <!-- ভিডিও -->
+              <div class='section-label' style='margin-top:24px;'><span>ভিডিও</span><a class='more' href='/search/label/ভিডিও'>আরও ❯</a></div>
+              <div class='grid-4' id='videoSection'><!-- Loaded via feed --></div>
+
+            </b:if>
+
+            <!-- POST PAGE -->
+            <b:if cond='data:blog.pageType == &quot;item&quot;'>
+              <b:loop values='data:posts' var='post'>
+                <article class='card' style='padding:16px 24px;'>
+                  <div class='post-header'>
+                    <b:if cond='data:post.labels'>
+                      <b:loop values='data:post.labels' var='label'>
+                        <a class='post-label-tag' expr:href='data:label.url'><data:label.name/></a>
+                      </b:loop>
+                    </b:if>
+                    <h1><data:post.title/></h1>
+                  </div>
+
+                  <div class='post-meta'>
+                    <div class='author-info'>
+                      <img expr:alt='data:post.author' expr:src='data:post.authorPhoto.image ? data:post.authorPhoto.image : &quot;https://via.placeholder.com/32&quot;'/>
+                      <div>
+                        <strong><data:post.author/></strong>
+                      </div>
+                    </div>
+                    <span><data:post.dateHeader/></span>
+                  </div>
+
+                  <div class='share-buttons'>
+                    <a class='share-btn fb' expr:href='&quot;https://www.facebook.com/sharer.php?u=&quot; + data:post.url' target='_blank'>f</a>
+                    <a class='share-btn tw' expr:href='&quot;https://twitter.com/intent/tweet?url=&quot; + data:post.url' target='_blank'>𝕏</a>
+                    <a class='share-btn wa' expr:href='&quot;https://api.whatsapp.com/send?text=&quot; + data:post.url' target='_blank'>W</a>
+                    <button class='share-btn print' onclick='window.print()'>🖨</button>
+                  </div>
+
+                  <div class='post-body'>
+                    <data:post.body/>
+                  </div>
+
+                  <!-- Tags -->
+                  <b:if cond='data:post.labels'>
+                    <div class='tags-bar'>
+                      <strong style='font-size:12px;color:var(--muted-fg);'>ট্যাগ:</strong>
+                      <b:loop values='data:post.labels' var='label'>
+                        <a class='tag' expr:href='data:label.url'><data:label.name/></a>
+                      </b:loop>
+                    </div>
+                  </b:if>
+                </article>
+
+                <!-- Author Box -->
+                <div class='card' style='padding:16px 24px; margin-top:16px;'>
+                  <h3 style='font-size:14px;font-weight:700;margin-bottom:16px;border-bottom:1px solid var(--border);padding-bottom:8px;'>লেখক সম্পর্কে</h3>
+                  <div class='author-box'>
+                    <img expr:alt='data:post.author' expr:src='data:post.authorPhoto.image ? data:post.authorPhoto.image : &quot;https://via.placeholder.com/80&quot;'/>
+                    <div>
+                      <h4><data:post.author/></h4>
+                      <p class='bio'>সাংবাদিকতায় নিয়োজিত। জাতীয় ও আন্তর্জাতিক বিষয়ে বিশেষ দক্ষতা রয়েছে।</p>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Comments -->
+                <div class='card' style='padding:16px 24px; margin-top:16px;'>
+                  <h3 style='font-size:14px;font-weight:700;margin-bottom:16px;border-bottom:2px solid var(--primary);padding-bottom:8px;'>মন্তব্য</h3>
+                  <div class='comment-form' style='background:var(--muted);padding:16px;border-radius:4px;margin-bottom:24px;'>
+                    <textarea placeholder='আপনার মন্তব্য লিখুন...' rows='3'/>
+                    <button class='submit-btn'>মন্তব্য করুন</button>
+                    <div style='clear:both;'/>
+                  </div>
+                  <b:include data='post' name='comments'/>
+                </div>
+
+                <!-- Related Posts -->
+                <div class='card' style='padding:16px 24px; margin-top:16px;'>
+                  <h3 style='font-size:14px;font-weight:700;margin-bottom:16px;border-bottom:2px solid var(--primary);padding-bottom:8px;'>সম্পর্কিত সংবাদ</h3>
+                  <div class='related-grid' id='relatedPosts'>
+                    <!-- Loaded via JS using post labels -->
+                  </div>
+                </div>
+
+              </b:loop>
+            </b:if>
+
+            <!-- LABEL / SEARCH PAGE -->
+            <b:if cond='data:blog.pageType == &quot;index&quot;'>
+              <b:if cond='data:blog.homepageUrl != data:blog.url'>
+                <div style='margin-bottom:16px;'>
+                  <b:if cond='data:blog.searchLabel'>
+                    <div class='section-label'><span><data:blog.searchLabel/></span></div>
+                  </b:if>
+                  <b:if cond='data:blog.searchQuery'>
+                    <div class='section-label'><span>অনুসন্ধান: <data:blog.searchQuery/></span></div>
+                  </b:if>
+                </div>
+                <b:loop values='data:posts' var='post'>
+                  <div class='list-item post-card'>
+                    <b:if cond='data:post.featuredImage'>
+                      <a expr:href='data:post.url'>
+                        <img expr:alt='data:post.title' expr:src='data:post.featuredImage' style='width:120px;height:90px;object-fit:cover;border-radius:4px;'/>
+                      </a>
+                    </b:if>
+                    <div>
+                      <a expr:href='data:post.url'>
+                        <h4><data:post.title/></h4>
+                      </a>
+                      <p style='font-size:12px;color:var(--muted-fg);margin-top:4px;'><data:post.dateHeader/></p>
+                    </div>
+                  </div>
+                </b:loop>
+                <b:include name='nextprev'/>
+              </b:if>
+            </b:if>
+
+          </b:includable>
+          <b:includable id='nextprev'>
+            <div class='flex justify-between' style='margin-top:16px;'>
+              <b:if cond='data:newerPageUrl'>
+                <a expr:href='data:newerPageUrl' style='background:var(--primary);color:#fff;padding:8px 16px;border-radius:4px;font-size:12px;font-weight:600;'>❮ নতুন পোস্ট</a>
+              </b:if>
+              <b:if cond='data:olderPageUrl'>
+                <a expr:href='data:olderPageUrl' style='background:var(--primary);color:#fff;padding:8px 16px;border-radius:4px;font-size:12px;font-weight:600;margin-left:auto;'>পুরাতন পোস্ট ❯</a>
+              </b:if>
+            </div>
+          </b:includable>
+          <b:includable id='comments' var='post'>
+            <b:if cond='data:post.allowComments'>
+              <div id='comments'>
+                <b:loop values='data:post.comments' var='comment'>
+                  <div class='comment-item'>
+                    <img expr:alt='data:comment.author' expr:src='data:comment.authorPhoto.image ? data:comment.authorPhoto.image : &quot;https://via.placeholder.com/40&quot;'/>
+                    <div>
+                      <div class='flex items-center gap-2'>
+                        <span class='name'><data:comment.author/></span>
+                        <span class='date'><data:comment.datetime/></span>
+                      </div>
+                      <p class='text'><data:comment.body/></p>
+                    </div>
+                  </div>
+                </b:loop>
+              </div>
+            </b:if>
+          </b:includable>
+        </b:widget>
+      </b:section>
+
+    </main>
+
+    <!-- ===== RIGHT SIDEBAR ===== -->
+    <aside>
+      <!-- Tab Widget: আলোচিত / স্পট লাইট -->
+      <div class='card sidebar-tabs' style='margin-bottom:16px;'>
+        <div class='tab-header'>
+          <button class='tab-btn active' onclick='switchTab(this, &quot;right-tab-1&quot;)'>আলোচিত</button>
+          <button class='tab-btn' onclick='switchTab(this, &quot;right-tab-2&quot;)'>স্পট লাইট</button>
+        </div>
+        <div class='tab-content' id='right-tab-1'>
+          <div id='rightTab1Content'><!-- Loaded via feed --></div>
+        </div>
+        <div class='tab-content' id='right-tab-2' style='display:none;'>
+          <div id='rightTab2Content'><!-- Loaded via feed --></div>
+        </div>
+      </div>
+
+      <!-- Tab Widget: জনপ্রিয় -->
+      <div class='card sidebar-tabs' style='margin-bottom:16px;'>
+        <div style='background:var(--secondary);color:var(--secondary-fg);padding:8px 12px;font-size:13px;font-weight:700;'>জনপ্রিয়</div>
+        <div id='popularContent'><!-- Loaded via feed --></div>
+      </div>
+
+      <!-- Widget: জটিল -->
+      <div class='card sidebar-widget' style='margin-bottom:16px;'>
+        <div class='widget-header'>❝ জটিল ❞</div>
+        <div id='jotilWidget'><!-- Loaded via feed --></div>
+      </div>
+
+      <!-- Ad -->
+      <div class='ad-box'>বিজ্ঞাপন — ৩০০×২৫০</div>
+    </aside>
+
+  </div>
+</div>
+
+<!-- ===== FOOTER ===== -->
+<div class='footer'>
+  <div class='container'>
+    <div class='footer-grid'>
+      <div>
+        <h3>আমাদের সম্পর্কে</h3>
+        <p style='font-size:12px;color:rgba(255,255,255,.6);line-height:1.8;'>বাংলাখবর একটি নির্ভরযোগ্য সংবাদ মাধ্যম। সত্য ও নিরপেক্ষ সংবাদ পরিবেশনই আমাদের লক্ষ্য।</p>
+      </div>
+      <div>
+        <h3>বিভাগসমূহ</h3>
+        <div style='display:flex;flex-direction:column;gap:6px;'>
+          <a href='/search/label/জাতীয়'>জাতীয়</a>
+          <a href='/search/label/রাজনীতি'>রাজনীতি</a>
+          <a href='/search/label/আন্তর্জাতিক'>আন্তর্জাতিক</a>
+          <a href='/search/label/অর্থনীতি'>অর্থনীতি</a>
+          <a href='/search/label/বিনোদন'>বিনোদন</a>
+          <a href='/search/label/খেলাধুলা'>খেলাধুলা</a>
+        </div>
+      </div>
+      <div>
+        <h3>গুরুত্বপূর্ণ লিংক</h3>
+        <div style='display:flex;flex-direction:column;gap:6px;'>
+          <a href='#'>বিজ্ঞাপন</a>
+          <a href='#'>গোপনীয়তা নীতি</a>
+          <a href='#'>শর্তাবলী</a>
+          <a href='#'>যোগাযোগ</a>
+        </div>
+      </div>
+      <div>
+        <h3>যোগাযোগ</h3>
+        <p style='font-size:12px;color:rgba(255,255,255,.6);line-height:1.8;'>📧 info@banglakhabar.com<br/>☎ +৮৮০-১৭০০-০০০০০০<br/>📍 ঢাকা, বাংলাদেশ</p>
+      </div>
+    </div>
+    <div class='footer-bottom'>
+      © ২০২৬ বাংলাখবর। সর্বস্বত্ব সংরক্ষিত।
+    </div>
+  </div>
+</div>
+
+<!-- ===== JAVASCRIPT ===== -->
+<script>
+//<![CDATA[
+
+// ===== Mobile Menu =====
+function toggleMobileMenu() {
+  var overlay = document.getElementById('mobileOverlay');
+  var drawer = document.getElementById('mobileDrawer');
+  overlay.classList.toggle('open');
+  drawer.classList.toggle('open');
+  document.body.style.overflow = drawer.classList.contains('open') ? 'hidden' : '';
+}
+
+// ===== Sticky Nav =====
+window.addEventListener('scroll', function() {
+  var stickyNav = document.getElementById('stickyNav');
+  if (window.scrollY > 150) {
+    stickyNav.classList.add('visible');
+  } else {
+    stickyNav.classList.remove('visible');
+  }
+});
+
+// ===== Tab Switching =====
+function switchTab(btn, tabId) {
+  var parent = btn.closest('.sidebar-tabs');
+  var btns = parent.querySelectorAll('.tab-btn');
+  var contents = parent.querySelectorAll('.tab-content');
+  btns.forEach(function(b) { b.classList.remove('active'); });
+  contents.forEach(function(c) { c.style.display = 'none'; });
+  btn.classList.add('active');
+  document.getElementById(tabId).style.display = 'block';
+}
+
+// ===== Feed Loader =====
+function loadFeed(label, count, callback) {
+  var url = '/feeds/posts/default/-/' + encodeURIComponent(label) + '?alt=json&max-results=' + count;
+  var script = document.createElement('script');
+  window['__feed_' + label.replace(/[^a-zA-Z]/g, '_')] = callback;
+  script.src = url + '&callback=__feed_' + label.replace(/[^a-zA-Z]/g, '_');
+  document.body.appendChild(script);
+}
+
+function getPostImage(entry) {
+  if (entry.media$thumbnail) return entry.media$thumbnail.url.replace(/\/s[0-9]+(-c)?\//, '/s600/');
+  var content = entry.content ? entry.content.$t : '';
+  var match = content.match(/<img[^>]+src=["']([^"']+)["']/);
+  return match ? match[1] : 'https://via.placeholder.com/600x400?text=No+Image';
+}
+
+function getPostUrl(entry) {
+  for (var i = 0; i < entry.link.length; i++) {
+    if (entry.link[i].rel === 'alternate') return entry.link[i].href;
+  }
+  return '#';
+}
+
+function getPostExcerpt(entry, len) {
+  var text = entry.summary ? entry.summary.$t : (entry.content ? entry.content.$t.replace(/<[^>]+>/g, '') : '');
+  return text.substring(0, len || 100) + '...';
+}
+
+function getAuthorImage(entry) {
+  return (entry.author && entry.author[0] && entry.author[0].gd$image && entry.author[0].gd$image.src !== 'https://img1.blogblog.com/img/b16-rounded.gif')
+    ? entry.author[0].gd$image.src : 'https://via.placeholder.com/40';
+}
+
+function getAuthorName(entry) {
+  return entry.author && entry.author[0] ? entry.author[0].name.$t : 'Unknown';
+}
+
+// ===== Render: Top News (1 big + 2 side) =====
+function renderTopNews(data) {
+  if (!data.feed || !data.feed.entry) return;
+  var entries = data.feed.entry;
+  var html = '<div class="grid-top">';
+  // Main
+  var e = entries[0];
+  html += '<a href="' + getPostUrl(e) + '" class="card post-card top-main" style="display:block;">';
+  html += '<div class="overflow-hidden aspect-video"><img class="post-img" src="' + getPostImage(e) + '" alt="' + e.title.$t + '" style="width:100%;height:100%;object-fit:cover;"/></div>';
+  html += '<div style="padding:16px;"><span class="post-label">শীর্ষ সংবাদ</span>';
+  html += '<h2>' + e.title.$t + '</h2>';
+  html += '<p style="font-size:13px;color:var(--muted-fg);margin-top:8px;" class="line-clamp-2">' + getPostExcerpt(e, 120) + '</p>';
+  html += '</div></a>';
+  // Side
+  html += '<div>';
+  for (var i = 1; i < Math.min(entries.length, 3); i++) {
+    var s = entries[i];
+    html += '<a href="' + getPostUrl(s) + '" class="card post-card top-side" style="display:block;margin-bottom:16px;">';
+    html += '<div class="overflow-hidden aspect-video"><img class="post-img" src="' + getPostImage(s) + '" alt="' + s.title.$t + '" style="width:100%;height:100%;object-fit:cover;"/></div>';
+    html += '<div style="padding:12px;"><h3 class="line-clamp-2">' + s.title.$t + '</h3>';
+    html += '</div></a>';
+  }
+  html += '</div></div>';
+  document.getElementById('topNewsSection').innerHTML = html;
+}
+
+// ===== Render: Grid Cards =====
+function renderGrid(containerId, data, aspectClass) {
+  if (!data.feed || !data.feed.entry) return;
+  var html = '';
+  data.feed.entry.forEach(function(e) {
+    html += '<a href="' + getPostUrl(e) + '" class="card post-card" style="display:block;">';
+    html += '<div class="overflow-hidden ' + (aspectClass || 'aspect-video') + '"><img class="post-img" src="' + getPostImage(e) + '" alt="' + e.title.$t + '" style="width:100%;height:100%;object-fit:cover;"/></div>';
+    html += '<div style="padding:8px;"><h3 style="font-size:12px;font-weight:700;line-height:1.6;" class="line-clamp-2">' + e.title.$t + '</h3></div>';
+    html += '</a>';
+  });
+  document.getElementById(containerId).innerHTML = html;
+}
+
+// ===== Render: Carousel =====
+function renderCarousel(data) {
+  if (!data.feed || !data.feed.entry) return;
+  var html = '';
+  data.feed.entry.forEach(function(e) {
+    html += '<a href="' + getPostUrl(e) + '" class="carousel-item post-card">';
+    html += '<img class="post-img" src="' + getPostImage(e) + '" alt="' + e.title.$t + '"/>';
+    html += '<h3 class="line-clamp-2">' + e.title.$t + '</h3>';
+    html += '</a>';
+  });
+  document.getElementById('carouselTrack').innerHTML = html;
+}
+
+// Carousel navigation
+var carouselPos = 0;
+function carouselNext() {
+  var track = document.getElementById('carouselTrack');
+  var items = track.querySelectorAll('.carousel-item');
+  var maxPos = Math.max(0, items.length - 4);
+  carouselPos = Math.min(carouselPos + 1, maxPos);
+  track.style.transform = 'translateX(-' + (carouselPos * 25) + '%)';
+  track.style.transition = 'transform .5s';
+}
+function carouselPrev() {
+  var track = document.getElementById('carouselTrack');
+  carouselPos = Math.max(0, carouselPos - 1);
+  track.style.transform = 'translateX(-' + (carouselPos * 25) + '%)';
+  track.style.transition = 'transform .5s';
+}
+// Auto-slide
+setInterval(function() { carouselNext(); if(carouselPos >= 4) carouselPos = -1; }, 4000);
+
+// ===== Render: Highlight =====
+function renderHighlight(containerId, data) {
+  if (!data.feed || !data.feed.entry) return;
+  var entries = data.feed.entry;
+  var html = '<div class="highlight-grid">';
+  var e = entries[0];
+  html += '<a href="' + getPostUrl(e) + '" class="card post-card" style="display:block;">';
+  html += '<div class="overflow-hidden aspect-video"><img class="post-img" src="' + getPostImage(e) + '" alt="' + e.title.$t + '" style="width:100%;height:100%;object-fit:cover;"/></div>';
+  html += '<div style="padding:16px;"><h3 style="font-size:16px;font-weight:700;line-height:1.6;">' + e.title.$t + '</h3>';
+  html += '<p style="font-size:13px;color:var(--muted-fg);margin-top:4px;" class="line-clamp-2">' + getPostExcerpt(e, 100) + '</p></div></a>';
+  html += '<div class="highlight-side">';
+  for (var i = 1; i < entries.length; i++) {
+    var s = entries[i];
+    html += '<a href="' + getPostUrl(s) + '" class="side-item post-card">';
+    html += '<img src="' + getPostImage(s) + '" alt="' + s.title.$t + '"/>';
+    html += '<h4 class="line-clamp-3">' + s.title.$t + '</h4></a>';
+  }
+  html += '</div></div>';
+  document.getElementById(containerId).innerHTML = html;
+}
+
+// ===== Render: List =====
+function renderList(containerId, data) {
+  if (!data.feed || !data.feed.entry) return;
+  var entries = data.feed.entry;
+  var html = '';
+  var e = entries[0];
+  html += '<a href="' + getPostUrl(e) + '" class="card post-card" style="display:block;margin-bottom:12px;">';
+  html += '<div class="overflow-hidden aspect-video"><img class="post-img" src="' + getPostImage(e) + '" alt="' + e.title.$t + '" style="width:100%;height:100%;object-fit:cover;"/></div>';
+  html += '<div style="padding:16px;"><h3 style="font-size:16px;font-weight:700;line-height:1.6;">' + e.title.$t + '</h3>';
+  html += '<p style="font-size:13px;color:var(--muted-fg);margin-top:4px;" class="line-clamp-2">' + getPostExcerpt(e, 100) + '</p></div></a>';
+  for (var i = 1; i < entries.length; i++) {
+    var s = entries[i];
+    html += '<a href="' + getPostUrl(s) + '" class="list-item post-card">';
+    html += '<img src="' + getPostImage(s) + '" alt="' + s.title.$t + '"/>';
+    html += '<div><h4 class="line-clamp-2">' + s.title.$t + '</h4></div></a>';
+  }
+  document.getElementById(containerId).innerHTML = html;
+}
+
+// ===== Render: Opinion =====
+function renderOpinion(data) {
+  if (!data.feed || !data.feed.entry) return;
+  var html = '';
+  data.feed.entry.forEach(function(e) {
+    html += '<a href="' + getPostUrl(e) + '" class="card post-card opinion-card" style="display:block;">';
+    html += '<img class="author-img" src="' + getAuthorImage(e) + '" alt="' + getAuthorName(e) + '"/>';
+    html += '<h4 class="author-name">' + getAuthorName(e) + '</h4>';
+    html += '<h3 style="font-size:12px;line-height:1.6;color:var(--muted-fg);margin-top:8px;"><span class="quote-mark">' + e.title.$t + '</span></h3>';
+    html += '</a>';
+  });
+  document.getElementById('opinionSection').innerHTML = html;
+}
+
+// ===== Render: Video =====
+function renderVideo(data) {
+  if (!data.feed || !data.feed.entry) return;
+  var html = '';
+  data.feed.entry.forEach(function(e) {
+    html += '<a href="' + getPostUrl(e) + '" class="card post-card" style="display:block;position:relative;">';
+    html += '<div class="overflow-hidden aspect-video" style="position:relative;"><img class="post-img" src="' + getPostImage(e) + '" alt="' + e.title.$t + '" style="width:100%;height:100%;object-fit:cover;"/>';
+    html += '<div class="video-overlay"><div class="play-btn">▶</div></div></div>';
+    html += '<div style="padding:8px;"><h3 style="font-size:12px;font-weight:700;line-height:1.6;" class="line-clamp-2">' + e.title.$t + '</h3></div>';
+    html += '</a>';
+  });
+  document.getElementById('videoSection').innerHTML = html;
+}
+
+// ===== Render: Sidebar Tabs =====
+function renderSidebarTab(containerId, data) {
+  if (!data.feed || !data.feed.entry) return;
+  var banglaNum = ['০','১','২','৩','৪','৫','৬','৭','৮','৯'];
+  var html = '';
+  data.feed.entry.forEach(function(e, i) {
+    html += '<a href="' + getPostUrl(e) + '" class="tab-item">';
+    html += '<span class="num">' + (banglaNum[i+1] || (i+1)) + '</span>';
+    html += '<img src="' + getPostImage(e) + '" alt="' + e.title.$t + '"/>';
+    html += '<h4 class="line-clamp-2">' + e.title.$t + '</h4>';
+    html += '</a>';
+  });
+  document.getElementById(containerId).innerHTML = html;
+}
+
+// ===== Render: Sidebar Widget =====
+function renderSidebarWidget(containerId, data) {
+  if (!data.feed || !data.feed.entry || !data.feed.entry[0]) return;
+  var e = data.feed.entry[0];
+  var html = '<a href="' + getPostUrl(e) + '" style="display:block;">';
+  html += '<div class="overflow-hidden"><img src="' + getPostImage(e) + '" alt="' + e.title.$t + '" style="width:100%;height:auto;"/></div>';
+  html += '<div class="widget-body"><h3 class="line-clamp-2">' + e.title.$t + '</h3>';
+  html += '<p class="line-clamp-2">' + getPostExcerpt(e, 80) + '</p></div></a>';
+  document.getElementById(containerId).innerHTML = html;
+}
+
+// ===== Render: Breaking News =====
+function renderBreaking(data) {
+  if (!data.feed || !data.feed.entry) return;
+  var html = '';
+  data.feed.entry.forEach(function(e) {
+    html += '<a href="' + getPostUrl(e) + '" style="white-space:nowrap;padding:0 20px;">' + e.title.$t + ' ●</a>';
+  });
+  document.getElementById('breakingTicker').innerHTML = html + html;
+}
+
+// ===== Render: Related Posts =====
+function renderRelated(data) {
+  if (!data.feed || !data.feed.entry) return;
+  var html = '';
+  data.feed.entry.slice(0, 4).forEach(function(e) {
+    html += '<a href="' + getPostUrl(e) + '" class="related-item post-card">';
+    html += '<img src="' + getPostImage(e) + '" alt="' + e.title.$t + '"/>';
+    html += '<div><h4 class="line-clamp-3">' + e.title.$t + '</h4></div></a>';
+  });
+  document.getElementById('relatedPosts').innerHTML = html;
+}
+
+// ===== LOAD ALL FEEDS =====
+// Breaking
+loadFeed('ব্রেকিং', 5, renderBreaking);
+
+// Top News
+loadFeed('শীর্ষ সংবাদ', 3, renderTopNews);
+
+// Carousel
+loadFeed('স্লাইড', 8, renderCarousel);
+
+// Highlights
+loadFeed('হাইলাইটস', 6, function(d) { renderHighlight('highlightsSection', d); });
+
+// National
+loadFeed('জাতীয়', 4, function(d) { renderGrid('nationalSection', d); });
+
+// Politics
+loadFeed('রাজনীতি', 4, function(d) { renderList('politicsSection', d); });
+
+// International
+loadFeed('আন্তর্জাতিক', 5, function(d) { renderHighlight('internationalSection', d); });
+
+// Entertainment
+loadFeed('বিনোদন', 6, function(d) { renderGrid('entertainmentSection', d, 'aspect-portrait'); });
+
+// Desh Bangla
+loadFeed('দেশ বাংলা', 4, function(d) { renderGrid('deshBanglaSection', d); });
+
+// Lifestyle
+loadFeed('লাইফস্টাইল', 6, function(d) { renderHighlight('lifestyleSection', d); });
+
+// Health
+loadFeed('স্বাস্থ্যসেবা', 4, function(d) { renderList('healthSection', d); });
+
+// Opinion
+loadFeed('মত-দ্বিমত', 4, renderOpinion);
+
+// Video
+loadFeed('ভিডিও', 4, renderVideo);
+
+// Left sidebar
+loadFeed('পিপল', 7, function(d) { renderSidebarTab('leftTab1Content', d); });
+loadFeed('একটু থামুন', 7, function(d) { renderSidebarTab('leftTab2Content', d); });
+loadFeed('ভাইরাল', 1, function(d) { renderSidebarWidget('viralWidget', d); });
+
+// Right sidebar
+loadFeed('আলোচিত', 7, function(d) { renderSidebarTab('rightTab1Content', d); });
+loadFeed('স্পট লাইট', 7, function(d) { renderSidebarTab('rightTab2Content', d); });
+loadFeed('জনপ্রিয়', 7, function(d) { renderSidebarTab('popularContent', d); });
+loadFeed('জটিল', 1, function(d) { renderSidebarWidget('jotilWidget', d); });
+
+// Related posts on post page
+(function() {
+  var meta = document.querySelector('meta[property="article:tag"]');
+  if (meta) loadFeed(meta.content, 4, renderRelated);
+  else {
+    var labels = document.querySelectorAll('.post-label-tag');
+    if (labels.length > 0) {
+      loadFeed(labels[0].textContent.trim(), 4, renderRelated);
+    }
+  }
+})();
+
+//]]>
+</script>
+
+</body>
+</html>

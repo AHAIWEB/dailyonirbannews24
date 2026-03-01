@@ -2,6 +2,7 @@ import { generatePosts, divisions, districts, upazilas } from "@/data/mockData";
 import SectionLabel from "./SectionLabel";
 import { useState } from "react";
 import { ChevronDown } from "lucide-react";
+import { Link } from "react-router-dom";
 
 export default function DeshBangla() {
   const posts = generatePosts("দেশ বাংলা", 4);
@@ -33,16 +34,16 @@ export default function DeshBangla() {
       </div>
       <div className="grid grid-cols-2 gap-3">
         {posts.map((post) => (
-          <div key={post.id} className="post-card bg-card rounded overflow-hidden shadow-sm">
+          <Link to={`/post/${post.id}`} key={post.id} className="post-card bg-card rounded overflow-hidden shadow-sm block">
             <div className="overflow-hidden aspect-video">
               <img src={post.image} alt={post.title} className="w-full h-full object-cover post-image" />
             </div>
             <div className="p-2">
-              <h3 className="text-xs font-bold leading-relaxed text-foreground hover:text-primary transition-colors cursor-pointer line-clamp-2">
+              <h3 className="text-xs font-bold leading-relaxed text-foreground hover:text-primary transition-colors line-clamp-2">
                 {post.title}
               </h3>
             </div>
-          </div>
+          </Link>
         ))}
       </div>
     </section>
