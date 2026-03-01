@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useSearchParams, useNavigate } from "react-router-dom";
+import { useAuth } from "@/hooks/useAuth";
 import Header from "@/components/news/Header";
 import Footer from "@/components/news/Footer";
 import { Link2, Loader2, ExternalLink, Send, Copy, Bookmark, CheckCircle2 } from "lucide-react";
@@ -15,8 +16,17 @@ interface FetchedContent {
 }
 
 export default function QuickPost() {
+  const { user, isAdmin, loading: authLoading } = useAuth();
+  const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const [url, setUrl] = useState(searchParams.get("u") || "");
+
+  // Protect: admin only
+  useEffect(() => {
+    if (!authLoading && (!user || !isAdmin)) {
+      navigate("/login");
+    }
+  }, [authLoading, user, isAdmin, navigate]);
   const [loading, setLoading] = useState(false);
   const [data, setData] = useState<FetchedContent | null>(null);
   const [error, setError] = useState("");
