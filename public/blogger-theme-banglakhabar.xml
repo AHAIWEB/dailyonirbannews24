@@ -642,7 +642,7 @@ h1,h2,h3,h4,h5,h6 { font-family: 'Noto Sans Bengali', sans-serif; }
 
 <!-- ===== HEADER SECTION ===== -->
 <b:section class='header-section' id='header-section' showaddelement='yes'>
-  <b:widget id='Header1' locked='false' title='হেডার' type='HTML' version='2' visible='true'>
+  <b:widget id='HTML1' locked='false' title='হেডার' type='HTML' version='2' visible='true'>
     <b:includable id='main'>
       <header>
         <!-- Top bar -->
@@ -703,7 +703,7 @@ h1,h2,h3,h4,h5,h6 { font-family: 'Noto Sans Bengali', sans-serif; }
 
 <!-- ===== BREAKING NEWS SECTION ===== -->
 <b:section class='breaking-section' id='breaking-section' showaddelement='yes'>
-  <b:widget id='BreakingNews1' locked='false' title='ব্রেকিং নিউজ' type='HTML' version='2' visible='true'>
+  <b:widget id='HTML2' locked='false' title='ব্রেকিং নিউজ' type='HTML' version='2' visible='true'>
     <b:includable id='main'>
       <div class='container' style='margin-top:8px;'>
         <div class='breaking-bar'>
@@ -748,7 +748,7 @@ h1,h2,h3,h4,h5,h6 { font-family: 'Noto Sans Bengali', sans-serif; }
       <b:section class='left-sidebar' id='left-sidebar' showaddelement='yes'>
 
         <!-- পিপল / একটু থামুন ট্যাব -->
-        <b:widget id='LeftTabs1' locked='false' title='পিপল / একটু থামুন' type='HTML' version='2' visible='true'>
+        <b:widget id='HTML3' locked='false' title='পিপল / একটু থামুন' type='HTML' version='2' visible='true'>
           <b:includable id='main'>
             <div class='card sidebar-tabs' style='margin-bottom:16px;'>
               <div class='tab-header'>
@@ -776,7 +776,7 @@ h1,h2,h3,h4,h5,h6 { font-family: 'Noto Sans Bengali', sans-serif; }
         </b:widget>
 
         <!-- ভাইরাল উইজেট -->
-        <b:widget id='LeftViral1' locked='false' title='ভাইরাল' type='HTML' version='2' visible='true'>
+        <b:widget id='HTML4' locked='false' title='ভাইরাল' type='HTML' version='2' visible='true'>
           <b:includable id='main'>
             <div class='card sidebar-widget' style='margin-bottom:16px;'>
               <div class='widget-header'>❝ ভাইরাল ❞</div>
@@ -953,7 +953,7 @@ h1,h2,h3,h4,h5,h6 { font-family: 'Noto Sans Bengali', sans-serif; }
       <b:section class='home-sections' id='home-sections' showaddelement='yes'>
 
         <!-- শীর্ষ সংবাদ -->
-        <b:widget id='TopNews1' locked='false' title='শীর্ষ সংবাদ' type='HTML' version='2' visible='true'>
+        <b:widget id='HTML5' locked='false' title='শীর্ষ সংবাদ' type='HTML' version='2' visible='true'>
           <b:includable id='main'>
             <div class='section-label'><span>শীর্ষ সংবাদ</span><a class='more' href='/search/label/শীর্ষ সংবাদ'>আরও ❯</a></div>
             <div id='topNewsSection'></div>
@@ -991,7 +991,7 @@ h1,h2,h3,h4,h5,h6 { font-family: 'Noto Sans Bengali', sans-serif; }
         </b:widget>
 
         <!-- কারসরল স্লাইড -->
-        <b:widget id='Carousel1' locked='false' title='কারসরল স্লাইড' type='HTML' version='2' visible='true'>
+        <b:widget id='HTML6' locked='false' title='কারসরল স্লাইড' type='HTML' version='2' visible='true'>
           <b:includable id='main'>
             <div class='section-label' style='margin-top:24px;'><span>কারসরল স্লাইড</span></div>
             <div class='card carousel-wrap' id='carouselSection'>
@@ -1040,7 +1040,7 @@ h1,h2,h3,h4,h5,h6 { font-family: 'Noto Sans Bengali', sans-serif; }
         </b:widget>
 
         <!-- হাইলাইটস -->
-        <b:widget id='Highlights1' locked='false' title='হাইলাইটস' type='HTML' version='2' visible='true'>
+        <b:widget id='HTML7' locked='false' title='হাইলাইটস' type='HTML' version='2' visible='true'>
           <b:includable id='main'>
             <div class='section-label' style='margin-top:24px;'><span>হাইলাইটস</span><a class='more' href='/search/label/হাইলাইটস'>আরও ❯</a></div>
             <div id='highlightsSection'></div>
@@ -1058,7 +1058,7 @@ h1,h2,h3,h4,h5,h6 { font-family: 'Noto Sans Bengali', sans-serif; }
         </b:widget>
 
         <!-- জাতীয় -->
-        <b:widget id='National1' locked='false' title='জাতীয়' type='HTML' version='2' visible='true'>
+        <b:widget id='HTML8' locked='false' title='জাতীয়' type='HTML' version='2' visible='true'>
           <b:includable id='main'>
             <div class='section-label' style='margin-top:24px;'><span>জাতীয়</span><a class='more' href='/search/label/জাতীয়'>আরও ❯</a></div>
             <div class='grid-2' id='nationalSection'></div>
@@ -1076,7 +1076,7 @@ h1,h2,h3,h4,h5,h6 { font-family: 'Noto Sans Bengali', sans-serif; }
         </b:widget>
 
         <!-- রাজনীতি -->
-        <b:widget id='Politics1' locked='false' title='রাজনীতি' type='HTML' version='2' visible='true'>
+        <b:widget id='HTML9' locked='false' title='রাজনীতি' type='HTML' version='2' visible='true'>
           <b:includable id='main'>
             <div class='section-label' style='margin-top:24px;'><span>রাজনীতি</span><a class='more' href='/search/label/রাজনীতি'>আরও ❯</a></div>
             <div id='politicsSection'></div>
@@ -1094,7 +1094,7 @@ h1,h2,h3,h4,h5,h6 { font-family: 'Noto Sans Bengali', sans-serif; }
         </b:widget>
 
         <!-- আন্তর্জাতিক -->
-        <b:widget id='International1' locked='false' title='আন্তর্জাতিক' type='HTML' version='2' visible='true'>
+        <b:widget id='HTML10' locked='false' title='আন্তর্জাতিক' type='HTML' version='2' visible='true'>
           <b:includable id='main'>
             <div class='section-label' style='margin-top:24px;'><span>আন্তর্জাতিক</span><a class='more' href='/search/label/আন্তর্জাতিক'>আরও ❯</a></div>
             <div id='internationalSection'></div>
@@ -1112,7 +1112,7 @@ h1,h2,h3,h4,h5,h6 { font-family: 'Noto Sans Bengali', sans-serif; }
         </b:widget>
 
         <!-- বিনোদন -->
-        <b:widget id='Entertainment1' locked='false' title='বিনোদন' type='HTML' version='2' visible='true'>
+        <b:widget id='HTML11' locked='false' title='বিনোদন' type='HTML' version='2' visible='true'>
           <b:includable id='main'>
             <div class='section-label' style='margin-top:24px;'><span>বিনোদন</span><a class='more' href='/search/label/বিনোদন'>আরও ❯</a></div>
             <div class='ent-grid' id='entertainmentSection'></div>
@@ -1130,7 +1130,7 @@ h1,h2,h3,h4,h5,h6 { font-family: 'Noto Sans Bengali', sans-serif; }
         </b:widget>
 
         <!-- দেশ বাংলা -->
-        <b:widget id='DeshBangla1' locked='false' title='দেশ বাংলা' type='HTML' version='2' visible='true'>
+        <b:widget id='HTML12' locked='false' title='দেশ বাংলা' type='HTML' version='2' visible='true'>
           <b:includable id='main'>
             <div class='section-label' style='margin-top:24px;'><span>দেশ বাংলা</span></div>
             <div class='dropdown-bar flex gap-2'>
@@ -1153,7 +1153,7 @@ h1,h2,h3,h4,h5,h6 { font-family: 'Noto Sans Bengali', sans-serif; }
         </b:widget>
 
         <!-- লাইফস্টাইল -->
-        <b:widget id='Lifestyle1' locked='false' title='লাইফস্টাইল' type='HTML' version='2' visible='true'>
+        <b:widget id='HTML13' locked='false' title='লাইফস্টাইল' type='HTML' version='2' visible='true'>
           <b:includable id='main'>
             <div class='section-label' style='margin-top:24px;'><span>লাইফস্টাইল</span><a class='more' href='/search/label/লাইফস্টাইল'>আরও ❯</a></div>
             <div id='lifestyleSection'></div>
@@ -1171,7 +1171,7 @@ h1,h2,h3,h4,h5,h6 { font-family: 'Noto Sans Bengali', sans-serif; }
         </b:widget>
 
         <!-- স্বাস্থ্যসেবা -->
-        <b:widget id='Health1' locked='false' title='স্বাস্থ্যসেবা' type='HTML' version='2' visible='true'>
+        <b:widget id='HTML14' locked='false' title='স্বাস্থ্যসেবা' type='HTML' version='2' visible='true'>
           <b:includable id='main'>
             <div class='section-label' style='margin-top:24px;'><span>স্বাস্থ্যসেবা</span><a class='more' href='/search/label/স্বাস্থ্যসেবা'>আরও ❯</a></div>
             <div id='healthSection'></div>
@@ -1189,7 +1189,7 @@ h1,h2,h3,h4,h5,h6 { font-family: 'Noto Sans Bengali', sans-serif; }
         </b:widget>
 
         <!-- মত-দ্বিমত -->
-        <b:widget id='Opinion1' locked='false' title='মত-দ্বিমত' type='HTML' version='2' visible='true'>
+        <b:widget id='HTML15' locked='false' title='মত-দ্বিমত' type='HTML' version='2' visible='true'>
           <b:includable id='main'>
             <div class='section-label' style='margin-top:24px;'><span>মত-দ্বিমত</span></div>
             <div class='opinion-grid' id='opinionSection'></div>
@@ -1220,7 +1220,7 @@ h1,h2,h3,h4,h5,h6 { font-family: 'Noto Sans Bengali', sans-serif; }
         </b:widget>
 
         <!-- ভিডিও -->
-        <b:widget id='Video1' locked='false' title='ভিডিও' type='HTML' version='2' visible='true'>
+        <b:widget id='HTML16' locked='false' title='ভিডিও' type='HTML' version='2' visible='true'>
           <b:includable id='main'>
             <div class='section-label' style='margin-top:24px;'><span>ভিডিও</span><a class='more' href='/search/label/ভিডিও'>আরও ❯</a></div>
             <div class='grid-4' id='videoSection'></div>
@@ -1255,7 +1255,7 @@ h1,h2,h3,h4,h5,h6 { font-family: 'Noto Sans Bengali', sans-serif; }
       <b:section class='right-sidebar' id='right-sidebar' showaddelement='yes'>
 
         <!-- আলোচিত / স্পট লাইট -->
-        <b:widget id='RightTabs1' locked='false' title='আলোচিত / স্পট লাইট' type='HTML' version='2' visible='true'>
+        <b:widget id='HTML17' locked='false' title='আলোচিত / স্পট লাইট' type='HTML' version='2' visible='true'>
           <b:includable id='main'>
             <div class='card sidebar-tabs' style='margin-bottom:16px;'>
               <div class='tab-header'>
@@ -1283,7 +1283,7 @@ h1,h2,h3,h4,h5,h6 { font-family: 'Noto Sans Bengali', sans-serif; }
         </b:widget>
 
         <!-- জনপ্রিয় -->
-        <b:widget id='Popular1' locked='false' title='জনপ্রিয়' type='HTML' version='2' visible='true'>
+        <b:widget id='HTML18' locked='false' title='জনপ্রিয়' type='HTML' version='2' visible='true'>
           <b:includable id='main'>
             <div class='card sidebar-tabs' style='margin-bottom:16px;'>
               <div style='background:var(--secondary);color:var(--secondary-fg);padding:8px 12px;font-size:13px;font-weight:700;'>জনপ্রিয়</div>
@@ -1303,7 +1303,7 @@ h1,h2,h3,h4,h5,h6 { font-family: 'Noto Sans Bengali', sans-serif; }
         </b:widget>
 
         <!-- জটিল -->
-        <b:widget id='RightJotil1' locked='false' title='জটিল' type='HTML' version='2' visible='true'>
+        <b:widget id='HTML19' locked='false' title='জটিল' type='HTML' version='2' visible='true'>
           <b:includable id='main'>
             <div class='card sidebar-widget' style='margin-bottom:16px;'>
               <div class='widget-header'>❝ জটিল ❞</div>
@@ -1323,7 +1323,7 @@ h1,h2,h3,h4,h5,h6 { font-family: 'Noto Sans Bengali', sans-serif; }
         </b:widget>
 
         <!-- বিজ্ঞাপন -->
-        <b:widget id='RightAd1' locked='false' title='বিজ্ঞাপন ৩০০×২৫০' type='HTML' version='2' visible='true'>
+        <b:widget id='HTML20' locked='false' title='বিজ্ঞাপন ৩০০×২৫০' type='HTML' version='2' visible='true'>
           <b:includable id='main'>
             <div class='ad-box'>বিজ্ঞাপন — ৩০০×২৫০</div>
           </b:includable>
@@ -1337,7 +1337,7 @@ h1,h2,h3,h4,h5,h6 { font-family: 'Noto Sans Bengali', sans-serif; }
 
 <!-- ===== FOOTER SECTION ===== -->
 <b:section class='footer-section' id='footer-section' showaddelement='yes'>
-  <b:widget id='Footer1' locked='false' title='ফুটার' type='HTML' version='2' visible='true'>
+  <b:widget id='HTML21' locked='false' title='ফুটার' type='HTML' version='2' visible='true'>
     <b:includable id='main'>
       <div class='footer'>
         <div class='container'>
