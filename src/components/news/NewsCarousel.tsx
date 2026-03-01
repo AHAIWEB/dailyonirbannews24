@@ -3,11 +3,13 @@ import SectionLabel from "./SectionLabel";
 import { useState, useEffect } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Link } from "react-router-dom";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 export default function NewsCarousel() {
   const posts = generatePosts("স্লাইড", 8, true);
   const [current, setCurrent] = useState(0);
-  const visible = 4;
+  const isMobile = useIsMobile();
+  const visible = isMobile ? 2 : 4;
 
   useEffect(() => {
     const timer = setInterval(() => {
