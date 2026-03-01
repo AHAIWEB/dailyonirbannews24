@@ -6,6 +6,7 @@ import SidebarTabs from "@/components/news/SidebarTabs";
 import SidebarWidget from "@/components/news/SidebarWidget";
 import { Clock, Share2, Facebook, Twitter, MessageCircle, Printer, ChevronRight, ThumbsUp, ThumbsDown, Reply } from "lucide-react";
 import { useState } from "react";
+import UrlPreview from "@/components/news/UrlPreview";
 
 const postBody = `
 <p>দেশের অর্থনৈতিক উন্নয়নে নতুন গতি আনতে সরকার বেশ কিছু গুরুত্বপূর্ণ সিদ্ধান্ত নিয়েছে। বিশেষজ্ঞদের মতে, এই পদক্ষেপগুলো দেশের সামগ্রিক প্রবৃদ্ধিতে ইতিবাচক ভূমিকা রাখবে।</p>
@@ -139,6 +140,9 @@ export default function PostPage() {
                 ))}
               </div>
             </div>
+
+            {/* URL Preview */}
+            <UrlPreview />
 
             {/* Author box */}
             <div className="bg-card rounded shadow-sm p-4 md:p-6 mt-4">
