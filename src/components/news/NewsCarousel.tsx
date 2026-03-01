@@ -5,7 +5,7 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Link } from "react-router-dom";
 
 export default function NewsCarousel() {
-  const posts = generatePosts("স্লাইড", 8);
+  const posts = generatePosts("স্লাইড", 8, true);
   const [current, setCurrent] = useState(0);
   const visible = 4;
 
@@ -39,12 +39,14 @@ export default function NewsCarousel() {
             style={{ transform: `translateX(-${current * (100 / visible)}%)` }}
           >
             {posts.map((post) => (
-              <Link to={`/post/${post.id}`} key={post.id} className="flex-shrink-0 post-card" style={{ width: `calc(${100 / visible}% - 9px)` }}>
-                <div className="overflow-hidden rounded aspect-[4/3]">
+            <Link to={`/post/${post.id}`} key={post.id} className="flex-shrink-0 post-card" style={{ width: `calc(${100 / visible}% - 9px)` }}>
+                <div className="overflow-hidden rounded aspect-[4/5]">
                   <img src={post.image} alt={post.title} className="w-full h-full object-cover post-image" />
                 </div>
-                <h3 className="text-xs font-semibold mt-2 leading-relaxed text-foreground hover:text-primary transition-colors line-clamp-2">
-                  {post.title}
+                <h3 className="text-sm font-semibold mt-2 leading-relaxed text-foreground hover:text-primary transition-colors line-clamp-2">
+                  <span className="text-primary text-lg font-bold leading-none">&#x275D;</span>
+                  {" "}{post.title}{" "}
+                  <span className="text-primary text-lg font-bold leading-none">&#x275E;</span>
                 </h3>
               </Link>
             ))}
