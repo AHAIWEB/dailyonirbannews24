@@ -20,8 +20,15 @@ export default function QuickPost() {
   const [loading, setLoading] = useState(false);
   const [data, setData] = useState<FetchedContent | null>(null);
   const [error, setError] = useState("");
-  const [blogUrl, setBlogUrl] = useState(""); // User's Blogger blog URL
   const [copied, setCopied] = useState(false);
+  const [selectedLabels, setSelectedLabels] = useState<string[]>([]);
+  const [customLabel, setCustomLabel] = useState("");
+
+  const predefinedLabels = [
+    "জাতীয়", "আন্তর্জাতিক", "রাজনীতি", "অর্থনীতি", "খেলাধুলা",
+    "বিনোদন", "তথ্যপ্রযুক্তি", "শিক্ষা", "স্বাস্থ্য", "লাইফস্টাইল",
+    "মতামত", "ব্রেকিং", "ভিডিও", "ফটো গ্যালারি", "দেশ-বাংলা",
+  ];
 
   // Auto-fetch if URL came from query params (bookmarklet/share)
   useEffect(() => {
@@ -104,10 +111,25 @@ export default function QuickPost() {
     return imageHtml + paragraphsHtml + sourceHtml;
   };
 
+  const toggleLabel = (label: string) => {
+    setSelectedLabels((prev) =>
+      prev.includes(label) ? prev.filter((l) => l !== label) : [...prev, label]
+    );
+  };
+
+  const addCustomLabel = () => {
+    const trimmed = customLabel.trim();
+    if (trimmed && !selectedLabels.includes(trimmed)) {
+      setSelectedLabels((prev) => [...prev, trimmed]);
+      setCustomLabel("");
+    }
+  };
+
   const openInBlogger = () => {
     if (!data) return;
     const content = generateBloggerHtml();
-    const bloggerUrl = `https://www.blogger.com/blog-this.g?n=${encodeURIComponent(data.title)}&t=${encodeURIComponent(content)}&u=${encodeURIComponent(data.url)}`;
+    const labels = selectedLabels.join(",");
+    const bloggerUrl = `https://www.blogger.com/blog-this.g?n=${encodeURIComponent(data.title)}&t=${encodeURIComponent(content)}&u=${encodeURIComponent(data.url)}${labels ? `&l=${encodeURIComponent(labels)}` : ""}`;
     window.open(bloggerUrl, "_blank");
   };
 
@@ -212,6 +234,50 @@ export default function QuickPost() {
                     সূত্র: {data.siteName}
                   </span>
                 </div>
+              </div>
+
+              {/* Label Selector */}
+              <div className="bg-card rounded shadow-sm p-6 mb-4">
+                <h2 className="text-sm font-bold text-foreground mb-4 border-b-2 border-primary pb-2">
+                  ক্যাটাগরি / লেবেল সিলেক্ট করুন
+                </h2>
+                <div className="flex flex-wrap gap-2 mb-3">
+                  {predefinedLabels.map((label) => (
+                    <button
+                      key={label}
+                      onClick={() => toggleLabel(label)}
+                      className={`px-3 py-1.5 rounded-full text-xs font-semibold border transition-colors ${
+                        selectedLabels.includes(label)
+                          ? "bg-primary text-primary-foreground border-primary"
+                          : "bg-muted text-muted-foreground border-border hover:border-primary hover:text-foreground"
+                      }`}
+                    >
+                      {label}
+                    </button>
+                  ))}
+                </div>
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    value={customLabel}
+                    onChange={(e) => setCustomLabel(e.target.value)}
+                    onKeyDown={(e) => e.key === "Enter" && addCustomLabel()}
+                    placeholder="কাস্টম লেবেল লিখুন..."
+                    className="flex-1 bg-muted border border-border rounded px-3 py-2 text-xs text-foreground placeholder:text-muted-foreground focus:ring-2 focus:ring-primary focus:outline-none"
+                  />
+                  <button
+                    onClick={addCustomLabel}
+                    disabled={!customLabel.trim()}
+                    className="bg-accent text-accent-foreground px-4 py-2 rounded text-xs font-semibold hover:opacity-90 disabled:opacity-50"
+                  >
+                    যোগ করুন
+                  </button>
+                </div>
+                {selectedLabels.length > 0 && (
+                  <div className="mt-3 text-xs text-muted-foreground">
+                    সিলেক্টেড: <span className="text-foreground font-semibold">{selectedLabels.join(", ")}</span>
+                  </div>
+                )}
               </div>
 
               {/* Action Buttons */}
