@@ -2,95 +2,58 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
-All colors MUST be HSL.
-*/
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Bengali:wght@300;400;500;600;700;800;900&family=Tiro+Bangla:ital@0;1&display=swap');
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    --background: 0 0% 96%;
+    --foreground: 220 20% 10%;
 
     --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    --card-foreground: 220 20% 10%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
+    --popover-foreground: 220 20% 10%;
 
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
+    --primary: 350 78% 45%;
+    --primary-foreground: 0 0% 100%;
 
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
+    --secondary: 220 15% 20%;
+    --secondary-foreground: 0 0% 100%;
 
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+    --muted: 220 10% 92%;
+    --muted-foreground: 220 10% 45%;
 
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    --accent: 35 95% 55%;
+    --accent-foreground: 220 20% 10%;
 
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 40% 98%;
 
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
+    --border: 220 10% 88%;
+    --input: 220 10% 88%;
+    --ring: 350 78% 45%;
 
-    --radius: 0.5rem;
+    --radius: 0.375rem;
 
-    --sidebar-background: 0 0% 98%;
+    --news-red: 350 78% 45%;
+    --news-dark: 220 20% 10%;
+    --news-gray: 220 10% 40%;
+    --news-light: 220 10% 97%;
+    --news-accent: 35 95% 55%;
+    --news-blue: 210 70% 45%;
+    --news-green: 145 60% 38%;
+    --news-border: 220 10% 88%;
+    --news-highlight: 48 100% 50%;
 
-    --sidebar-foreground: 240 5.3% 26.1%;
-
-    --sidebar-primary: 240 5.9% 10%;
-
-    --sidebar-primary-foreground: 0 0% 98%;
-
-    --sidebar-accent: 240 4.8% 95.9%;
-
-    --sidebar-accent-foreground: 240 5.9% 10%;
-
-    --sidebar-border: 220 13% 91%;
-
-    --sidebar-ring: 217.2 91.2% 59.8%;
-  }
-
-  .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
-
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
-
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
-
-    --primary: 210 40% 98%;
-    --primary-foreground: 222.2 47.4% 11.2%;
-
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
-
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
-
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
-
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
-
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
+    --sidebar-background: 0 0% 100%;
+    --sidebar-foreground: 220 20% 10%;
+    --sidebar-primary: 350 78% 45%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --sidebar-accent: 220 10% 95%;
+    --sidebar-accent-foreground: 220 20% 10%;
+    --sidebar-border: 220 10% 88%;
+    --sidebar-ring: 350 78% 45%;
   }
 }
 
@@ -101,5 +64,88 @@ All colors MUST be HSL.
 
   body {
     @apply bg-background text-foreground;
+    font-family: 'Noto Sans Bengali', 'Tiro Bangla', sans-serif;
   }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Noto Sans Bengali', sans-serif;
+  }
+}
+
+/* Breaking news ticker animation */
+@keyframes ticker {
+  0% { transform: translateX(100%); }
+  100% { transform: translateX(-100%); }
+}
+
+.ticker-animate {
+  animation: ticker 25s linear infinite;
+}
+
+.ticker-animate:hover {
+  animation-play-state: paused;
+}
+
+/* Section label bar */
+.section-label {
+  @apply relative font-bold text-sm tracking-wide uppercase;
+  @apply bg-primary text-primary-foreground px-4 py-2;
+  @apply inline-block;
+}
+
+.section-label::after {
+  content: '';
+  @apply absolute top-0 -right-3 w-0 h-0;
+  border-top: 18px solid transparent;
+  border-bottom: 18px solid transparent;
+  border-left: 12px solid hsl(var(--primary));
+}
+
+/* Post hover effects */
+.post-card {
+  @apply transition-all duration-300;
+}
+
+.post-card:hover {
+  @apply shadow-lg;
+  transform: translateY(-2px);
+}
+
+.post-card:hover .post-image {
+  @apply scale-105;
+}
+
+.post-image {
+  @apply transition-transform duration-500;
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: hsl(var(--muted));
+}
+::-webkit-scrollbar-thumb {
+  background: hsl(var(--news-gray));
+  border-radius: 3px;
+}
+
+/* Tab active indicator */
+.tab-active {
+  @apply border-b-2 font-semibold;
+  border-color: hsl(var(--primary));
+  color: hsl(var(--primary));
+}
+
+/* Quotation mark styling */
+.quote-mark::before {
+  content: '\201C';
+  @apply text-3xl font-bold leading-none mr-1;
+  color: hsl(var(--primary));
+}
+.quote-mark::after {
+  content: '\201D';
+  @apply text-3xl font-bold leading-none ml-1;
+  color: hsl(var(--primary));
 }
