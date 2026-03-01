@@ -4,7 +4,6 @@ const corsHeaders = {
 };
 
 function extractMeta(html: string, property: string): string | null {
-  // Try og: and twitter: variants
   const patterns = [
     new RegExp(`<meta[^>]+(?:property|name)=["']${property}["'][^>]+content=["']([^"']+)["']`, 'i'),
     new RegExp(`<meta[^>]+content=["']([^"']+)["'][^>]+(?:property|name)=["']${property}["']`, 'i'),
@@ -38,7 +37,6 @@ function extractImage(html: string): string {
 }
 
 function extractFavicon(html: string, baseUrl: string): string {
-  // Look for link rel="icon" or rel="shortcut icon"
   const iconPatterns = [
     /<link[^>]+rel=["'](?:shortcut )?icon["'][^>]+href=["']([^"']+)["']/i,
     /<link[^>]+href=["']([^"']+)["'][^>]+rel=["'](?:shortcut )?icon["']/i,
@@ -54,7 +52,6 @@ function extractFavicon(html: string, baseUrl: string): string {
       return `${url.origin}${href.startsWith('/') ? '' : '/'}${href}`;
     }
   }
-  // Fallback to Google's favicon service
   const url = new URL(baseUrl);
   return `https://www.google.com/s2/favicons?domain=${url.hostname}&sz=64`;
 }
@@ -70,13 +67,55 @@ function extractSiteName(html: string, baseUrl: string): string {
   }
 }
 
+function extractArticleBody(html: string): string {
+  // Remove script, style, nav, header, footer, aside tags
+  let cleaned = html
+    .replace(/<script[\s\S]*?<\/script>/gi, '')
+    .replace(/<style[\s\S]*?<\/style>/gi, '')
+    .replace(/<nav[\s\S]*?<\/nav>/gi, '')
+    .replace(/<header[\s\S]*?<\/header>/gi, '')
+    .replace(/<footer[\s\S]*?<\/footer>/gi, '')
+    .replace(/<aside[\s\S]*?<\/aside>/gi, '')
+    .replace(/<!--[\s\S]*?-->/g, '');
+
+  // Try to find article or main content
+  const articleMatch = cleaned.match(/<article[^>]*>([\s\S]*?)<\/article>/i);
+  if (articleMatch) {
+    cleaned = articleMatch[1];
+  } else {
+    const mainMatch = cleaned.match(/<main[^>]*>([\s\S]*?)<\/main>/i);
+    if (mainMatch) {
+      cleaned = mainMatch[1];
+    } else {
+      // Try common content div patterns
+      const contentMatch = cleaned.match(/<div[^>]*class=["'][^"']*(?:article|content|post|entry|story)[^"']*["'][^>]*>([\s\S]*?)<\/div>\s*(?:<\/div>|$)/i);
+      if (contentMatch) {
+        cleaned = contentMatch[1];
+      }
+    }
+  }
+
+  // Extract paragraphs
+  const paragraphs: string[] = [];
+  const pMatches = cleaned.matchAll(/<p[^>]*>([\s\S]*?)<\/p>/gi);
+  for (const m of pMatches) {
+    // Strip inner HTML tags but keep text
+    const text = m[1].replace(/<[^>]+>/g, '').trim();
+    if (text.length > 20) {
+      paragraphs.push(text);
+    }
+  }
+
+  return paragraphs.join('\n\n');
+}
+
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    const { url } = await req.json();
+    const { url, extractContent } = await req.json();
 
     if (!url) {
       return new Response(
@@ -109,7 +148,7 @@ Deno.serve(async (req) => {
 
     const html = await response.text();
 
-    const metadata = {
+    const metadata: Record<string, string> = {
       title: extractTitle(html),
       description: extractDescription(html),
       image: extractImage(html),
@@ -128,7 +167,12 @@ Deno.serve(async (req) => {
       }
     }
 
-    console.log('Metadata extracted:', JSON.stringify(metadata));
+    // Extract article body content if requested
+    if (extractContent) {
+      metadata.content = extractArticleBody(html);
+    }
+
+    console.log('Metadata extracted:', JSON.stringify({ ...metadata, content: metadata.content?.substring(0, 100) }));
 
     return new Response(
       JSON.stringify({ success: true, data: metadata }),
