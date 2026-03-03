@@ -68,7 +68,7 @@ function extractSiteName(html: string, baseUrl: string): string {
 }
 
 function extractArticleBody(html: string): string {
-  // Remove script, style, nav, header, footer, aside tags
+  // Remove script, style, nav, header, footer, aside, form, iframe tags
   let cleaned = html
     .replace(/<script[\s\S]*?<\/script>/gi, '')
     .replace(/<style[\s\S]*?<\/style>/gi, '')
@@ -76,33 +76,82 @@ function extractArticleBody(html: string): string {
     .replace(/<header[\s\S]*?<\/header>/gi, '')
     .replace(/<footer[\s\S]*?<\/footer>/gi, '')
     .replace(/<aside[\s\S]*?<\/aside>/gi, '')
+    .replace(/<form[\s\S]*?<\/form>/gi, '')
+    .replace(/<iframe[\s\S]*?<\/iframe>/gi, '')
     .replace(/<!--[\s\S]*?-->/g, '');
 
-  // Try to find article or main content
+  // Strategy 1: Try <article> tag
   const articleMatch = cleaned.match(/<article[^>]*>([\s\S]*?)<\/article>/i);
+  let contentHtml = '';
+  
   if (articleMatch) {
-    cleaned = articleMatch[1];
+    contentHtml = articleMatch[1];
   } else {
+    // Strategy 2: Try <main> tag
     const mainMatch = cleaned.match(/<main[^>]*>([\s\S]*?)<\/main>/i);
     if (mainMatch) {
-      cleaned = mainMatch[1];
+      contentHtml = mainMatch[1];
     } else {
-      // Try common content div patterns
-      const contentMatch = cleaned.match(/<div[^>]*class=["'][^"']*(?:article|content|post|entry|story)[^"']*["'][^>]*>([\s\S]*?)<\/div>\s*(?:<\/div>|$)/i);
-      if (contentMatch) {
-        cleaned = contentMatch[1];
+      // Strategy 3: Try common content class/id patterns (greedy approach)
+      const contentPatterns = [
+        /<div[^>]*(?:id|class)=["'][^"']*(?:article-body|article-content|post-body|post-content|entry-content|story-body|story-content|content-body|main-content|single-content)[^"']*["'][^>]*>([\s\S]*?)<\/div>\s*<(?:div|section|aside|footer)/i,
+        /<div[^>]*(?:id|class)=["'][^"']*(?:article|content|post|entry|story)[^"']*["'][^>]*>([\s\S]*?)<\/div>\s*<(?:div|section|aside|footer)/i,
+      ];
+      
+      for (const pattern of contentPatterns) {
+        const match = cleaned.match(pattern);
+        if (match && match[1].length > 200) {
+          contentHtml = match[1];
+          break;
+        }
+      }
+      
+      // Strategy 4: If still no content, use the whole body
+      if (!contentHtml) {
+        const bodyMatch = cleaned.match(/<body[^>]*>([\s\S]*?)<\/body>/i);
+        if (bodyMatch) {
+          contentHtml = bodyMatch[1];
+        } else {
+          contentHtml = cleaned;
+        }
       }
     }
   }
 
   // Extract paragraphs
   const paragraphs: string[] = [];
-  const pMatches = cleaned.matchAll(/<p[^>]*>([\s\S]*?)<\/p>/gi);
+  const pMatches = contentHtml.matchAll(/<p[^>]*>([\s\S]*?)<\/p>/gi);
   for (const m of pMatches) {
-    // Strip inner HTML tags but keep text
-    const text = m[1].replace(/<[^>]+>/g, '').trim();
-    if (text.length > 20) {
+    const text = m[1]
+      .replace(/<br\s*\/?>/gi, '\n')
+      .replace(/<[^>]+>/g, '')
+      .replace(/&nbsp;/g, ' ')
+      .replace(/&amp;/g, '&')
+      .replace(/&lt;/g, '<')
+      .replace(/&gt;/g, '>')
+      .replace(/&quot;/g, '"')
+      .replace(/&#39;/g, "'")
+      .trim();
+    if (text.length > 15) {
       paragraphs.push(text);
+    }
+  }
+
+  // If very few paragraphs found, also try div-based text blocks
+  if (paragraphs.length < 3) {
+    const divTexts = contentHtml.matchAll(/<div[^>]*>([\s\S]*?)<\/div>/gi);
+    for (const m of divTexts) {
+      const inner = m[1];
+      // Skip if contains nested divs (structural)
+      if (/<div/i.test(inner)) continue;
+      const text = inner
+        .replace(/<br\s*\/?>/gi, '\n')
+        .replace(/<[^>]+>/g, '')
+        .replace(/&nbsp;/g, ' ')
+        .trim();
+      if (text.length > 30 && !paragraphs.includes(text)) {
+        paragraphs.push(text);
+      }
     }
   }
 
@@ -133,8 +182,9 @@ Deno.serve(async (req) => {
 
     const response = await fetch(formattedUrl, {
       headers: {
-        'User-Agent': 'Mozilla/5.0 (compatible; LinkPreview/1.0)',
-        'Accept': 'text/html',
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+        'Accept-Language': 'bn-BD,bn;q=0.9,en-US;q=0.8,en;q=0.7',
       },
       redirect: 'follow',
     });
@@ -170,9 +220,8 @@ Deno.serve(async (req) => {
     // Extract article body content if requested
     if (extractContent) {
       metadata.content = extractArticleBody(html);
+      console.log(`Content extracted: ${metadata.content.length} chars, ${metadata.content.split('\n\n').length} paragraphs`);
     }
-
-    console.log('Metadata extracted:', JSON.stringify({ ...metadata, content: metadata.content?.substring(0, 100) }));
 
     return new Response(
       JSON.stringify({ success: true, data: metadata }),

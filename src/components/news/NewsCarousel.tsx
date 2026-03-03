@@ -11,12 +11,18 @@ export default function NewsCarousel() {
   const isMobile = useIsMobile();
   const visible = isMobile ? 2 : 4;
 
+  const maxIndex = Math.max(0, posts.length - visible);
+
   useEffect(() => {
     const timer = setInterval(() => {
-      setCurrent((prev) => (prev + 1) % (posts.length - visible + 1));
+      setCurrent((prev) => (prev + 1) % (maxIndex + 1));
     }, 4000);
     return () => clearInterval(timer);
-  }, [posts.length]);
+  }, [maxIndex]);
+
+  // Calculate per-item width percentage accounting for gaps
+  const gapPx = 12; // gap-3 = 12px
+  const itemWidthCalc = `calc((100% - ${gapPx * (visible - 1)}px) / ${visible})`;
 
   return (
     <section>
@@ -29,7 +35,7 @@ export default function NewsCarousel() {
           <ChevronLeft className="w-4 h-4" />
         </button>
         <button
-          onClick={() => setCurrent(Math.min(posts.length - visible, current + 1))}
+          onClick={() => setCurrent(Math.min(maxIndex, current + 1))}
           className="absolute right-1 top-1/2 -translate-y-1/2 z-10 w-8 h-8 bg-secondary/80 text-secondary-foreground rounded-full flex items-center justify-center hover:bg-secondary transition-colors"
         >
           <ChevronRight className="w-4 h-4" />
@@ -37,11 +43,19 @@ export default function NewsCarousel() {
 
         <div className="overflow-hidden">
           <div
-            className="flex transition-transform duration-500 gap-3"
-            style={{ transform: `translateX(-${current * (100 / visible)}%)` }}
+            className="flex transition-transform duration-500"
+            style={{
+              gap: `${gapPx}px`,
+              transform: `translateX(calc(-${current} * (${itemWidthCalc} + ${gapPx}px)))`,
+            }}
           >
             {posts.map((post) => (
-            <Link to={`/post/${post.id}`} key={post.id} className="flex-shrink-0 post-card" style={{ width: `calc(${100 / visible}% - 9px)` }}>
+              <Link
+                to={`/post/${post.id}`}
+                key={post.id}
+                className="flex-shrink-0 post-card"
+                style={{ width: itemWidthCalc }}
+              >
                 <div className="overflow-hidden rounded aspect-[4/5]">
                   <img src={post.image} alt={post.title} className="w-full h-full object-cover post-image" />
                 </div>
@@ -56,7 +70,7 @@ export default function NewsCarousel() {
         </div>
 
         <div className="flex justify-center gap-1.5 mt-3">
-          {Array.from({ length: posts.length - visible + 1 }, (_, i) => (
+          {Array.from({ length: maxIndex + 1 }, (_, i) => (
             <button
               key={i}
               onClick={() => setCurrent(i)}

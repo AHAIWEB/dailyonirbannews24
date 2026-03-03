@@ -3,7 +3,7 @@ import { useSearchParams, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import Header from "@/components/news/Header";
 import Footer from "@/components/news/Footer";
-import { Link2, Loader2, ExternalLink, Send, Copy, Bookmark, CheckCircle2 } from "lucide-react";
+import { Link2, Loader2, ExternalLink, Send, Copy, Bookmark, CheckCircle2, ClipboardPaste } from "lucide-react";
 
 interface FetchedContent {
   title: string;
@@ -42,13 +42,14 @@ export default function QuickPost() {
 
   // Auto-fetch if URL came from query params (bookmarklet/share)
   useEffect(() => {
-    const paramUrl = searchParams.get("u");
-    const paramTitle = searchParams.get("t");
-    if (paramUrl) {
-      setUrl(paramUrl);
-      // If title also provided via share, pre-fill
-      if (paramTitle && !data) {
-        fetchContent(paramUrl);
+    const paramUrl = searchParams.get("u") || searchParams.get("url") || searchParams.get("text") || "";
+    const paramTitle = searchParams.get("t") || searchParams.get("title") || "";
+    // Extract URL from text if it contains one
+    const extractedUrl = paramUrl.startsWith("http") ? paramUrl : paramUrl.match(/https?:\/\/[^\s]+/)?.[0] || paramUrl;
+    if (extractedUrl) {
+      setUrl(extractedUrl);
+      if (extractedUrl.startsWith("http") && !data) {
+        fetchContent(extractedUrl);
       }
     }
   }, [searchParams]);
@@ -182,6 +183,27 @@ export default function QuickPost() {
                 placeholder="https://example.com/article-url"
                 className="flex-1 bg-muted border border-border rounded px-3 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:ring-2 focus:ring-primary focus:outline-none"
               />
+              <button
+                onClick={async () => {
+                  try {
+                    const text = await navigator.clipboard.readText();
+                    if (text) {
+                      setUrl(text.trim());
+                      // Auto-fetch if it looks like a URL
+                      if (text.trim().startsWith("http")) {
+                        fetchContent(text.trim());
+                      }
+                    }
+                  } catch {
+                    // Clipboard API not available
+                  }
+                }}
+                className="bg-accent text-accent-foreground px-3 py-2.5 rounded text-sm font-semibold hover:opacity-90 transition-opacity flex items-center gap-1"
+                title="ক্লিপবোর্ড থেকে পেস্ট করুন"
+              >
+                <ClipboardPaste className="w-4 h-4" />
+                <span className="hidden sm:inline">পেস্ট</span>
+              </button>
               <button
                 onClick={() => fetchContent()}
                 disabled={loading || !url.trim()}
