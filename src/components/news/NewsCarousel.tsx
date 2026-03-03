@@ -26,7 +26,7 @@ export default function NewsCarousel() {
 
   return (
     <section>
-      <SectionLabel label="কারসরল স্লাইড" />
+      <SectionLabel label="এডিটর পিক" />
       <div className="relative bg-card rounded shadow-sm p-3">
         <button
           onClick={() => setCurrent(Math.max(0, current - 1))}
