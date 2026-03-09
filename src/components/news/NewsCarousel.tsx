@@ -1,6 +1,6 @@
 import { generatePosts } from "@/data/mockData";
 import SectionLabel from "./SectionLabel";
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef, useCallback } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -10,8 +10,35 @@ export default function NewsCarousel() {
   const [current, setCurrent] = useState(0);
   const isMobile = useIsMobile();
   const visible = isMobile ? 2 : 4;
-
   const maxIndex = Math.max(0, posts.length - visible);
+
+  // Touch swipe support
+  const touchStartX = useRef(0);
+  const touchEndX = useRef(0);
+  const isDragging = useRef(false);
+
+  const handlePrev = useCallback(() => setCurrent((p) => Math.max(0, p - 1)), []);
+  const handleNext = useCallback(() => setCurrent((p) => Math.min(maxIndex, p + 1)), [maxIndex]);
+
+  const handleTouchStart = useCallback((e: React.TouchEvent) => {
+    touchStartX.current = e.touches[0].clientX;
+    isDragging.current = true;
+  }, []);
+
+  const handleTouchMove = useCallback((e: React.TouchEvent) => {
+    if (isDragging.current) {
+      touchEndX.current = e.touches[0].clientX;
+    }
+  }, []);
+
+  const handleTouchEnd = useCallback(() => {
+    if (!isDragging.current) return;
+    isDragging.current = false;
+    const diff = touchStartX.current - touchEndX.current;
+    const threshold = 50;
+    if (diff > threshold) handleNext();
+    else if (diff < -threshold) handlePrev();
+  }, [handleNext, handlePrev]);
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -20,8 +47,7 @@ export default function NewsCarousel() {
     return () => clearInterval(timer);
   }, [maxIndex]);
 
-  // Calculate per-item width percentage accounting for gaps
-  const gapPx = 12; // gap-3 = 12px
+  const gapPx = 12;
   const itemWidthCalc = `calc((100% - ${gapPx * (visible - 1)}px) / ${visible})`;
 
   return (
@@ -29,19 +55,24 @@ export default function NewsCarousel() {
       <SectionLabel label="এডিটর পিক" />
       <div className="relative bg-card rounded shadow-sm p-3">
         <button
-          onClick={() => setCurrent(Math.max(0, current - 1))}
+          onClick={handlePrev}
           className="absolute left-1 top-1/2 -translate-y-1/2 z-10 w-8 h-8 bg-secondary/80 text-secondary-foreground rounded-full flex items-center justify-center hover:bg-secondary transition-colors"
         >
           <ChevronLeft className="w-4 h-4" />
         </button>
         <button
-          onClick={() => setCurrent(Math.min(maxIndex, current + 1))}
+          onClick={handleNext}
           className="absolute right-1 top-1/2 -translate-y-1/2 z-10 w-8 h-8 bg-secondary/80 text-secondary-foreground rounded-full flex items-center justify-center hover:bg-secondary transition-colors"
         >
           <ChevronRight className="w-4 h-4" />
         </button>
 
-        <div className="overflow-hidden">
+        <div
+          className="overflow-hidden"
+          onTouchStart={handleTouchStart}
+          onTouchMove={handleTouchMove}
+          onTouchEnd={handleTouchEnd}
+        >
           <div
             className="flex transition-transform duration-500"
             style={{
