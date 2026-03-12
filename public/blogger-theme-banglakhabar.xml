@@ -1182,7 +1182,7 @@ h1,h2,h3,h4,h5,h6 { font-family: 'Noto Sans Bengali', sans-serif; }
               s.src='/feeds/posts/default/-/স্বাস্থ্যসেবা?alt=json-in-script&max-results=4&callback=_bkHealth';
               document.body.appendChild(s);
             })();
-            function _bkHealth(d){_renderList('healthSection',d);}
+            function _bkHealth(d){if(typeof _renderList==='function'){_renderList('healthSection',d);}else{var _t=setInterval(function(){if(typeof _renderList==='function'){clearInterval(_t);_renderList('healthSection',d);}},100);}}
             //]]>
             </script>
           </b:includable>
