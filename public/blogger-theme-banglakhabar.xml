@@ -1316,7 +1316,7 @@ h1,h2,h3,h4,h5,h6 { font-family: 'Noto Sans Bengali', sans-serif; }
               s.src='/feeds/posts/default/-/জটিল?alt=json-in-script&max-results=1&callback=_bkJotil';
               document.body.appendChild(s);
             })();
-            function _bkJotil(d){_renderSideWidget('jotilWidget',d);}
+            function _bkJotil(d){if(typeof _renderSideWidget==='function'){_renderSideWidget('jotilWidget',d);}else{var _t=setInterval(function(){if(typeof _renderSideWidget==='function'){clearInterval(_t);_renderSideWidget('jotilWidget',d);}},100);}}
             //]]>
             </script>
           </b:includable>
