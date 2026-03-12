@@ -990,10 +990,10 @@ h1,h2,h3,h4,h5,h6 { font-family: 'Noto Sans Bengali', sans-serif; }
           </b:includable>
         </b:widget>
 
-        <!-- কারসরল স্লাইড -->
-        <b:widget id='HTML6' locked='false' title='কারসরল স্লাইড' type='HTML' version='2' visible='true'>
+        <!-- এডিটর পিক -->
+        <b:widget id='HTML6' locked='false' title='এডিটর পিক' type='HTML' version='2' visible='true'>
           <b:includable id='main'>
-            <div class='section-label' style='margin-top:24px;'><span>কারসরল স্লাইড</span></div>
+            <div class='section-label' style='margin-top:24px;'><span>এডিটর পিক</span></div>
             <div class='card carousel-wrap' id='carouselSection'>
               <button class='carousel-btn prev' onclick='carouselPrev()'>❮</button>
               <div class='carousel-track' id='carouselTrack'></div>
@@ -1003,7 +1003,7 @@ h1,h2,h3,h4,h5,h6 { font-family: 'Noto Sans Bengali', sans-serif; }
             //<![CDATA[
             (function(){
               var s=document.createElement('script');
-              s.src='/feeds/posts/default/-/স্লাইড?alt=json-in-script&max-results=8&callback=_bkCarousel';
+              s.src='/feeds/posts/default/-/এডিটর পিক?alt=json-in-script&max-results=8&callback=_bkCarousel';
               document.body.appendChild(s);
             })();
             function _bkCarousel(d){
