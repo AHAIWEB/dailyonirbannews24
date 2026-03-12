@@ -101,7 +101,7 @@ export default function NewsCarousel() {
                 to={`/post/${post.id}`}
                 key={post.id}
                 className="flex-shrink-0 post-card"
-                style={{ width: itemWidthCalc }}
+                style={{ width: itemWidthPx > 0 ? `${itemWidthPx}px` : `calc((100% - ${gapPx * (visible - 1)}px) / ${visible})` }}
               >
                 <div className="overflow-hidden rounded aspect-[4/5]">
                   <img src={post.image} alt={post.title} className="w-full h-full object-cover post-image" />
