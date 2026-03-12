@@ -1164,7 +1164,7 @@ h1,h2,h3,h4,h5,h6 { font-family: 'Noto Sans Bengali', sans-serif; }
               s.src='/feeds/posts/default/-/লাইফস্টাইল?alt=json-in-script&max-results=6&callback=_bkLifestyle';
               document.body.appendChild(s);
             })();
-            function _bkLifestyle(d){_renderHighlight('lifestyleSection',d);}
+            function _bkLifestyle(d){if(typeof _renderHighlight==='function'){_renderHighlight('lifestyleSection',d);}else{var _t=setInterval(function(){if(typeof _renderHighlight==='function'){clearInterval(_t);_renderHighlight('lifestyleSection',d);}},100);}}
             //]]>
             </script>
           </b:includable>
