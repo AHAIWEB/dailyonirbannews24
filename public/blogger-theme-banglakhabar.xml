@@ -768,8 +768,8 @@ h1,h2,h3,h4,h5,h6 { font-family: 'Noto Sans Bengali', sans-serif; }
               s2.src='/feeds/posts/default/-/একটু থামুন?alt=json-in-script&max-results=7&callback=_bkLt2';
               document.body.appendChild(s2);
             })();
-            function _bkLt1(d){_renderSideTab('lt1c',d);}
-            function _bkLt2(d){_renderSideTab('lt2c',d);}
+            function _bkLt1(d){if(typeof _renderSideTab==='function'){_renderSideTab('lt1c',d);}else{var _t=setInterval(function(){if(typeof _renderSideTab==='function'){clearInterval(_t);_renderSideTab('lt1c',d);}},100);}}
+            function _bkLt2(d){if(typeof _renderSideTab==='function'){_renderSideTab('lt2c',d);}else{var _t=setInterval(function(){if(typeof _renderSideTab==='function'){clearInterval(_t);_renderSideTab('lt2c',d);}},100);}}
             //]]>
             </script>
           </b:includable>
