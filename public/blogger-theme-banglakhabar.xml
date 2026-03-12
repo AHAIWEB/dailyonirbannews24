@@ -1275,8 +1275,8 @@ h1,h2,h3,h4,h5,h6 { font-family: 'Noto Sans Bengali', sans-serif; }
               s2.src='/feeds/posts/default/-/স্পট লাইট?alt=json-in-script&max-results=7&callback=_bkRt2';
               document.body.appendChild(s2);
             })();
-            function _bkRt1(d){_renderSideTab('rt1c',d);}
-            function _bkRt2(d){_renderSideTab('rt2c',d);}
+            function _bkRt1(d){if(typeof _renderSideTab==='function'){_renderSideTab('rt1c',d);}else{var _t=setInterval(function(){if(typeof _renderSideTab==='function'){clearInterval(_t);_renderSideTab('rt1c',d);}},100);}}
+            function _bkRt2(d){if(typeof _renderSideTab==='function'){_renderSideTab('rt2c',d);}else{var _t=setInterval(function(){if(typeof _renderSideTab==='function'){clearInterval(_t);_renderSideTab('rt2c',d);}},100);}}
             //]]>
             </script>
           </b:includable>
