@@ -789,7 +789,7 @@ h1,h2,h3,h4,h5,h6 { font-family: 'Noto Sans Bengali', sans-serif; }
               s.src='/feeds/posts/default/-/ভাইরাল?alt=json-in-script&max-results=1&callback=_bkViral';
               document.body.appendChild(s);
             })();
-            function _bkViral(d){_renderSideWidget('viralWidget',d);}
+            function _bkViral(d){if(typeof _renderSideWidget==='function'){_renderSideWidget('viralWidget',d);}else{var _t=setInterval(function(){if(typeof _renderSideWidget==='function'){clearInterval(_t);_renderSideWidget('viralWidget',d);}},100);}}
             //]]>
             </script>
           </b:includable>
