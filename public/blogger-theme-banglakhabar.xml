@@ -1296,7 +1296,7 @@ h1,h2,h3,h4,h5,h6 { font-family: 'Noto Sans Bengali', sans-serif; }
               s.src='/feeds/posts/default/-/জনপ্রিয়?alt=json-in-script&max-results=7&callback=_bkPopular';
               document.body.appendChild(s);
             })();
-            function _bkPopular(d){_renderSideTab('popularContent',d);}
+            function _bkPopular(d){if(typeof _renderSideTab==='function'){_renderSideTab('popularContent',d);}else{var _t=setInterval(function(){if(typeof _renderSideTab==='function'){clearInterval(_t);_renderSideTab('popularContent',d);}},100);}}
             //]]>
             </script>
           </b:includable>
