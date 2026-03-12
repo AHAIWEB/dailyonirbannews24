@@ -1051,7 +1051,7 @@ h1,h2,h3,h4,h5,h6 { font-family: 'Noto Sans Bengali', sans-serif; }
               s.src='/feeds/posts/default/-/হাইলাইটস?alt=json-in-script&max-results=6&callback=_bkHighlights';
               document.body.appendChild(s);
             })();
-            function _bkHighlights(d){_renderHighlight('highlightsSection',d);}
+            function _bkHighlights(d){if(typeof _renderHighlight==='function'){_renderHighlight('highlightsSection',d);}else{var _t=setInterval(function(){if(typeof _renderHighlight==='function'){clearInterval(_t);_renderHighlight('highlightsSection',d);}},100);}}
             //]]>
             </script>
           </b:includable>
