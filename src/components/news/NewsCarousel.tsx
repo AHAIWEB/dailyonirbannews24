@@ -8,14 +8,28 @@ import { useIsMobile } from "@/hooks/use-mobile";
 export default function NewsCarousel() {
   const posts = useMemo(() => generatePosts("এডিটর পিক", 8, true), []);
   const [current, setCurrent] = useState(0);
+  const [containerWidth, setContainerWidth] = useState(0);
   const isMobile = useIsMobile();
   const visible = isMobile ? 2 : 4;
   const maxIndex = Math.max(0, posts.length - visible);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   // Touch swipe support
   const touchStartX = useRef(0);
   const touchEndX = useRef(0);
   const isDragging = useRef(false);
+
+  // Measure container width
+  useEffect(() => {
+    const measure = () => {
+      if (containerRef.current) {
+        setContainerWidth(containerRef.current.offsetWidth);
+      }
+    };
+    measure();
+    window.addEventListener("resize", measure);
+    return () => window.removeEventListener("resize", measure);
+  }, []);
 
   const handlePrev = useCallback(() => setCurrent((p) => Math.max(0, p - 1)), []);
   const handleNext = useCallback(() => setCurrent((p) => Math.min(maxIndex, p + 1)), [maxIndex]);
@@ -48,7 +62,8 @@ export default function NewsCarousel() {
   }, [maxIndex]);
 
   const gapPx = 12;
-  const itemWidthCalc = `calc((100% - ${gapPx * (visible - 1)}px) / ${visible})`;
+  const itemWidthPx = containerWidth > 0 ? (containerWidth - gapPx * (visible - 1)) / visible : 0;
+  const offsetPx = current * (itemWidthPx + gapPx);
 
   return (
     <section>
@@ -68,6 +83,7 @@ export default function NewsCarousel() {
         </button>
 
         <div
+          ref={containerRef}
           className="overflow-hidden"
           onTouchStart={handleTouchStart}
           onTouchMove={handleTouchMove}
@@ -77,7 +93,7 @@ export default function NewsCarousel() {
             className="flex transition-transform duration-500"
             style={{
               gap: `${gapPx}px`,
-              transform: `translateX(calc(-${current} * (${itemWidthCalc} + ${gapPx}px)))`,
+              transform: `translateX(-${offsetPx}px)`,
             }}
           >
             {posts.map((post) => (
@@ -85,7 +101,7 @@ export default function NewsCarousel() {
                 to={`/post/${post.id}`}
                 key={post.id}
                 className="flex-shrink-0 post-card"
-                style={{ width: itemWidthCalc }}
+                style={{ width: itemWidthPx > 0 ? `${itemWidthPx}px` : `calc((100% - ${gapPx * (visible - 1)}px) / ${visible})` }}
               >
                 <div className="overflow-hidden rounded aspect-[4/5]">
                   <img src={post.image} alt={post.title} className="w-full h-full object-cover post-image" />
