@@ -8,14 +8,28 @@ import { useIsMobile } from "@/hooks/use-mobile";
 export default function NewsCarousel() {
   const posts = useMemo(() => generatePosts("এডিটর পিক", 8, true), []);
   const [current, setCurrent] = useState(0);
+  const [containerWidth, setContainerWidth] = useState(0);
   const isMobile = useIsMobile();
   const visible = isMobile ? 2 : 4;
   const maxIndex = Math.max(0, posts.length - visible);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   // Touch swipe support
   const touchStartX = useRef(0);
   const touchEndX = useRef(0);
   const isDragging = useRef(false);
+
+  // Measure container width
+  useEffect(() => {
+    const measure = () => {
+      if (containerRef.current) {
+        setContainerWidth(containerRef.current.offsetWidth);
+      }
+    };
+    measure();
+    window.addEventListener("resize", measure);
+    return () => window.removeEventListener("resize", measure);
+  }, []);
 
   const handlePrev = useCallback(() => setCurrent((p) => Math.max(0, p - 1)), []);
   const handleNext = useCallback(() => setCurrent((p) => Math.min(maxIndex, p + 1)), [maxIndex]);
