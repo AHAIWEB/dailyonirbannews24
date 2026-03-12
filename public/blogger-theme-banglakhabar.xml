@@ -1105,7 +1105,7 @@ h1,h2,h3,h4,h5,h6 { font-family: 'Noto Sans Bengali', sans-serif; }
               s.src='/feeds/posts/default/-/আন্তর্জাতিক?alt=json-in-script&max-results=5&callback=_bkInternational';
               document.body.appendChild(s);
             })();
-            function _bkInternational(d){_renderHighlight('internationalSection',d);}
+            function _bkInternational(d){if(typeof _renderHighlight==='function'){_renderHighlight('internationalSection',d);}else{var _t=setInterval(function(){if(typeof _renderHighlight==='function'){clearInterval(_t);_renderHighlight('internationalSection',d);}},100);}}
             //]]>
             </script>
           </b:includable>
