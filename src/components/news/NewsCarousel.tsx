@@ -62,7 +62,8 @@ export default function NewsCarousel() {
   }, [maxIndex]);
 
   const gapPx = 12;
-  const itemWidthCalc = `calc((100% - ${gapPx * (visible - 1)}px) / ${visible})`;
+  const itemWidthPx = containerWidth > 0 ? (containerWidth - gapPx * (visible - 1)) / visible : 0;
+  const offsetPx = current * (itemWidthPx + gapPx);
 
   return (
     <section>
@@ -82,6 +83,7 @@ export default function NewsCarousel() {
         </button>
 
         <div
+          ref={containerRef}
           className="overflow-hidden"
           onTouchStart={handleTouchStart}
           onTouchMove={handleTouchMove}
@@ -91,7 +93,7 @@ export default function NewsCarousel() {
             className="flex transition-transform duration-500"
             style={{
               gap: `${gapPx}px`,
-              transform: `translateX(calc(-${current} * (${itemWidthCalc} + ${gapPx}px)))`,
+              transform: `translateX(-${offsetPx}px)`,
             }}
           >
             {posts.map((post) => (
