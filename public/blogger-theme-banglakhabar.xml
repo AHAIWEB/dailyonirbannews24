@@ -1123,7 +1123,7 @@ h1,h2,h3,h4,h5,h6 { font-family: 'Noto Sans Bengali', sans-serif; }
               s.src='/feeds/posts/default/-/বিনোদন?alt=json-in-script&max-results=6&callback=_bkEntertainment';
               document.body.appendChild(s);
             })();
-            function _bkEntertainment(d){_renderGrid('entertainmentSection',d,'aspect-portrait');}
+            function _bkEntertainment(d){if(typeof _renderGrid==='function'){_renderGrid('entertainmentSection',d,'aspect-portrait');}else{var _t=setInterval(function(){if(typeof _renderGrid==='function'){clearInterval(_t);_renderGrid('entertainmentSection',d,'aspect-portrait');}},100);}}
             //]]>
             </script>
           </b:includable>
