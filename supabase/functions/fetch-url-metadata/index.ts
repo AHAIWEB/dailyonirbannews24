@@ -158,6 +158,95 @@ function extractArticleBody(html: string): string {
   return paragraphs.join('\n\n');
 }
 
+// Multiple User-Agent strings to rotate
+const USER_AGENTS = [
+  'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36',
+  'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36',
+  'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36',
+  'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:133.0) Gecko/20100101 Firefox/133.0',
+  'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.2 Safari/605.1.15',
+];
+
+function getRandomUA(): string {
+  return USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)];
+}
+
+async function fetchWithRetry(url: string, maxRetries = 2): Promise<Response> {
+  let lastError: Error | null = null;
+
+  for (let attempt = 0; attempt <= maxRetries; attempt++) {
+    const ua = getRandomUA();
+    const headers: Record<string, string> = {
+      'User-Agent': ua,
+      'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8',
+      'Accept-Language': 'bn-BD,bn;q=0.9,en-US;q=0.8,en;q=0.7',
+      'Accept-Encoding': 'gzip, deflate, br',
+      'Cache-Control': 'no-cache',
+      'Pragma': 'no-cache',
+      'Sec-Ch-Ua': '"Chromium";v="131", "Not_A Brand";v="24"',
+      'Sec-Ch-Ua-Mobile': '?0',
+      'Sec-Ch-Ua-Platform': '"Windows"',
+      'Sec-Fetch-Dest': 'document',
+      'Sec-Fetch-Mode': 'navigate',
+      'Sec-Fetch-Site': 'none',
+      'Sec-Fetch-User': '?1',
+      'Upgrade-Insecure-Requests': '1',
+    };
+
+    // On retry, add Referer from Google to look like a search click
+    if (attempt > 0) {
+      const parsedUrl = new URL(url);
+      headers['Referer'] = `https://www.google.com/search?q=${encodeURIComponent(parsedUrl.hostname)}`;
+    }
+
+    try {
+      const response = await fetch(url, {
+        headers,
+        redirect: 'follow',
+      });
+
+      if (response.ok) {
+        return response;
+      }
+
+      // If 403, try next attempt
+      if (response.status === 403 && attempt < maxRetries) {
+        console.log(`Attempt ${attempt + 1} got 403, retrying with different headers...`);
+        lastError = new Error(`HTTP ${response.status}`);
+        continue;
+      }
+
+      return response; // Return non-403 errors or final 403
+    } catch (err) {
+      lastError = err instanceof Error ? err : new Error(String(err));
+      if (attempt < maxRetries) continue;
+    }
+  }
+
+  throw lastError || new Error('Failed after retries');
+}
+
+// Google Cache / Web Cache fallback for stubborn 403s
+async function fetchViaGoogleCache(url: string): Promise<string | null> {
+  try {
+    // Try Google's webcache
+    const cacheUrl = `https://webcache.googleusercontent.com/search?q=cache:${encodeURIComponent(url)}&strip=0`;
+    const response = await fetch(cacheUrl, {
+      headers: {
+        'User-Agent': getRandomUA(),
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+      },
+    });
+    if (response.ok) {
+      console.log('Successfully fetched from Google cache');
+      return await response.text();
+    }
+  } catch (e) {
+    console.log('Google cache fallback failed:', e);
+  }
+  return null;
+}
+
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
@@ -180,23 +269,35 @@ Deno.serve(async (req) => {
 
     console.log('Fetching metadata for:', formattedUrl);
 
-    const response = await fetch(formattedUrl, {
-      headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-        'Accept-Language': 'bn-BD,bn;q=0.9,en-US;q=0.8,en;q=0.7',
-      },
-      redirect: 'follow',
-    });
+    let html = '';
+    let fetchFailed = false;
 
-    if (!response.ok) {
-      return new Response(
-        JSON.stringify({ success: false, error: `Failed to fetch URL: ${response.status}` }),
-        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
+    try {
+      const response = await fetchWithRetry(formattedUrl);
+
+      if (!response.ok) {
+        console.log(`Direct fetch failed with ${response.status}, trying cache fallback...`);
+        fetchFailed = true;
+      } else {
+        html = await response.text();
+      }
+    } catch (err) {
+      console.log('Direct fetch error, trying cache fallback...');
+      fetchFailed = true;
     }
 
-    const html = await response.text();
+    // Fallback: try Google cache if direct fetch failed
+    if (fetchFailed) {
+      const cachedHtml = await fetchViaGoogleCache(formattedUrl);
+      if (cachedHtml) {
+        html = cachedHtml;
+      } else {
+        return new Response(
+          JSON.stringify({ success: false, error: `সাইটটি অ্যাক্সেস ব্লক করেছে (403)। অনুগ্রহ করে অন্য একটি সোর্স ব্যবহার করুন।` }),
+          { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+    }
 
     const metadata: Record<string, string> = {
       title: extractTitle(html),
@@ -207,7 +308,6 @@ Deno.serve(async (req) => {
       url: formattedUrl,
     };
 
-    // Make relative image URLs absolute
     if (metadata.image && !metadata.image.startsWith('http')) {
       if (metadata.image.startsWith('//')) {
         metadata.image = `https:${metadata.image}`;
@@ -217,7 +317,6 @@ Deno.serve(async (req) => {
       }
     }
 
-    // Extract article body content if requested
     if (extractContent) {
       metadata.content = extractArticleBody(html);
       console.log(`Content extracted: ${metadata.content.length} chars, ${metadata.content.split('\n\n').length} paragraphs`);
