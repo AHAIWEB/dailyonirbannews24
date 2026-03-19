@@ -10,6 +10,7 @@ import OpinionSection from "@/components/news/OpinionSection";
 import VideoSlider from "@/components/news/VideoSlider";
 import SidebarTabs from "@/components/news/SidebarTabs";
 import SidebarWidget from "@/components/news/SidebarWidget";
+import RssNewsWidget from "@/components/news/RssNewsWidget";
 import Footer from "@/components/news/Footer";
 
 const Index = () => {
@@ -29,6 +30,7 @@ const Index = () => {
               ]}
             />
             <SidebarWidget label="ভাইরাল" title="ভাইরাল" />
+            <RssNewsWidget />
           </aside>
 
           {/* Main Content */}

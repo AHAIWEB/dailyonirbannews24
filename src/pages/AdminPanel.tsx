@@ -4,8 +4,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import Header from "@/components/news/Header";
 import Footer from "@/components/news/Footer";
-import { Shield, Users, CheckCircle2, XCircle, FileText, Settings, UserCog, Eye, Trash2, Save, RefreshCw } from "lucide-react";
+import { Shield, Users, CheckCircle2, XCircle, FileText, Settings, UserCog, Eye, Trash2, Save, RefreshCw, Rss } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import RssFeedManager from "@/components/admin/RssFeedManager";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -60,12 +61,15 @@ export default function AdminPanel() {
         </div>
 
         <Tabs defaultValue="reporters" className="w-full">
-          <TabsList className="w-full grid grid-cols-3 mb-4">
+          <TabsList className="w-full grid grid-cols-4 mb-4">
             <TabsTrigger value="reporters" className="flex items-center gap-1.5 text-xs md:text-sm">
               <Users className="w-3.5 h-3.5" /> রিপোর্টার
             </TabsTrigger>
             <TabsTrigger value="users" className="flex items-center gap-1.5 text-xs md:text-sm">
               <UserCog className="w-3.5 h-3.5" /> ইউজার
+            </TabsTrigger>
+            <TabsTrigger value="rss" className="flex items-center gap-1.5 text-xs md:text-sm">
+              <Rss className="w-3.5 h-3.5" /> RSS ফিড
             </TabsTrigger>
             <TabsTrigger value="settings" className="flex items-center gap-1.5 text-xs md:text-sm">
               <Settings className="w-3.5 h-3.5" /> সেটিংস
@@ -74,6 +78,7 @@ export default function AdminPanel() {
 
           <TabsContent value="reporters"><ReporterManagement /></TabsContent>
           <TabsContent value="users"><UserManagement /></TabsContent>
+          <TabsContent value="rss"><RssFeedManager /></TabsContent>
           <TabsContent value="settings"><SiteSettings /></TabsContent>
         </Tabs>
       </div>
