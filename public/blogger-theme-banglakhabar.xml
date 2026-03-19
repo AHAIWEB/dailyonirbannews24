@@ -402,6 +402,37 @@ h1,h2,h3,h4,h5,h6 { font-family: 'Noto Sans Bengali', sans-serif; }
 .fotocard-item .fc-brand small { color: rgba(255,255,255,.5); font-size: 8px; }
 .fotocard-item:hover .fc-text { color: var(--primary); }
 
+/* ===== DESH BANGLA SECTION (hero + grid) ===== */
+.deshbangla-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 12px; }
+@media(max-width: 767px) { .deshbangla-grid { grid-template-columns: 1fr; } }
+.deshbangla-hero { position: relative; border-radius: var(--radius); overflow: hidden; }
+.deshbangla-hero img { width: 100%; aspect-ratio: 16/10; object-fit: cover; transition: transform .5s; }
+.deshbangla-hero:hover img { transform: scale(1.05); }
+.deshbangla-hero .overlay { position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,.9), rgba(0,0,0,.3) 50%, transparent); }
+.deshbangla-hero .caption { position: absolute; bottom: 0; left: 0; right: 0; padding: 16px; }
+.deshbangla-hero .caption span { background: #16a34a; color: #fff; font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 3px; }
+.deshbangla-hero .caption h3 { color: #fff; font-size: 16px; font-weight: 800; margin-top: 8px; line-height: 1.6; }
+.deshbangla-hero:hover .caption h3 { color: var(--accent); }
+.deshbangla-side { display: flex; flex-direction: column; gap: 8px; }
+.deshbangla-side-img { position: relative; border-radius: var(--radius); overflow: hidden; }
+.deshbangla-side-img img { width: 100%; aspect-ratio: 16/9; object-fit: cover; transition: transform .3s; }
+.deshbangla-side-img:hover img { transform: scale(1.05); }
+.deshbangla-side-img .overlay { position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,.8), transparent 60%); }
+.deshbangla-side-img h4 { position: absolute; bottom: 8px; left: 8px; right: 8px; color: #fff; font-size: 12px; font-weight: 700; line-height: 1.5; }
+.deshbangla-side-img:hover h4 { color: var(--accent); }
+.deshbangla-list-item { display: flex; gap: 8px; }
+.deshbangla-list-item img { width: 80px; height: 56px; object-fit: cover; border-radius: 4px; flex-shrink: 0; }
+.deshbangla-list-item h4 { font-size: 12px; font-weight: 600; line-height: 1.5; }
+.deshbangla-list-item:hover h4 { color: var(--primary); }
+.deshbangla-bottom { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-top: 12px; }
+@media(max-width: 767px) { .deshbangla-bottom { grid-template-columns: repeat(2, 1fr); } }
+.deshbangla-bottom a { position: relative; border-radius: var(--radius); overflow: hidden; display: block; }
+.deshbangla-bottom img { width: 100%; aspect-ratio: 4/3; object-fit: cover; transition: transform .3s; }
+.deshbangla-bottom a:hover img { transform: scale(1.05); }
+.deshbangla-bottom .overlay { position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,.8), transparent 60%); }
+.deshbangla-bottom h4 { position: absolute; bottom: 6px; left: 6px; right: 6px; color: #fff; font-size: 11px; font-weight: 700; line-height: 1.4; }
+.deshbangla-bottom a:hover h4 { color: var(--accent); }
+
 /* Top News */
 .top-main .post-label {
   display: inline-block;
