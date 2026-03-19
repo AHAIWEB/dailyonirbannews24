@@ -23,17 +23,11 @@ function extractTitle(html: string): string {
 }
 
 function extractDescription(html: string): string {
-  const ogDesc = extractMeta(html, 'og:description');
-  if (ogDesc) return ogDesc;
-  const descMatch = extractMeta(html, 'description');
-  return descMatch || '';
+  return extractMeta(html, 'og:description') || extractMeta(html, 'description') || '';
 }
 
 function extractImage(html: string): string {
-  const ogImage = extractMeta(html, 'og:image');
-  if (ogImage) return ogImage;
-  const twitterImage = extractMeta(html, 'twitter:image');
-  return twitterImage || '';
+  return extractMeta(html, 'og:image') || extractMeta(html, 'twitter:image') || '';
 }
 
 function extractFavicon(html: string, baseUrl: string): string {
@@ -60,8 +54,7 @@ function extractSiteName(html: string, baseUrl: string): string {
   const ogSite = extractMeta(html, 'og:site_name');
   if (ogSite) return ogSite;
   try {
-    const url = new URL(baseUrl);
-    return url.hostname.replace('www.', '');
+    return new URL(baseUrl).hostname.replace('www.', '');
   } catch {
     return '';
   }
@@ -90,8 +83,8 @@ function extractArticleBody(html: string): string {
       contentHtml = mainMatch[1];
     } else {
       const contentPatterns = [
-        /<div[^>]*(?:id|class)=["'][^"']*(?:article-body|article-content|post-body|post-content|entry-content|story-body|story-content|content-body|main-content|single-content)[^"']*["'][^>]*>([\s\S]*?)<\/div>\s*<(?:div|section|aside|footer)/i,
-        /<div[^>]*(?:id|class)=["'][^"']*(?:article|content|post|entry|story)[^"']*["'][^>]*>([\s\S]*?)<\/div>\s*<(?:div|section|aside|footer)/i,
+        /<div[^>]*(?:id|class)=["'][^"']*(?:article-body|article-content|post-body|post-content|entry-content|story-body|story-content|content-body|main-content|single-content|news-content|news-detail|article-detail|story-detail|content-area|post-detail)[^"']*["'][^>]*>([\s\S]*?)<\/div>\s*<(?:div|section|aside|footer)/i,
+        /<div[^>]*(?:id|class)=["'][^"']*(?:article|content|post|entry|story|news)[^"']*["'][^>]*>([\s\S]*?)<\/div>\s*<(?:div|section|aside|footer)/i,
       ];
       
       for (const pattern of contentPatterns) {
@@ -104,11 +97,7 @@ function extractArticleBody(html: string): string {
       
       if (!contentHtml) {
         const bodyMatch = cleaned.match(/<body[^>]*>([\s\S]*?)<\/body>/i);
-        if (bodyMatch) {
-          contentHtml = bodyMatch[1];
-        } else {
-          contentHtml = cleaned;
-        }
+        contentHtml = bodyMatch ? bodyMatch[1] : cleaned;
       }
     }
   }
@@ -125,6 +114,7 @@ function extractArticleBody(html: string): string {
       .replace(/&gt;/g, '>')
       .replace(/&quot;/g, '"')
       .replace(/&#39;/g, "'")
+      .replace(/&#\d+;/g, '')
       .trim();
     if (text.length > 15) {
       paragraphs.push(text);
@@ -147,6 +137,17 @@ function extractArticleBody(html: string): string {
     }
   }
 
+  // Also try extracting from <span> blocks inside content divs (bd-pratidin style)
+  if (paragraphs.length < 2) {
+    const spanTexts = contentHtml.matchAll(/<span[^>]*>([\s\S]*?)<\/span>/gi);
+    for (const m of spanTexts) {
+      const text = m[1].replace(/<[^>]+>/g, '').trim();
+      if (text.length > 50 && !paragraphs.includes(text)) {
+        paragraphs.push(text);
+      }
+    }
+  }
+
   return paragraphs.join('\n\n');
 }
 
@@ -156,50 +157,76 @@ const USER_AGENTS = [
   'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36',
   'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:133.0) Gecko/20100101 Firefox/133.0',
   'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.2 Safari/605.1.15',
-  'Mozilla/5.0 (Linux; Android 13; SM-S901B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Mobile Safari/537.36',
-  'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1',
+  'Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)',
+  'facebookexternalhit/1.1 (+http://www.facebook.com/externalhit_uatext.php)',
 ];
 
 function getRandomUA(): string {
   return USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)];
 }
 
-async function fetchWithRetry(url: string, maxRetries = 3): Promise<Response> {
+// Site-specific fetch strategies
+function getSiteHeaders(url: string, attempt: number): Record<string, string> {
+  const hostname = new URL(url).hostname;
+  const ua = getRandomUA();
+
+  // For bd-pratidin, kalerkantho - use Googlebot or Facebook bot
+  const banglaNewsSites = ['bd-pratidin.com', 'kalerkantho.com', 'prothomalo.com', 'jugantor.com', 'daily-bangladesh.com', 'jagonews24.com', 'banglatribune.com'];
+  const isBanglaNews = banglaNewsSites.some(s => hostname.includes(s));
+
+  if (isBanglaNews) {
+    if (attempt === 0) {
+      return {
+        'User-Agent': 'facebookexternalhit/1.1 (+http://www.facebook.com/externalhit_uatext.php)',
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+        'Accept-Language': 'bn,en;q=0.5',
+      };
+    } else if (attempt === 1) {
+      return {
+        'User-Agent': 'Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)',
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+      };
+    } else {
+      return {
+        'User-Agent': 'WhatsApp/2.23.20.0',
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+      };
+    }
+  }
+
+  // Generic strategy
+  const headers: Record<string, string> = {
+    'User-Agent': ua,
+    'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8',
+    'Accept-Language': 'bn-BD,bn;q=0.9,en-US;q=0.8,en;q=0.7',
+    'Cache-Control': 'no-cache',
+    'Sec-Fetch-Dest': 'document',
+    'Sec-Fetch-Mode': 'navigate',
+    'Sec-Fetch-Site': 'cross-site',
+    'Upgrade-Insecure-Requests': '1',
+  };
+
+  if (attempt === 1) {
+    headers['Referer'] = `https://www.google.com/search?q=${encodeURIComponent(hostname)}`;
+  } else if (attempt >= 2) {
+    headers['Referer'] = `https://t.co/${Math.random().toString(36).slice(2, 8)}`;
+    delete headers['Sec-Fetch-Dest'];
+    delete headers['Sec-Fetch-Mode'];
+    delete headers['Sec-Fetch-Site'];
+  }
+
+  return headers;
+}
+
+async function fetchWithRetry(url: string, maxRetries = 4): Promise<Response> {
   let lastError: Error | null = null;
 
   for (let attempt = 0; attempt <= maxRetries; attempt++) {
-    const ua = getRandomUA();
-    const headers: Record<string, string> = {
-      'User-Agent': ua,
-      'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8',
-      'Accept-Language': 'bn-BD,bn;q=0.9,en-US;q=0.8,en;q=0.7',
-      'Cache-Control': 'no-cache',
-      'Pragma': 'no-cache',
-      'Sec-Fetch-Dest': 'document',
-      'Sec-Fetch-Mode': 'navigate',
-      'Sec-Fetch-Site': 'cross-site',
-      'Sec-Fetch-User': '?1',
-      'Upgrade-Insecure-Requests': '1',
-    };
-
-    // Progressive header strategies
-    if (attempt === 1) {
-      headers['Referer'] = `https://www.google.com/search?q=${encodeURIComponent(new URL(url).hostname)}`;
-    } else if (attempt === 2) {
-      headers['Referer'] = url;
-      headers['Sec-Fetch-Site'] = 'same-origin';
-    } else if (attempt >= 3) {
-      // Minimal headers - some sites block on too many headers
-      delete headers['Sec-Fetch-Dest'];
-      delete headers['Sec-Fetch-Mode'];
-      delete headers['Sec-Fetch-Site'];
-      delete headers['Sec-Fetch-User'];
-      headers['Referer'] = `https://t.co/${Math.random().toString(36).slice(2, 8)}`;
-    }
+    const headers = getSiteHeaders(url, attempt);
 
     try {
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 15000);
+      const timeoutId = setTimeout(() => controller.abort(), 20000);
       
       const response = await fetch(url, {
         headers,
@@ -208,15 +235,12 @@ async function fetchWithRetry(url: string, maxRetries = 3): Promise<Response> {
       });
       clearTimeout(timeoutId);
 
-      if (response.ok) {
-        return response;
-      }
+      if (response.ok) return response;
 
       if ((response.status === 403 || response.status === 429 || response.status === 503) && attempt < maxRetries) {
-        console.log(`Attempt ${attempt + 1} got ${response.status}, retrying...`);
+        console.log(`Attempt ${attempt + 1} got ${response.status} for ${url}, retrying...`);
         lastError = new Error(`HTTP ${response.status}`);
-        // Small delay between retries
-        await new Promise(r => setTimeout(r, 500 * (attempt + 1)));
+        await new Promise(r => setTimeout(r, 800 * (attempt + 1)));
         continue;
       }
 
@@ -224,7 +248,7 @@ async function fetchWithRetry(url: string, maxRetries = 3): Promise<Response> {
     } catch (err) {
       lastError = err instanceof Error ? err : new Error(String(err));
       if (attempt < maxRetries) {
-        await new Promise(r => setTimeout(r, 500 * (attempt + 1)));
+        await new Promise(r => setTimeout(r, 800 * (attempt + 1)));
         continue;
       }
     }
@@ -237,22 +261,18 @@ async function fetchViaGoogleCache(url: string): Promise<string | null> {
   try {
     const cacheUrl = `https://webcache.googleusercontent.com/search?q=cache:${encodeURIComponent(url)}&strip=0`;
     const response = await fetch(cacheUrl, {
-      headers: {
-        'User-Agent': getRandomUA(),
-        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-      },
+      headers: { 'User-Agent': getRandomUA(), 'Accept': 'text/html,*/*;q=0.8' },
     });
     if (response.ok) {
-      console.log('Successfully fetched from Google cache');
+      console.log('Fetched from Google cache');
       return await response.text();
     }
   } catch (e) {
-    console.log('Google cache fallback failed:', e);
+    console.log('Google cache failed:', e);
   }
   return null;
 }
 
-// Try fetching via archive.org as another fallback
 async function fetchViaArchive(url: string): Promise<string | null> {
   try {
     const archiveUrl = `https://web.archive.org/web/2/${url}`;
@@ -261,11 +281,32 @@ async function fetchViaArchive(url: string): Promise<string | null> {
       redirect: 'follow',
     });
     if (response.ok) {
-      console.log('Successfully fetched from archive.org');
+      console.log('Fetched from archive.org');
       return await response.text();
     }
   } catch (e) {
-    console.log('Archive.org fallback failed:', e);
+    console.log('Archive.org failed:', e);
+  }
+  return null;
+}
+
+// Try fetching via 12ft.io proxy (paywall bypass)
+async function fetchViaProxy(url: string): Promise<string | null> {
+  const proxies = [
+    `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
+  ];
+  for (const proxyUrl of proxies) {
+    try {
+      const response = await fetch(proxyUrl, {
+        headers: { 'User-Agent': getRandomUA() },
+      });
+      if (response.ok) {
+        console.log('Fetched via proxy');
+        return await response.text();
+      }
+    } catch (e) {
+      console.log('Proxy failed:', e);
+    }
   }
   return null;
 }
@@ -297,33 +338,31 @@ Deno.serve(async (req) => {
 
     try {
       const response = await fetchWithRetry(formattedUrl);
-
       if (!response.ok) {
-        console.log(`Direct fetch failed with ${response.status}, trying fallbacks...`);
+        console.log(`Direct fetch failed with ${response.status}`);
         fetchFailed = true;
       } else {
         html = await response.text();
       }
     } catch (err) {
-      console.log('Direct fetch error, trying fallbacks...');
+      console.log('Direct fetch error');
       fetchFailed = true;
     }
 
     // Fallback chain
     if (fetchFailed || !html) {
+      const proxyHtml = await fetchViaProxy(formattedUrl);
+      if (proxyHtml) { html = proxyHtml; fetchFailed = false; }
+    }
+
+    if (fetchFailed || !html) {
       const cachedHtml = await fetchViaGoogleCache(formattedUrl);
-      if (cachedHtml) {
-        html = cachedHtml;
-        fetchFailed = false;
-      }
+      if (cachedHtml) { html = cachedHtml; fetchFailed = false; }
     }
     
     if (fetchFailed || !html) {
       const archivedHtml = await fetchViaArchive(formattedUrl);
-      if (archivedHtml) {
-        html = archivedHtml;
-        fetchFailed = false;
-      }
+      if (archivedHtml) { html = archivedHtml; fetchFailed = false; }
     }
 
     if (!html) {
