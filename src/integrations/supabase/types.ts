@@ -107,6 +107,101 @@ export type Database = {
         }
         Relationships: []
       }
+      rss_articles: {
+        Row: {
+          category: string
+          content: string | null
+          created_at: string
+          feed_id: string
+          fetched_at: string
+          id: string
+          image_url: string | null
+          is_featured: boolean
+          is_published: boolean
+          published_at: string | null
+          source_name: string | null
+          source_url: string
+          title: string
+        }
+        Insert: {
+          category?: string
+          content?: string | null
+          created_at?: string
+          feed_id: string
+          fetched_at?: string
+          id?: string
+          image_url?: string | null
+          is_featured?: boolean
+          is_published?: boolean
+          published_at?: string | null
+          source_name?: string | null
+          source_url: string
+          title: string
+        }
+        Update: {
+          category?: string
+          content?: string | null
+          created_at?: string
+          feed_id?: string
+          fetched_at?: string
+          id?: string
+          image_url?: string | null
+          is_featured?: boolean
+          is_published?: boolean
+          published_at?: string | null
+          source_name?: string | null
+          source_url?: string
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "rss_articles_feed_id_fkey"
+            columns: ["feed_id"]
+            isOneToOne: false
+            referencedRelation: "rss_feeds"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      rss_feeds: {
+        Row: {
+          category: string
+          created_at: string
+          created_by: string | null
+          fetch_interval_seconds: number
+          id: string
+          is_active: boolean
+          last_fetched_at: string | null
+          name: string
+          updated_at: string
+          url: string
+        }
+        Insert: {
+          category?: string
+          created_at?: string
+          created_by?: string | null
+          fetch_interval_seconds?: number
+          id?: string
+          is_active?: boolean
+          last_fetched_at?: string | null
+          name: string
+          updated_at?: string
+          url: string
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          created_by?: string | null
+          fetch_interval_seconds?: number
+          id?: string
+          is_active?: boolean
+          last_fetched_at?: string | null
+          name?: string
+          updated_at?: string
+          url?: string
+        }
+        Relationships: []
+      }
       site_settings: {
         Row: {
           id: string
