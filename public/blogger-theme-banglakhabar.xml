@@ -1769,6 +1769,44 @@ function _renderFotoCard(containerId, d) {
   document.getElementById(containerId).innerHTML = h;
 }
 
+// ===== Render: Desh Bangla (hero + side + bottom grid like React) =====
+function _renderDeshBangla(containerId, d) {
+  if (!d.feed || !d.feed.entry) return;
+  var e = d.feed.entry;
+  var h = '<div class="deshbangla-grid">';
+  // Hero left
+  if (e[0]) {
+    h += '<a href="' + _gu(e[0]) + '" class="deshbangla-hero post-card">';
+    h += '<img src="' + _gi(e[0]) + '" alt="' + e[0].title.$t + '"/>';
+    h += '<div class="overlay"></div>';
+    h += '<div class="caption"><span>দেশ বাংলা</span><h3 class="line-clamp-3">' + e[0].title.$t + '</h3></div></a>';
+  }
+  // Right side
+  h += '<div class="deshbangla-side">';
+  if (e[1]) {
+    h += '<a href="' + _gu(e[1]) + '" class="deshbangla-side-img post-card">';
+    h += '<img src="' + _gi(e[1]) + '" alt="' + e[1].title.$t + '"/>';
+    h += '<div class="overlay"></div><h4 class="line-clamp-2">' + e[1].title.$t + '</h4></a>';
+  }
+  for (var i = 2; i < Math.min(5, e.length); i++) {
+    h += '<a href="' + _gu(e[i]) + '" class="deshbangla-list-item post-card">';
+    h += '<img src="' + _gi(e[i]) + '" alt="' + e[i].title.$t + '"/>';
+    h += '<h4 class="line-clamp-2">' + e[i].title.$t + '</h4></a>';
+  }
+  h += '</div></div>';
+  // Bottom row
+  if (e.length > 4) {
+    h += '<div class="deshbangla-bottom">';
+    for (var j = 4; j < Math.min(8, e.length); j++) {
+      h += '<a href="' + _gu(e[j]) + '" class="post-card">';
+      h += '<img src="' + _gi(e[j]) + '" alt="' + e[j].title.$t + '"/>';
+      h += '<div class="overlay"></div><h4 class="line-clamp-2">' + e[j].title.$t + '</h4></a>';
+    }
+    h += '</div>';
+  }
+  document.getElementById(containerId).innerHTML = h;
+}
+
 // ===== Related Posts (Post Page) =====
 (function() {
   var labels = document.querySelectorAll('.post-label-tag');
