@@ -16,8 +16,8 @@ export default function SidebarWidget({ label, title }: Props) {
           ❝ {title} ❞
         </span>
       </div>
-      <div className="overflow-hidden">
-        <img src={post.image} alt={post.title} className="w-full h-auto object-cover post-image hover:scale-105 transition-transform duration-500" />
+      <div className="overflow-hidden aspect-[9/16]">
+        <img src={post.image} alt={post.title} className="w-full h-full object-cover post-image hover:scale-105 transition-transform duration-500" />
       </div>
       <div className="p-3">
         <h3 className="text-sm font-bold leading-relaxed text-foreground hover:text-primary transition-colors">

@@ -2,6 +2,7 @@ import { Search, Menu, X, User, Bell, Home, ChevronDown, LogIn, UserPlus, Shield
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
+import { getFormattedDates } from "@/lib/banglaDate";
 
 const navItems = [
   "জাতীয়", "রাজনীতি", "আন্তর্জাতিক", "অর্থনীতি", "বিনোদন",
