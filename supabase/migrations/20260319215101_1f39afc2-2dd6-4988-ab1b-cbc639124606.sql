@@ -1,0 +1,1 @@
+ALTER TABLE public.rss_feeds ADD CONSTRAINT rss_feeds_url_unique UNIQUE (url);
