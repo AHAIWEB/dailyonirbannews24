@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
 import { Link2, Loader2, X, ExternalLink } from "lucide-react";
 
 interface UrlMetadata {
