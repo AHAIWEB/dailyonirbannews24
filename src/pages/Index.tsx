@@ -30,6 +30,7 @@ const Index = () => {
               ]}
             />
             <SidebarWidget label="ভাইরাল" title="ভাইরাল" />
+            <RssNewsWidget />
           </aside>
 
           {/* Main Content */}
