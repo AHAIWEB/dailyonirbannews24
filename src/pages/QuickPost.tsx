@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { supabase } from "@/integrations/supabase/client";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import Header from "@/components/news/Header";
@@ -52,6 +53,12 @@ export default function QuickPost() {
     setError("");
     setData(null);
     try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session?.access_token) {
+        setError("লগইন করুন");
+        setLoading(false);
+        return;
+      }
       const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
       const supabaseKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
       const response = await fetch(`${supabaseUrl}/functions/v1/fetch-url-metadata`, {
@@ -59,7 +66,7 @@ export default function QuickPost() {
         headers: {
           "Content-Type": "application/json",
           "apikey": supabaseKey,
-          "Authorization": `Bearer ${supabaseKey}`,
+          "Authorization": `Bearer ${session.access_token}`,
         },
         body: JSON.stringify({ url: fetchUrl.trim(), extractContent: true }),
       });

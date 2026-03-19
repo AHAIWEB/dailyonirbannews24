@@ -311,12 +311,50 @@ async function fetchViaProxy(url: string): Promise<string | null> {
   return null;
 }
 
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+
+function isPrivateUrl(urlStr: string): boolean {
+  try {
+    const parsed = new URL(urlStr);
+    const hostname = parsed.hostname;
+    // Block private IPs, loopback, link-local, cloud metadata
+    const blocked = /^(127\.|10\.|192\.168\.|172\.(1[6-9]|2[0-9]|3[0-1])\.|169\.254\.|0\.|localhost|::1|\[::1\]|metadata\.google|100\.100\.100\.200)/i;
+    if (blocked.test(hostname)) return true;
+    // Block non-http(s) schemes
+    if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') return true;
+    return false;
+  } catch {
+    return true;
+  }
+}
+
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
+    // Auth check: require authenticated user
+    const authHeader = req.headers.get('Authorization');
+    if (!authHeader) {
+      return new Response(
+        JSON.stringify({ success: false, error: 'Unauthorized' }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+    const supabaseClient = createClient(
+      Deno.env.get('SUPABASE_URL') ?? '',
+      Deno.env.get('SUPABASE_ANON_KEY') ?? '',
+      { global: { headers: { Authorization: authHeader } } }
+    );
+    const { data: { user } } = await supabaseClient.auth.getUser();
+    if (!user) {
+      return new Response(
+        JSON.stringify({ success: false, error: 'Unauthorized' }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
     const { url, extractContent } = await req.json();
 
     if (!url) {
@@ -329,6 +367,14 @@ Deno.serve(async (req) => {
     let formattedUrl = url.trim();
     if (!formattedUrl.startsWith('http://') && !formattedUrl.startsWith('https://')) {
       formattedUrl = `https://${formattedUrl}`;
+    }
+
+    // SSRF protection: block private/internal URLs
+    if (isPrivateUrl(formattedUrl)) {
+      return new Response(
+        JSON.stringify({ success: false, error: 'URL not allowed' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
     }
 
     console.log('Fetching metadata for:', formattedUrl);
