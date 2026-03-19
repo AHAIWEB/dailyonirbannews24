@@ -1226,6 +1226,24 @@ h1,h2,h3,h4,h5,h6 { font-family: 'Noto Sans Bengali', sans-serif; }
           </b:includable>
         </b:widget>
 
+        <!-- কালের কন্ঠ (FotoCard) -->
+        <b:widget id='HTML23' locked='false' title='কালের কন্ঠ' type='HTML' version='2' visible='true'>
+          <b:includable id='main'>
+            <div class='section-label' style='margin-top:24px;'><span>কালের কন্ঠ</span></div>
+            <div class='fotocard-scroll' id='fotoCardSection'></div>
+            <script>
+            //<![CDATA[
+            (function(){
+              var s=document.createElement('script');
+              s.src='/feeds/posts/default/-/মত-দ্বিমত?alt=json-in-script&max-results=6&callback=_bkFotoCard';
+              document.body.appendChild(s);
+            })();
+            function _bkFotoCard(d){if(typeof _renderFotoCard==='function'){_renderFotoCard('fotoCardSection',d);}else{var _t=setInterval(function(){if(typeof _renderFotoCard==='function'){clearInterval(_t);_renderFotoCard('fotoCardSection',d);}},100);}}
+            //]]>
+            </script>
+          </b:includable>
+        </b:widget>
+
         <!-- বিনোদন -->
         <b:widget id='HTML11' locked='false' title='বিনোদন' type='HTML' version='2' visible='true'>
           <b:includable id='main'>
