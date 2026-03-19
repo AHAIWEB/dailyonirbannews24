@@ -274,12 +274,13 @@ export default function Header() {
 }
 
 function BanglaDate() {
+  const dates = getFormattedDates();
   return (
     <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[10px] md:text-sm">
-      <span className="font-semibold text-foreground">আজ রবিবার |</span>
-      <span className="text-foreground">০১ মার্চ ২০২৬ ইংরেজি</span>
-      <span className="text-news-green font-medium">১৬ ফাল্গুন, ১৪৩২, বসন্তকাল</span>
-      <span className="text-news-blue font-medium">১২ রমজান ১৪৪৭ হিজরি</span>
+      <span className="font-semibold text-foreground">আজ {dates.dayName} |</span>
+      <span className="text-foreground">{dates.english}</span>
+      <span className="text-news-green font-medium">{dates.bangla}</span>
+      <span className="text-news-blue font-medium">{dates.hijri}</span>
     </div>
   );
 }
