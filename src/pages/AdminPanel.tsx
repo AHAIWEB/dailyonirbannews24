@@ -56,9 +56,20 @@ export default function AdminPanel() {
     <div className="min-h-screen bg-background font-bangla">
       <Header />
       <div className="container mx-auto mt-4 mb-10 px-3 md:px-4">
-        <div className="flex items-center gap-3 mb-4">
-          <Shield className="w-6 h-6 text-primary" />
-          <h1 className="text-xl font-black text-foreground">এডমিন প্যানেল</h1>
+        <div className="flex items-center justify-between flex-wrap gap-3 mb-4">
+          <div className="flex items-center gap-3">
+            <Shield className="w-6 h-6 text-primary" />
+            <h1 className="text-xl font-black text-foreground">এডমিন প্যানেল</h1>
+          </div>
+          <div className="flex items-center gap-2">
+            <a href="/" className="flex items-center gap-1.5 bg-primary text-primary-foreground px-3 py-1.5 rounded text-xs font-semibold hover:opacity-90 transition-opacity">
+              🏠 হোম পেইজ
+            </a>
+            <a href="https://dailyonirbannews24.lovable.app" target="_blank" rel="noopener noreferrer"
+              className="flex items-center gap-1.5 bg-secondary text-secondary-foreground px-3 py-1.5 rounded text-xs font-semibold hover:opacity-90 transition-opacity">
+              🌐 মূল সাইট
+            </a>
+          </div>
         </div>
 
         {/* Dashboard Stats */}

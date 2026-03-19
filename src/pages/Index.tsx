@@ -11,6 +11,8 @@ import VideoSlider from "@/components/news/VideoSlider";
 import SidebarTabs from "@/components/news/SidebarTabs";
 import SidebarWidget from "@/components/news/SidebarWidget";
 import RssNewsWidget from "@/components/news/RssNewsWidget";
+import WebStorySection from "@/components/news/WebStorySection";
+import FotoCardSection from "@/components/news/FotoCardSection";
 import Footer from "@/components/news/Footer";
 
 const Index = () => {
@@ -38,13 +40,15 @@ const Index = () => {
             <TopNews />
             <NewsCarousel />
             <LabelPostSection label="হাইলাইটস" count={6} layout="highlight" />
-            <LabelPostSection label="জাতীয়" count={4} layout="grid" />
+            <LabelPostSection label="জাতীয়" count={8} layout="grid" />
+            <WebStorySection />
             <LabelPostSection label="রাজনীতি" count={4} layout="list" />
             <LabelPostSection label="আন্তর্জাতিক" count={5} layout="highlight" />
+            <FotoCardSection />
             <EntertainmentGrid />
             <DeshBangla />
             <LifestyleSection />
-            <LabelPostSection label="স্বাস্থ্যসেবা" count={4} layout="list" />
+            <LabelPostSection label="স্বাস্থ্যসেবা" count={5} layout="list" />
             <OpinionSection />
             <VideoSlider />
           </main>
@@ -64,8 +68,6 @@ const Index = () => {
               ]}
             />
             <SidebarWidget label="জটিল" title="জটিল" />
-
-            {/* Ad placeholder */}
             <div className="bg-muted rounded flex items-center justify-center h-[250px] text-xs text-muted-foreground">
               বিজ্ঞাপন — ৩০০×২৫০
             </div>
