@@ -61,25 +61,28 @@ export default function AdminPanel() {
           <h1 className="text-xl font-black text-foreground">এডমিন প্যানেল</h1>
         </div>
 
-        <Tabs defaultValue="reporters" className="w-full">
+        {/* Dashboard Stats */}
+        <AdminDashboardStats />
+
+        <Tabs defaultValue="rss" className="w-full mt-4">
           <TabsList className="w-full grid grid-cols-4 mb-4">
+            <TabsTrigger value="rss" className="flex items-center gap-1.5 text-xs md:text-sm">
+              <Rss className="w-3.5 h-3.5" /> RSS ফিড
+            </TabsTrigger>
             <TabsTrigger value="reporters" className="flex items-center gap-1.5 text-xs md:text-sm">
               <Users className="w-3.5 h-3.5" /> রিপোর্টার
             </TabsTrigger>
             <TabsTrigger value="users" className="flex items-center gap-1.5 text-xs md:text-sm">
               <UserCog className="w-3.5 h-3.5" /> ইউজার
             </TabsTrigger>
-            <TabsTrigger value="rss" className="flex items-center gap-1.5 text-xs md:text-sm">
-              <Rss className="w-3.5 h-3.5" /> RSS ফিড
-            </TabsTrigger>
             <TabsTrigger value="settings" className="flex items-center gap-1.5 text-xs md:text-sm">
               <Settings className="w-3.5 h-3.5" /> সেটিংস
             </TabsTrigger>
           </TabsList>
 
+          <TabsContent value="rss"><RssFeedManager /></TabsContent>
           <TabsContent value="reporters"><ReporterManagement /></TabsContent>
           <TabsContent value="users"><UserManagement /></TabsContent>
-          <TabsContent value="rss"><RssFeedManager /></TabsContent>
           <TabsContent value="settings"><SiteSettings /></TabsContent>
         </Tabs>
       </div>
