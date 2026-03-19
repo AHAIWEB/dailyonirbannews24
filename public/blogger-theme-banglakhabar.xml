@@ -1262,7 +1262,7 @@ h1,h2,h3,h4,h5,h6 { font-family: 'Noto Sans Bengali', sans-serif; }
           </b:includable>
         </b:widget>
 
-        <!-- দেশ বাংলা -->
+        <!-- দেশ বাংলা (hero + grid like React) -->
         <b:widget id='HTML12' locked='false' title='দেশ বাংলা' type='HTML' version='2' visible='true'>
           <b:includable id='main'>
             <div class='section-label' style='margin-top:24px;'><span>দেশ বাংলা</span></div>
@@ -1271,15 +1271,15 @@ h1,h2,h3,h4,h5,h6 { font-family: 'Noto Sans Bengali', sans-serif; }
               <select id='districtSelect'><option>জেলা</option><option>ঢাকা</option><option>গাজীপুর</option><option>নারায়ণগঞ্জ</option><option>মানিকগঞ্জ</option><option>মুন্সীগঞ্জ</option></select>
               <select id='upazilaSelect'><option>উপজেলা</option><option>সাভার</option><option>ধামরাই</option><option>কেরানীগঞ্জ</option><option>নবাবগঞ্জ</option></select>
             </div>
-            <div class='grid-2' id='deshBanglaSection'></div>
+            <div id='deshBanglaSection'></div>
             <script>
             //<![CDATA[
             (function(){
               var s=document.createElement('script');
-              s.src='/feeds/posts/default/-/দেশ বাংলা?alt=json-in-script&max-results=4&callback=_bkDeshBangla';
+              s.src='/feeds/posts/default/-/দেশ বাংলা?alt=json-in-script&max-results=8&callback=_bkDeshBangla';
               document.body.appendChild(s);
             })();
-            function _bkDeshBangla(d){if(typeof _renderGrid==='function'){_renderGrid('deshBanglaSection',d,'aspect-video');}else{var _t=setInterval(function(){if(typeof _renderGrid==='function'){clearInterval(_t);_renderGrid('deshBanglaSection',d,'aspect-video');}},100);}}
+            function _bkDeshBangla(d){if(typeof _renderDeshBangla==='function'){_renderDeshBangla('deshBanglaSection',d);}else{var _t=setInterval(function(){if(typeof _renderDeshBangla==='function'){clearInterval(_t);_renderDeshBangla('deshBanglaSection',d);}},100);}}
             //]]>
             </script>
           </b:includable>
