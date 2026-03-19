@@ -29,39 +29,35 @@ export default function FotoCardSection() {
           <ChevronRight className="w-5 h-5" />
         </button>
 
-        <div ref={scrollRef} className="flex gap-4 overflow-x-auto scrollbar-hide pb-2 snap-x snap-mandatory">
+        {/* Mobile: 3-column grid, Desktop: horizontal scroll */}
+        <div ref={scrollRef} className="grid grid-cols-3 gap-2 md:flex md:gap-4 md:overflow-x-auto md:scrollbar-hide pb-2 md:snap-x md:snap-mandatory">
           {posts.map((post) => (
             <Link key={post.id} to={`/post/${post.id}`}
-              className="flex-shrink-0 w-[280px] md:w-[300px] snap-start block group">
-              {/* Card */}
-              <div className="bg-sky-50 dark:bg-sky-950/30 rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-all border border-sky-100 dark:border-sky-900/50">
-                {/* Top - date + quote icon */}
-                <div className="px-4 pt-4 pb-2 flex items-start justify-between">
-                  <span className="text-[10px] text-muted-foreground">{today}</span>
+              className="md:flex-shrink-0 md:w-[280px] lg:w-[300px] md:snap-start block group">
+              <div className="bg-sky-50 dark:bg-sky-950/30 rounded-xl md:rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-all border border-sky-100 dark:border-sky-900/50">
+                <div className="px-2 pt-2 pb-1 md:px-4 md:pt-4 md:pb-2 flex items-start justify-between">
+                  <span className="text-[8px] md:text-[10px] text-muted-foreground">{today}</span>
                   <div className="text-sky-500">
-                    <Quote className="w-6 h-6" />
+                    <Quote className="w-4 h-4 md:w-6 md:h-6" />
                   </div>
                 </div>
-                {/* Quote text */}
-                <div className="px-4 pb-4">
-                  <p className="text-sm font-bold text-foreground leading-[1.8] line-clamp-5 group-hover:text-primary transition-colors">
+                <div className="px-2 pb-2 md:px-4 md:pb-4">
+                  <p className="text-[10px] md:text-sm font-bold text-foreground leading-[1.6] md:leading-[1.8] line-clamp-3 md:line-clamp-5 group-hover:text-primary transition-colors">
                     {post.excerpt} {post.title}
                   </p>
                 </div>
-                {/* Author section */}
-                <div className="bg-white dark:bg-card border-t border-sky-100 dark:border-sky-900/50 px-4 py-3 flex items-center gap-3">
-                  <div className="w-12 h-12 rounded-full overflow-hidden border-2 border-sky-200 shrink-0">
+                <div className="bg-white dark:bg-card border-t border-sky-100 dark:border-sky-900/50 px-2 py-2 md:px-4 md:py-3 flex items-center gap-2 md:gap-3">
+                  <div className="w-8 h-8 md:w-12 md:h-12 rounded-full overflow-hidden border-2 border-sky-200 shrink-0">
                     <img src={post.authorImage} alt={post.author} className="w-full h-full object-cover" />
                   </div>
                   <div className="min-w-0">
-                    <h4 className="text-xs font-bold text-foreground truncate">{post.author}</h4>
-                    <p className="text-[10px] text-muted-foreground truncate">{post.authorTitle}</p>
+                    <h4 className="text-[9px] md:text-xs font-bold text-foreground truncate">{post.author}</h4>
+                    <p className="text-[8px] md:text-[10px] text-muted-foreground truncate">{post.authorTitle}</p>
                   </div>
                 </div>
-                {/* Brand footer */}
-                <div className="bg-sky-600 dark:bg-sky-800 px-4 py-1.5 flex items-center justify-between">
-                  <span className="text-[10px] font-bold text-white tracking-wider">কালের কন্ঠ</span>
-                  <span className="text-[8px] text-white/60">dailyonirbannews24.com</span>
+                <div className="bg-sky-600 dark:bg-sky-800 px-2 py-1 md:px-4 md:py-1.5 flex items-center justify-between">
+                  <span className="text-[8px] md:text-[10px] font-bold text-white tracking-wider">কালের কন্ঠ</span>
+                  <span className="text-[7px] md:text-[8px] text-white/60 hidden md:inline">dailyonirbannews24.com</span>
                 </div>
               </div>
             </Link>
