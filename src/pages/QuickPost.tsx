@@ -192,7 +192,7 @@ export default function QuickPost() {
               <LabelSelector selectedLabels={selectedLabels} setSelectedLabels={setSelectedLabels} />
 
               {/* Share/Post Buttons */}
-              <ShareButtons data={data} generateHtml={generateBloggerHtml} selectedLabels={selectedLabels} />
+              <ShareButtons data={{ ...data, content: data.content, description: data.description }} generateHtml={generateBloggerHtml} selectedLabels={selectedLabels} />
             </>
           )}
 

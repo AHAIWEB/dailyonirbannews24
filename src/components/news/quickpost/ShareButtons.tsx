@@ -1,5 +1,7 @@
 import { useState } from "react";
-import { Bookmark, Copy, CheckCircle2, Globe, FileText, Share2 } from "lucide-react";
+import { Bookmark, Copy, CheckCircle2, Globe, FileText, Share2, Database, Loader2 } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 interface ShareButtonsProps {
   data: {
@@ -7,6 +9,8 @@ interface ShareButtonsProps {
     url: string;
     siteName: string;
     image: string;
+    description?: string;
+    content?: string;
   };
   generateHtml: () => string;
   selectedLabels: string[];
@@ -14,7 +18,35 @@ interface ShareButtonsProps {
 
 export default function ShareButtons({ data, generateHtml, selectedLabels }: ShareButtonsProps) {
   const [copied, setCopied] = useState(false);
-  const [activeShare, setActiveShare] = useState<string | null>(null);
+  const [posting, setPosting] = useState(false);
+
+  const postToReact = async () => {
+    setPosting(true);
+    try {
+      const halfContent = data.content || data.description || "";
+      const paragraphs = halfContent.split("\n\n").filter(Boolean);
+      const half = Math.ceil(paragraphs.length / 2);
+      const content50 = paragraphs.slice(0, half).join("\n\n");
+
+      const category = selectedLabels[0] || "জাতীয়";
+      const { error } = await supabase.from("rss_articles").insert({
+        title: data.title,
+        content: content50,
+        image_url: data.image || null,
+        source_url: data.url,
+        source_name: data.siteName || "Quick Post",
+        category,
+        is_published: true,
+        is_featured: false,
+      } as any);
+      if (error) throw error;
+      toast.success(`"${category}" ক্যাটাগরিতে পোস্ট হয়েছে!`);
+    } catch (err: any) {
+      toast.error("পোস্ট করতে সমস্যা: " + (err.message || ""));
+    } finally {
+      setPosting(false);
+    }
+  };
 
   const openInBlogger = () => {
     const content = generateHtml();
@@ -25,21 +57,17 @@ export default function ShareButtons({ data, generateHtml, selectedLabels }: Sha
 
   const openInWordPress = () => {
     const content = generateHtml();
-    // WordPress "Press This" style URL - works with most WP installations
-    // User can also use wp-admin/post-new.php with content param
     const tags = selectedLabels.join(",");
     const wpUrl = `https://wordpress.com/post?title=${encodeURIComponent(data.title)}&content=${encodeURIComponent(content)}&tags=${encodeURIComponent(tags)}&url=${encodeURIComponent(data.url)}`;
     window.open(wpUrl, "_blank");
   };
 
   const openInMedium = () => {
-    // Medium doesn't have a direct post API via URL, but we can use their intent URL
     const mediumUrl = `https://medium.com/new-story?title=${encodeURIComponent(data.title)}&content=${encodeURIComponent(data.url)}`;
     window.open(mediumUrl, "_blank");
   };
 
   const shareToTelegram = () => {
-    const text = `${data.title}\n\n${data.url}`;
     const telegramUrl = `https://t.me/share/url?url=${encodeURIComponent(data.url)}&text=${encodeURIComponent(data.title)}`;
     window.open(telegramUrl, "_blank");
   };
@@ -78,6 +106,14 @@ export default function ShareButtons({ data, generateHtml, selectedLabels }: Sha
         <p className="text-xs font-semibold text-muted-foreground mb-2 uppercase tracking-wide">📝 পাবলিশ করুন</p>
         <div className="flex flex-wrap gap-2">
           <button
+            onClick={postToReact}
+            disabled={posting}
+            className="bg-primary text-primary-foreground px-4 py-2.5 rounded text-xs font-bold hover:opacity-90 transition-opacity flex items-center gap-2 disabled:opacity-50"
+          >
+            {posting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Database className="w-4 h-4" />}
+            {posting ? "পোস্ট হচ্ছে..." : "React সাইটে পোস্ট"}
+          </button>
+          <button
             onClick={openInBlogger}
             className="bg-[#FF6600] text-white px-4 py-2.5 rounded text-xs font-bold hover:opacity-90 transition-opacity flex items-center gap-2"
           >
@@ -112,30 +148,10 @@ export default function ShareButtons({ data, generateHtml, selectedLabels }: Sha
       <div>
         <p className="text-xs font-semibold text-muted-foreground mb-2 uppercase tracking-wide">📢 সোশ্যাল শেয়ার</p>
         <div className="flex flex-wrap gap-2">
-          <button
-            onClick={shareToFacebook}
-            className="bg-[#1877F2] text-white px-4 py-2.5 rounded text-xs font-bold hover:opacity-90 transition-opacity flex items-center gap-2"
-          >
-            Facebook
-          </button>
-          <button
-            onClick={shareToTwitter}
-            className="bg-[#1DA1F2] text-white px-4 py-2.5 rounded text-xs font-bold hover:opacity-90 transition-opacity flex items-center gap-2"
-          >
-            Twitter/X
-          </button>
-          <button
-            onClick={shareToWhatsApp}
-            className="bg-[#25D366] text-white px-4 py-2.5 rounded text-xs font-bold hover:opacity-90 transition-opacity flex items-center gap-2"
-          >
-            WhatsApp
-          </button>
-          <button
-            onClick={shareToTelegram}
-            className="bg-[#0088CC] text-white px-4 py-2.5 rounded text-xs font-bold hover:opacity-90 transition-opacity flex items-center gap-2"
-          >
-            Telegram
-          </button>
+          <button onClick={shareToFacebook} className="bg-[#1877F2] text-white px-4 py-2.5 rounded text-xs font-bold hover:opacity-90 transition-opacity flex items-center gap-2">Facebook</button>
+          <button onClick={shareToTwitter} className="bg-[#1DA1F2] text-white px-4 py-2.5 rounded text-xs font-bold hover:opacity-90 transition-opacity flex items-center gap-2">Twitter/X</button>
+          <button onClick={shareToWhatsApp} className="bg-[#25D366] text-white px-4 py-2.5 rounded text-xs font-bold hover:opacity-90 transition-opacity flex items-center gap-2">WhatsApp</button>
+          <button onClick={shareToTelegram} className="bg-[#0088CC] text-white px-4 py-2.5 rounded text-xs font-bold hover:opacity-90 transition-opacity flex items-center gap-2">Telegram</button>
         </div>
       </div>
     </div>

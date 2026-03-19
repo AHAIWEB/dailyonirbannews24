@@ -4,10 +4,12 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import Header from "@/components/news/Header";
 import Footer from "@/components/news/Footer";
-import { Shield, Users, CheckCircle2, XCircle, FileText, Settings, UserCog, Eye, Trash2, Save, RefreshCw, Rss, LayoutDashboard } from "lucide-react";
+import { Shield, Users, CheckCircle2, XCircle, FileText, Settings, UserCog, Eye, Trash2, Save, RefreshCw, Rss, LayoutDashboard, Send, Palette } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import RssFeedManager from "@/components/admin/RssFeedManager";
 import AdminDashboardStats from "@/components/admin/AdminDashboardStats";
+import PostManager from "@/components/admin/PostManager";
+import SiteCustomizer from "@/components/admin/SiteCustomizer";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -76,24 +78,32 @@ export default function AdminPanel() {
         <AdminDashboardStats />
 
         <Tabs defaultValue="rss" className="w-full mt-4">
-          <TabsList className="w-full grid grid-cols-4 mb-4">
-            <TabsTrigger value="rss" className="flex items-center gap-1.5 text-xs md:text-sm">
-              <Rss className="w-3.5 h-3.5" /> RSS ফিড
+          <TabsList className="w-full flex flex-wrap gap-1 mb-4 h-auto p-1">
+            <TabsTrigger value="rss" className="flex items-center gap-1 text-[10px] md:text-xs px-2 py-1.5">
+              <Rss className="w-3 h-3" /> RSS ফিড
             </TabsTrigger>
-            <TabsTrigger value="reporters" className="flex items-center gap-1.5 text-xs md:text-sm">
-              <Users className="w-3.5 h-3.5" /> রিপোর্টার
+            <TabsTrigger value="post" className="flex items-center gap-1 text-[10px] md:text-xs px-2 py-1.5">
+              <Send className="w-3 h-3" /> পোস্ট
             </TabsTrigger>
-            <TabsTrigger value="users" className="flex items-center gap-1.5 text-xs md:text-sm">
-              <UserCog className="w-3.5 h-3.5" /> ইউজার
+            <TabsTrigger value="reporters" className="flex items-center gap-1 text-[10px] md:text-xs px-2 py-1.5">
+              <Users className="w-3 h-3" /> রিপোর্টার
             </TabsTrigger>
-            <TabsTrigger value="settings" className="flex items-center gap-1.5 text-xs md:text-sm">
-              <Settings className="w-3.5 h-3.5" /> সেটিংস
+            <TabsTrigger value="users" className="flex items-center gap-1 text-[10px] md:text-xs px-2 py-1.5">
+              <UserCog className="w-3 h-3" /> ইউজার
+            </TabsTrigger>
+            <TabsTrigger value="customize" className="flex items-center gap-1 text-[10px] md:text-xs px-2 py-1.5">
+              <Palette className="w-3 h-3" /> কাস্টমাইজ
+            </TabsTrigger>
+            <TabsTrigger value="settings" className="flex items-center gap-1 text-[10px] md:text-xs px-2 py-1.5">
+              <Settings className="w-3 h-3" /> সেটিংস
             </TabsTrigger>
           </TabsList>
 
           <TabsContent value="rss"><RssFeedManager /></TabsContent>
+          <TabsContent value="post"><PostManager /></TabsContent>
           <TabsContent value="reporters"><ReporterManagement /></TabsContent>
           <TabsContent value="users"><UserManagement /></TabsContent>
+          <TabsContent value="customize"><SiteCustomizer /></TabsContent>
           <TabsContent value="settings"><SiteSettings /></TabsContent>
         </Tabs>
       </div>
