@@ -112,7 +112,7 @@ export type Database = {
           category: string
           content: string | null
           created_at: string
-          feed_id: string
+          feed_id: string | null
           fetched_at: string
           id: string
           image_url: string | null
@@ -127,7 +127,7 @@ export type Database = {
           category?: string
           content?: string | null
           created_at?: string
-          feed_id: string
+          feed_id?: string | null
           fetched_at?: string
           id?: string
           image_url?: string | null
@@ -142,7 +142,7 @@ export type Database = {
           category?: string
           content?: string | null
           created_at?: string
-          feed_id?: string
+          feed_id?: string | null
           fetched_at?: string
           id?: string
           image_url?: string | null

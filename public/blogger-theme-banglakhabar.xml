@@ -656,12 +656,32 @@ h1,h2,h3,h4,h5,h6 { font-family: 'Noto Sans Bengali', sans-serif; }
         <!-- Date bar -->
         <div class='date-bar'>
           <div class='container flex flex-wrap items-center gap-3'>
-            <strong>আজ রবিবার |</strong>
-            <span>০১ মার্চ ২০২৬ ইংরেজি</span>
-            <span class='bangla-date'>১৬ ফাল্গুন, ১৪৩২, বসন্তকাল</span>
-            <span class='hijri-date'>১২ রমজান ১৪৪৭ হিজরি</span>
+            <strong id='bkDayName'>আজ</strong>
+            <span id='bkEngDate'></span>
+            <span class='bangla-date' id='bkBanglaDate'></span>
+            <span class='hijri-date' id='bkHijriDate'></span>
           </div>
         </div>
+        <script>
+        //<![CDATA[
+        (function(){
+          var bn=['০','১','২','৩','৪','৫','৬','৭','৮','৯'];
+          function toB(n){return String(n).replace(/[0-9]/g,function(d){return bn[d];});}
+          var days=['রবিবার','সোমবার','মঙ্গলবার','বুধবার','বৃহস্পতিবার','শুক্রবার','শনিবার'];
+          var months=['জানুয়ারি','ফেব্রুয়ারি','মার্চ','এপ্রিল','মে','জুন','জুলাই','আগস্ট','সেপ্টেম্বর','অক্টোবর','নভেম্বর','ডিসেম্বর'];
+          var bMonths=['বৈশাখ','জ্যৈষ্ঠ','আষাঢ়','শ্রাবণ','ভাদ্র','আশ্বিন','কার্তিক','অগ্রহায়ণ','পৌষ','মাঘ','ফাল্গুন','চৈত্র'];
+          var seasons=['গ্রীষ্মকাল','গ্রীষ্মকাল','বর্ষাকাল','বর্ষাকাল','শরৎকাল','শরৎকাল','হেমন্তকাল','হেমন্তকাল','শীতকাল','শীতকাল','বসন্তকাল','বসন্তকাল'];
+          var now=new Date();
+          document.getElementById('bkDayName').textContent='আজ '+days[now.getDay()]+' |';
+          document.getElementById('bkEngDate').textContent=toB(now.getDate())+' '+months[now.getMonth()]+' '+toB(now.getFullYear())+' ইংরেজি';
+          var bm=now.getMonth()>=3?(now.getMonth()-3):(now.getMonth()+9);
+          var by=now.getMonth()>=3?(now.getFullYear()-593):(now.getFullYear()-594);
+          document.getElementById('bkBanglaDate').textContent=toB(now.getDate())+' '+bMonths[bm]+', '+toB(by)+', '+seasons[bm];
+          var hy=now.getFullYear()-579;
+          document.getElementById('bkHijriDate').textContent=toB(now.getDate())+' হিজরি '+toB(hy);
+        })();
+        //]]>
+        </script>
 
         <!-- Logo -->
         <div class='header-logo'>

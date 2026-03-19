@@ -1,0 +1,1 @@
+ALTER TABLE public.rss_articles ALTER COLUMN feed_id DROP NOT NULL;
