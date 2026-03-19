@@ -246,7 +246,48 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      public_reporters: {
+        Row: {
+          designation: string | null
+          expiry_date: string | null
+          full_name: string | null
+          id: string | null
+          issue_date: string | null
+          photo_url: string | null
+          reporter_id: string | null
+          social_facebook: string | null
+          social_twitter: string | null
+          social_youtube: string | null
+          status: string | null
+        }
+        Insert: {
+          designation?: string | null
+          expiry_date?: string | null
+          full_name?: string | null
+          id?: string | null
+          issue_date?: string | null
+          photo_url?: string | null
+          reporter_id?: string | null
+          social_facebook?: string | null
+          social_twitter?: string | null
+          social_youtube?: string | null
+          status?: string | null
+        }
+        Update: {
+          designation?: string | null
+          expiry_date?: string | null
+          full_name?: string | null
+          id?: string | null
+          issue_date?: string | null
+          photo_url?: string | null
+          reporter_id?: string | null
+          social_facebook?: string | null
+          social_twitter?: string | null
+          social_youtube?: string | null
+          status?: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       generate_reporter_id: { Args: never; Returns: string }
