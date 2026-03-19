@@ -68,7 +68,6 @@ function extractSiteName(html: string, baseUrl: string): string {
 }
 
 function extractArticleBody(html: string): string {
-  // Remove script, style, nav, header, footer, aside, form, iframe tags
   let cleaned = html
     .replace(/<script[\s\S]*?<\/script>/gi, '')
     .replace(/<style[\s\S]*?<\/style>/gi, '')
@@ -80,19 +79,16 @@ function extractArticleBody(html: string): string {
     .replace(/<iframe[\s\S]*?<\/iframe>/gi, '')
     .replace(/<!--[\s\S]*?-->/g, '');
 
-  // Strategy 1: Try <article> tag
   const articleMatch = cleaned.match(/<article[^>]*>([\s\S]*?)<\/article>/i);
   let contentHtml = '';
   
   if (articleMatch) {
     contentHtml = articleMatch[1];
   } else {
-    // Strategy 2: Try <main> tag
     const mainMatch = cleaned.match(/<main[^>]*>([\s\S]*?)<\/main>/i);
     if (mainMatch) {
       contentHtml = mainMatch[1];
     } else {
-      // Strategy 3: Try common content class/id patterns (greedy approach)
       const contentPatterns = [
         /<div[^>]*(?:id|class)=["'][^"']*(?:article-body|article-content|post-body|post-content|entry-content|story-body|story-content|content-body|main-content|single-content)[^"']*["'][^>]*>([\s\S]*?)<\/div>\s*<(?:div|section|aside|footer)/i,
         /<div[^>]*(?:id|class)=["'][^"']*(?:article|content|post|entry|story)[^"']*["'][^>]*>([\s\S]*?)<\/div>\s*<(?:div|section|aside|footer)/i,
@@ -106,7 +102,6 @@ function extractArticleBody(html: string): string {
         }
       }
       
-      // Strategy 4: If still no content, use the whole body
       if (!contentHtml) {
         const bodyMatch = cleaned.match(/<body[^>]*>([\s\S]*?)<\/body>/i);
         if (bodyMatch) {
@@ -118,7 +113,6 @@ function extractArticleBody(html: string): string {
     }
   }
 
-  // Extract paragraphs
   const paragraphs: string[] = [];
   const pMatches = contentHtml.matchAll(/<p[^>]*>([\s\S]*?)<\/p>/gi);
   for (const m of pMatches) {
@@ -137,12 +131,10 @@ function extractArticleBody(html: string): string {
     }
   }
 
-  // If very few paragraphs found, also try div-based text blocks
   if (paragraphs.length < 3) {
     const divTexts = contentHtml.matchAll(/<div[^>]*>([\s\S]*?)<\/div>/gi);
     for (const m of divTexts) {
       const inner = m[1];
-      // Skip if contains nested divs (structural)
       if (/<div/i.test(inner)) continue;
       const text = inner
         .replace(/<br\s*\/?>/gi, '\n')
@@ -158,20 +150,21 @@ function extractArticleBody(html: string): string {
   return paragraphs.join('\n\n');
 }
 
-// Multiple User-Agent strings to rotate
 const USER_AGENTS = [
   'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36',
   'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36',
   'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36',
   'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:133.0) Gecko/20100101 Firefox/133.0',
   'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.2 Safari/605.1.15',
+  'Mozilla/5.0 (Linux; Android 13; SM-S901B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Mobile Safari/537.36',
+  'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1',
 ];
 
 function getRandomUA(): string {
   return USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)];
 }
 
-async function fetchWithRetry(url: string, maxRetries = 2): Promise<Response> {
+async function fetchWithRetry(url: string, maxRetries = 3): Promise<Response> {
   let lastError: Error | null = null;
 
   for (let attempt = 0; attempt <= maxRetries; attempt++) {
@@ -180,56 +173,68 @@ async function fetchWithRetry(url: string, maxRetries = 2): Promise<Response> {
       'User-Agent': ua,
       'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8',
       'Accept-Language': 'bn-BD,bn;q=0.9,en-US;q=0.8,en;q=0.7',
-      'Accept-Encoding': 'gzip, deflate, br',
       'Cache-Control': 'no-cache',
       'Pragma': 'no-cache',
-      'Sec-Ch-Ua': '"Chromium";v="131", "Not_A Brand";v="24"',
-      'Sec-Ch-Ua-Mobile': '?0',
-      'Sec-Ch-Ua-Platform': '"Windows"',
       'Sec-Fetch-Dest': 'document',
       'Sec-Fetch-Mode': 'navigate',
-      'Sec-Fetch-Site': 'none',
+      'Sec-Fetch-Site': 'cross-site',
       'Sec-Fetch-User': '?1',
       'Upgrade-Insecure-Requests': '1',
     };
 
-    // On retry, add Referer from Google to look like a search click
-    if (attempt > 0) {
-      const parsedUrl = new URL(url);
-      headers['Referer'] = `https://www.google.com/search?q=${encodeURIComponent(parsedUrl.hostname)}`;
+    // Progressive header strategies
+    if (attempt === 1) {
+      headers['Referer'] = `https://www.google.com/search?q=${encodeURIComponent(new URL(url).hostname)}`;
+    } else if (attempt === 2) {
+      headers['Referer'] = url;
+      headers['Sec-Fetch-Site'] = 'same-origin';
+    } else if (attempt >= 3) {
+      // Minimal headers - some sites block on too many headers
+      delete headers['Sec-Fetch-Dest'];
+      delete headers['Sec-Fetch-Mode'];
+      delete headers['Sec-Fetch-Site'];
+      delete headers['Sec-Fetch-User'];
+      headers['Referer'] = `https://t.co/${Math.random().toString(36).slice(2, 8)}`;
     }
 
     try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 15000);
+      
       const response = await fetch(url, {
         headers,
         redirect: 'follow',
+        signal: controller.signal,
       });
+      clearTimeout(timeoutId);
 
       if (response.ok) {
         return response;
       }
 
-      // If 403, try next attempt
-      if (response.status === 403 && attempt < maxRetries) {
-        console.log(`Attempt ${attempt + 1} got 403, retrying with different headers...`);
+      if ((response.status === 403 || response.status === 429 || response.status === 503) && attempt < maxRetries) {
+        console.log(`Attempt ${attempt + 1} got ${response.status}, retrying...`);
         lastError = new Error(`HTTP ${response.status}`);
+        // Small delay between retries
+        await new Promise(r => setTimeout(r, 500 * (attempt + 1)));
         continue;
       }
 
-      return response; // Return non-403 errors or final 403
+      return response;
     } catch (err) {
       lastError = err instanceof Error ? err : new Error(String(err));
-      if (attempt < maxRetries) continue;
+      if (attempt < maxRetries) {
+        await new Promise(r => setTimeout(r, 500 * (attempt + 1)));
+        continue;
+      }
     }
   }
 
   throw lastError || new Error('Failed after retries');
 }
 
-// Google Cache / Web Cache fallback for stubborn 403s
 async function fetchViaGoogleCache(url: string): Promise<string | null> {
   try {
-    // Try Google's webcache
     const cacheUrl = `https://webcache.googleusercontent.com/search?q=cache:${encodeURIComponent(url)}&strip=0`;
     const response = await fetch(cacheUrl, {
       headers: {
@@ -243,6 +248,24 @@ async function fetchViaGoogleCache(url: string): Promise<string | null> {
     }
   } catch (e) {
     console.log('Google cache fallback failed:', e);
+  }
+  return null;
+}
+
+// Try fetching via archive.org as another fallback
+async function fetchViaArchive(url: string): Promise<string | null> {
+  try {
+    const archiveUrl = `https://web.archive.org/web/2/${url}`;
+    const response = await fetch(archiveUrl, {
+      headers: { 'User-Agent': getRandomUA() },
+      redirect: 'follow',
+    });
+    if (response.ok) {
+      console.log('Successfully fetched from archive.org');
+      return await response.text();
+    }
+  } catch (e) {
+    console.log('Archive.org fallback failed:', e);
   }
   return null;
 }
@@ -276,27 +299,38 @@ Deno.serve(async (req) => {
       const response = await fetchWithRetry(formattedUrl);
 
       if (!response.ok) {
-        console.log(`Direct fetch failed with ${response.status}, trying cache fallback...`);
+        console.log(`Direct fetch failed with ${response.status}, trying fallbacks...`);
         fetchFailed = true;
       } else {
         html = await response.text();
       }
     } catch (err) {
-      console.log('Direct fetch error, trying cache fallback...');
+      console.log('Direct fetch error, trying fallbacks...');
       fetchFailed = true;
     }
 
-    // Fallback: try Google cache if direct fetch failed
-    if (fetchFailed) {
+    // Fallback chain
+    if (fetchFailed || !html) {
       const cachedHtml = await fetchViaGoogleCache(formattedUrl);
       if (cachedHtml) {
         html = cachedHtml;
-      } else {
-        return new Response(
-          JSON.stringify({ success: false, error: `সাইটটি অ্যাক্সেস ব্লক করেছে (403)। অনুগ্রহ করে অন্য একটি সোর্স ব্যবহার করুন।` }),
-          { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-        );
+        fetchFailed = false;
       }
+    }
+    
+    if (fetchFailed || !html) {
+      const archivedHtml = await fetchViaArchive(formattedUrl);
+      if (archivedHtml) {
+        html = archivedHtml;
+        fetchFailed = false;
+      }
+    }
+
+    if (!html) {
+      return new Response(
+        JSON.stringify({ success: false, error: `সাইটটি অ্যাক্সেস ব্লক করেছে। অনুগ্রহ করে অন্য একটি সোর্স ব্যবহার করুন।` }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
     }
 
     const metadata: Record<string, string> = {
