@@ -27,12 +27,13 @@ interface RssArticle {
   fetched_at: string;
 }
 
-const categories = ["জাতীয়", "রাজনীতি", "আন্তর্জাতিক", "অর্থনীতি", "বিনোদন", "খেলাধুলা", "প্রযুক্তি", "শিক্ষা", "স্বাস্থ্যসেবা", "লাইফস্টাইল"];
+const DEFAULT_CATEGORIES = ["জাতীয়", "রাজনীতি", "আন্তর্জাতিক", "অর্থনীতি", "বিনোদন", "খেলাধুলা", "প্রযুক্তি", "শিক্ষা", "স্বাস্থ্যসেবা", "লাইফস্টাইল", "মতামত", "সারা দেশ", "অপরাধ"];
 
 export default function RssFeedManager() {
   const { user } = useAuth();
   const [feeds, setFeeds] = useState<RssFeed[]>([]);
   const [articles, setArticles] = useState<RssArticle[]>([]);
+  const [categories, setCategories] = useState<string[]>(DEFAULT_CATEGORIES);
   const [loading, setLoading] = useState(true);
   const [fetching, setFetching] = useState(false);
   const [newFeed, setNewFeed] = useState({ name: "", url: "", category: "জাতীয়" });
@@ -47,6 +48,7 @@ export default function RssFeedManager() {
   useEffect(() => {
     loadFeeds();
     loadArticles();
+    loadCategories();
   }, []);
 
   useEffect(() => {
@@ -63,6 +65,16 @@ export default function RssFeedManager() {
   const loadArticles = async () => {
     const { data } = await supabase.from("rss_articles").select("*").order("published_at", { ascending: false }).limit(100);
     setArticles((data as any[]) || []);
+  };
+
+  const loadCategories = async () => {
+    // Fetch unique categories from articles + feeds
+    const { data: articleCats } = await supabase.from("rss_articles").select("category");
+    const { data: feedCats } = await supabase.from("rss_feeds").select("category");
+    const allCats = new Set(DEFAULT_CATEGORIES);
+    articleCats?.forEach((a: any) => { if (a.category) allCats.add(a.category); });
+    feedCats?.forEach((f: any) => { if (f.category) allCats.add(f.category); });
+    setCategories(Array.from(allCats));
   };
 
   const addFeed = async () => {
