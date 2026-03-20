@@ -15,7 +15,7 @@ export default function WebStorySection() {
         .from("rss_articles")
         .select("*")
         .eq("is_published", true)
-        .eq("is_web_story" as any, true)
+        .eq("category", "ওয়েব স্টোরি")
         .order("published_at", { ascending: false })
         .limit(9);
       setArticles(data || []);

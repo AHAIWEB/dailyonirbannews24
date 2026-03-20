@@ -24,7 +24,7 @@ export default function NewsCarousel() {
         .from("rss_articles")
         .select("*")
         .eq("is_published", true)
-        .eq("is_editor_pick" as any, true)
+        .eq("category", "এডিটর পিক")
         .order("published_at", { ascending: false })
         .limit(8);
       setArticles(data || []);

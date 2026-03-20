@@ -32,21 +32,20 @@ export default function DeshBangla() {
   // Load articles filtered by location
   useEffect(() => {
     const load = async () => {
-      let query = supabase
+      const { data } = await supabase
         .from("rss_articles")
         .select("*")
         .eq("is_published", true)
         .eq("category", "দেশ বাংলা")
         .order("published_at", { ascending: false })
         .limit(8);
-
-      // Apply location filters if available
-      if (div) query = query.eq("location_division" as any, div);
-      if (dist) query = query.eq("location_district" as any, dist);
-      if (upa) query = query.eq("location_upazila" as any, upa);
-
-      const { data } = await query;
-      setArticles(data || []);
+      // Client-side location filter since columns may not be in types yet
+      let filtered = data || [];
+      if (div) filtered = filtered.filter((a: any) => a.location_division === div);
+      if (dist) filtered = filtered.filter((a: any) => a.location_district === dist);
+      if (upa) filtered = filtered.filter((a: any) => a.location_upazila === upa);
+      // If no location-filtered results, show all দেশ বাংলা
+      setArticles(filtered.length > 0 ? filtered : (data || []));
     };
     load();
   }, [div, dist, upa]);
