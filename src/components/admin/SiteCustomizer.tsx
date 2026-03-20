@@ -334,37 +334,6 @@ export default function SiteCustomizer() {
               <Plus className="w-3 h-3 mr-1" /> যোগ
             </Button>
           </div>
-
-          {/* DB Categories hint */}
-          {dbCategories.length > 0 && (
-            <div className="pt-2">
-              <p className="text-[10px] text-muted-foreground mb-1">ডাটাবেজে পাওয়া ক্যাটাগরি:</p>
-              <div className="flex flex-wrap gap-1">
-                {dbCategories.map(cat => {
-                  const exists = sections.some(s => s.label === cat);
-                  return (
-                    <button
-                      key={cat}
-                      onClick={() => {
-                        if (!exists) {
-                          setSections(prev => [...prev, { label: cat, count: 4, layout: "grid", visible: true, subcategories: [] }]);
-                          toast.success(`"${cat}" যোগ হয়েছে`);
-                        }
-                      }}
-                      disabled={exists}
-                      className={`px-2 py-0.5 rounded-full text-[10px] border transition-colors ${
-                        exists
-                          ? "bg-primary/10 text-primary border-primary/20 cursor-default"
-                          : "bg-muted text-muted-foreground border-border hover:border-primary hover:text-primary cursor-pointer"
-                      }`}
-                    >
-                      {exists ? "✓ " : "+ "}{cat}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-          )}
         </CardContent>
       </Card>
     </div>
