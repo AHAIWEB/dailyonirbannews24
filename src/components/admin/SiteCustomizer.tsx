@@ -156,11 +156,7 @@ export default function SiteCustomizer() {
   };
 
   const resetToDefault = () => {
-    const existingLabels = new Set(DEFAULT_SECTIONS.map(s => s.label));
-    const newFromDb = dbCategories
-      .filter(c => !existingLabels.has(c))
-      .map(c => ({ label: c, count: 4, layout: "grid", visible: true, subcategories: [] }));
-    setSections([...DEFAULT_SECTIONS, ...newFromDb]);
+    setSections([...DEFAULT_SECTIONS]);
     localStorage.removeItem(STORAGE_KEY);
     toast.success("ডিফল্ট লেআউট পুনরুদ্ধার হয়েছে");
   };
