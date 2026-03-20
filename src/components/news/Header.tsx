@@ -307,9 +307,9 @@ export default function Header() {
             <div className="flex items-center gap-3">
               <Link to="/" className="flex items-center gap-2 py-2">
                 <div className="w-8 h-8 rounded bg-primary-foreground/20 flex items-center justify-center">
-                  <span className="text-primary-foreground font-black text-sm">বা</span>
+                  <span className="text-primary-foreground font-black text-sm">অ</span>
                 </div>
-                <span className="text-primary-foreground font-bold text-sm hidden sm:inline">বাংলাখবর</span>
+                <span className="text-primary-foreground font-bold text-sm hidden sm:inline">দৈনিক অনির্বাণ নিউজ ২৪</span>
               </Link>
               <div className="hidden lg:flex items-stretch">
                 {navItems.slice(0, 8).map((item) => (
