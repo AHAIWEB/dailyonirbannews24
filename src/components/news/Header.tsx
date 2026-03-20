@@ -158,13 +158,13 @@ export default function Header() {
           <div className="container mx-auto flex items-center justify-between py-3 md:py-4">
             <Link to="/" className="flex items-center gap-2 md:gap-3">
               <div className="w-10 h-10 md:w-12 md:h-12 rounded-lg bg-primary flex items-center justify-center">
-                <span className="text-primary-foreground font-black text-lg md:text-xl">অ</span>
+                <span className="text-primary-foreground font-black text-lg md:text-xl">বে</span>
               </div>
               <div>
                 <h1 className="text-xl md:text-3xl font-black text-foreground leading-tight">
-                  দৈনিক অনির্বাণ <span className="text-primary">নিউজ ২৪</span>
+                  বেলাভূমি <span className="text-primary">NEWS</span>
                 </h1>
-                <p className="text-[8px] md:text-[10px] text-muted-foreground tracking-widest">স্বাধীন বাংলার স্বাধীন কথা</p>
+                <p className="text-[8px] md:text-[10px] text-muted-foreground tracking-widest">Belabhumi News</p>
               </div>
             </Link>
 
