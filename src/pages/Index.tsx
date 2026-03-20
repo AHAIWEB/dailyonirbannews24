@@ -42,7 +42,7 @@ const DEFAULT_SECTIONS: SectionConfig[] = [
 // Map of special component labels to their renderers
 const SPECIAL_SECTIONS: Record<string, (config: SectionConfig) => JSX.Element> = {
   "ওয়েব স্টোরি": () => <WebStorySection key="webstory" />,
-  "কালের কন্ঠ": () => <FotoCardSection key="fotocard" />,
+  "বেলাভূমি কণ্ঠ": () => <FotoCardSection key="fotocard" />,
   "বিনোদন": () => <EntertainmentGrid key="entertainment" />,
   "দেশ বাংলা": () => <DeshBangla key="deshbangla" />,
   "লাইফস্টাইল": () => <LifestyleSection key="lifestyle" />,
