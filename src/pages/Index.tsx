@@ -30,7 +30,7 @@ const DEFAULT_SECTIONS: SectionConfig[] = [
   { label: "ওয়েব স্টোরি", count: 9, layout: "webstory", visible: true },
   { label: "রাজনীতি", count: 4, layout: "list", visible: true },
   { label: "আন্তর্জাতিক", count: 5, layout: "highlight", visible: true },
-  { label: "কালের কন্ঠ", count: 6, layout: "fotocard", visible: true },
+  { label: "বেলাভূমি কণ্ঠ", count: 6, layout: "fotocard", visible: true },
   { label: "বিনোদন", count: 6, layout: "grid", visible: true },
   { label: "দেশ বাংলা", count: 8, layout: "deshbangla", visible: true },
   { label: "লাইফস্টাইল", count: 6, layout: "highlight", visible: true },
@@ -42,7 +42,7 @@ const DEFAULT_SECTIONS: SectionConfig[] = [
 // Map of special component labels to their renderers
 const SPECIAL_SECTIONS: Record<string, (config: SectionConfig) => JSX.Element> = {
   "ওয়েব স্টোরি": () => <WebStorySection key="webstory" />,
-  "কালের কন্ঠ": () => <FotoCardSection key="fotocard" />,
+  "বেলাভূমি কণ্ঠ": () => <FotoCardSection key="fotocard" />,
   "বিনোদন": () => <EntertainmentGrid key="entertainment" />,
   "দেশ বাংলা": () => <DeshBangla key="deshbangla" />,
   "লাইফস্টাইল": () => <LifestyleSection key="lifestyle" />,

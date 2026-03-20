@@ -23,7 +23,7 @@ const LAYOUT_OPTIONS = [
   { value: "deshbangla", label: "দেশ বাংলা", icon: Map },
 ];
 
-const SPECIAL_SECTIONS = ["ওয়েব স্টোরি", "কালের কন্ঠ", "বিনোদন", "দেশ বাংলা", "লাইফস্টাইল", "মতামত", "ভিডিও"];
+const SPECIAL_SECTIONS = ["ওয়েব স্টোরি", "বেলাভূমি কণ্ঠ", "বিনোদন", "দেশ বাংলা", "লাইফস্টাইল", "মতামত", "ভিডিও"];
 
 // শীর্ষ সংবাদ is NOT a category — it's a fixed featured section at the top, always visible
 // It shows is_featured articles from ANY category. Not shown in customizer.
@@ -34,7 +34,7 @@ const DEFAULT_SECTIONS: SectionConfig[] = [
   { label: "ওয়েব স্টোরি", count: 9, layout: "webstory", visible: true },
   { label: "রাজনীতি", count: 4, layout: "magazine", visible: true },
   { label: "আন্তর্জাতিক", count: 5, layout: "highlight", visible: true },
-  { label: "কালের কন্ঠ", count: 6, layout: "fotocard", visible: true },
+  { label: "বেলাভূমি কণ্ঠ", count: 6, layout: "fotocard", visible: true },
   { label: "বিনোদন", count: 6, layout: "grid", visible: true },
   { label: "দেশ বাংলা", count: 8, layout: "deshbangla", visible: true },
   { label: "লাইফস্টাইল", count: 6, layout: "highlight", visible: true },

@@ -1275,10 +1275,10 @@ h1,h2,h3,h4,h5,h6 { font-family: 'Noto Sans Bengali', sans-serif; }
           </b:includable>
         </b:widget>
 
-        <!-- কালের কন্ঠ (FotoCard) -->
-        <b:widget id='HTML23' locked='false' title='কালের কন্ঠ' type='HTML' version='2' visible='true'>
+        <!-- বেলাভূমি কণ্ঠ (FotoCard) -->
+        <b:widget id='HTML23' locked='false' title='বেলাভূমি কণ্ঠ' type='HTML' version='2' visible='true'>
           <b:includable id='main'>
-            <div class='section-label' style='margin-top:24px;'><span>কালের কন্ঠ</span></div>
+            <div class='section-label' style='margin-top:24px;'><span>বেলাভূমি কণ্ঠ</span></div>
             <div class='fotocard-scroll' id='fotoCardSection'></div>
             <script>
             //<![CDATA[
@@ -1782,7 +1782,7 @@ function _renderFotoCard(containerId, d) {
     h += '<div class="fc-top"><span class="fc-date">' + dateStr + '</span><span class="fc-quote-icon">❝</span></div>';
     h += '<div class="fc-text line-clamp-5">' + _ge(e, 200) + '</div>';
     h += '<div class="fc-author"><img src="' + ai + '" alt="' + an + '"/><div><h4>' + an + '</h4><p>কলামিস্ট</p></div></div>';
-    h += '<div class="fc-brand"><span>কালের কন্ঠ</span><small>dailyonirbannews24.com</small></div></a>';
+    h += '<div class="fc-brand"><span>বেলাভূমি কণ্ঠ</span><small>belabhuminews.com</small></div></a>';
   });
   document.getElementById(containerId).innerHTML = h;
 }

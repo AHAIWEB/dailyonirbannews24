@@ -219,7 +219,7 @@ export default function QuickPost() {
                 title="এটি ড্র্যাগ করে বুকমার্ক বারে রাখুন"
               >
                 <Send className="w-4 h-4" />
-                📰 বাংলাখবরে পোস্ট
+                📰 বেলাভূমি NEWS-এ পোস্ট
               </a>
               <span className="text-[11px] text-muted-foreground">← ড্র্যাগ করে বুকমার্ক বারে রাখুন</span>
             </div>

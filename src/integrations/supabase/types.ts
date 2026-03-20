@@ -116,11 +116,17 @@ export type Database = {
           fetched_at: string
           id: string
           image_url: string | null
+          is_editor_pick: boolean
           is_featured: boolean
           is_published: boolean
+          is_web_story: boolean
+          location_district: string | null
+          location_division: string | null
+          location_upazila: string | null
           published_at: string | null
           source_name: string | null
           source_url: string
+          sub_category: string | null
           title: string
         }
         Insert: {
@@ -131,11 +137,17 @@ export type Database = {
           fetched_at?: string
           id?: string
           image_url?: string | null
+          is_editor_pick?: boolean
           is_featured?: boolean
           is_published?: boolean
+          is_web_story?: boolean
+          location_district?: string | null
+          location_division?: string | null
+          location_upazila?: string | null
           published_at?: string | null
           source_name?: string | null
           source_url: string
+          sub_category?: string | null
           title: string
         }
         Update: {
@@ -146,11 +158,17 @@ export type Database = {
           fetched_at?: string
           id?: string
           image_url?: string | null
+          is_editor_pick?: boolean
           is_featured?: boolean
           is_published?: boolean
+          is_web_story?: boolean
+          location_district?: string | null
+          location_division?: string | null
+          location_upazila?: string | null
           published_at?: string | null
           source_name?: string | null
           source_url?: string
+          sub_category?: string | null
           title?: string
         }
         Relationships: [

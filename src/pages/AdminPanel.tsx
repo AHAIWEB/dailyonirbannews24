@@ -68,7 +68,7 @@ export default function AdminPanel() {
             <a href="/" className="flex items-center gap-1.5 bg-primary text-primary-foreground px-3 py-1.5 rounded text-xs font-semibold hover:opacity-90 transition-opacity">
               🏠 হোম পেইজ
             </a>
-            <a href="https://dailyonirbannews24.lovable.app" target="_blank" rel="noopener noreferrer"
+            <a href="https://belabhuminews.lovable.app" target="_blank" rel="noopener noreferrer"
               className="flex items-center gap-1.5 bg-secondary text-secondary-foreground px-3 py-1.5 rounded text-xs font-semibold hover:opacity-90 transition-opacity">
               🌐 মূল সাইট
             </a>

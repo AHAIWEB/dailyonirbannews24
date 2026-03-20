@@ -50,7 +50,7 @@ export default function Header() {
         if (data?.value) {
           const sections: SectionConfig[] = JSON.parse(data.value);
           const visible = sections.filter(s => s.visible);
-          const labels = visible.map(s => s.label).filter(l => l !== "শীর্ষ সংবাদ" && l !== "হাইলাইটস" && l !== "ওয়েব স্টোরি" && l !== "কালের কন্ঠ");
+          const labels = visible.map(s => s.label).filter(l => l !== "শীর্ষ সংবাদ" && l !== "হাইলাইটস" && l !== "ওয়েব স্টোরি" && l !== "বেলাভূমি কণ্ঠ");
           if (labels.length > 0) {
             setNavItems(labels);
             // Build subcategory map
