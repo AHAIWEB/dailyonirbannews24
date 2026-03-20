@@ -68,13 +68,25 @@ export default function RssFeedManager() {
   };
 
   const loadCategories = async () => {
-    // Fetch unique categories from articles + feeds
-    const { data: articleCats } = await supabase.from("rss_articles").select("category");
-    const { data: feedCats } = await supabase.from("rss_feeds").select("category");
-    const allCats = new Set(DEFAULT_CATEGORIES);
-    articleCats?.forEach((a: any) => { if (a.category) allCats.add(a.category); });
-    feedCats?.forEach((f: any) => { if (f.category) allCats.add(f.category); });
-    setCategories(Array.from(allCats));
+    // Load categories from admin layout_config (not from RSS data)
+    try {
+      const { data } = await supabase
+        .from("site_settings")
+        .select("value")
+        .eq("key", "layout_config")
+        .maybeSingle();
+      if (data?.value) {
+        const sections = JSON.parse(data.value);
+        if (Array.isArray(sections)) {
+          const labels = sections.map((s: any) => s.label).filter(Boolean);
+          // Merge with defaults, keeping unique
+          const allCats = new Set([...DEFAULT_CATEGORIES, ...labels]);
+          setCategories(Array.from(allCats));
+          return;
+        }
+      }
+    } catch {}
+    setCategories([...DEFAULT_CATEGORIES]);
   };
 
   const addFeed = async () => {
