@@ -21,15 +21,15 @@ export default function Footer() {
           <div>
             <div className="flex items-center gap-2 mb-3">
               <div className="w-10 h-10 rounded bg-primary flex items-center justify-center">
-                <span className="text-primary-foreground font-black text-lg">অ</span>
+                <span className="text-primary-foreground font-black text-lg">বে</span>
               </div>
               <div>
-                <h3 className="text-lg font-black">দৈনিক অনির্বাণ নিউজ ২৪</h3>
-                <p className="text-[10px] text-secondary-foreground/60">স্বাধীন বাংলার স্বাধীন কথা</p>
+                <h3 className="text-lg font-black">বেলাভূমি NEWS</h3>
+                <p className="text-[10px] text-secondary-foreground/60">Belabhumi News</p>
               </div>
             </div>
             <p className="text-xs text-secondary-foreground/70 leading-relaxed">
-              বাংলাদেশের অন্যতম বিশ্বস্ত অনলাইন নিউজ পোর্টাল। সর্বশেষ খবর, বিশ্লেষণ এবং মতামত।
+              বেলাভূমি NEWS — বাংলাদেশের অন্যতম বিশ্বস্ত অনলাইন নিউজ পোর্টাল। সর্বশেষ খবর, বিশ্লেষণ এবং মতামত।
             </p>
           </div>
           {sections.map((sec) => (
