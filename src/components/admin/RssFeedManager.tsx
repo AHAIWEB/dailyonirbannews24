@@ -33,6 +33,7 @@ export default function RssFeedManager() {
   const { user } = useAuth();
   const [feeds, setFeeds] = useState<RssFeed[]>([]);
   const [articles, setArticles] = useState<RssArticle[]>([]);
+  const [categories, setCategories] = useState<string[]>(DEFAULT_CATEGORIES);
   const [loading, setLoading] = useState(true);
   const [fetching, setFetching] = useState(false);
   const [newFeed, setNewFeed] = useState({ name: "", url: "", category: "জাতীয়" });
