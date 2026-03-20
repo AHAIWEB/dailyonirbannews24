@@ -55,23 +55,12 @@ export default function SiteCustomizer() {
   const [newSubcat, setNewSubcat] = useState("");
   const [saving, setSaving] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [dbCategories, setDbCategories] = useState<string[]>([]);
   const [expandedIdx, setExpandedIdx] = useState<number | null>(null);
 
-  // Load config and fetch DB categories
+  // Load config — only from saved config or defaults, NO RSS auto-merge
   useEffect(() => {
     const load = async () => {
       setLoading(true);
-      // Fetch unique categories from rss_articles
-      const { data: catData } = await supabase
-        .from("rss_articles")
-        .select("category")
-        .eq("is_published", true);
-      
-      const uniqueCats = [...new Set((catData || []).map((r: any) => r.category))].filter(Boolean);
-      setDbCategories(uniqueCats as string[]);
-
-      // Load saved config
       try {
         const { data } = await supabase
           .from("site_settings")
@@ -82,12 +71,7 @@ export default function SiteCustomizer() {
         if (data?.value) {
           const parsed = JSON.parse(data.value);
           if (Array.isArray(parsed) && parsed.length > 0) {
-            // Merge DB categories that aren't in saved config
-            const existingLabels = new Set(parsed.map((s: SectionConfig) => s.label));
-            const newFromDb = (uniqueCats as string[])
-              .filter(c => !existingLabels.has(c))
-              .map(c => ({ label: c, count: 4, layout: "grid", visible: true, subcategories: [] }));
-            setSections([...parsed, ...newFromDb]);
+            setSections(parsed);
             setLoading(false);
             return;
           }
@@ -99,22 +83,16 @@ export default function SiteCustomizer() {
         const saved = localStorage.getItem(STORAGE_KEY);
         if (saved) {
           const parsed = JSON.parse(saved);
-          const existingLabels = new Set(parsed.map((s: SectionConfig) => s.label));
-          const newFromDb = (uniqueCats as string[])
-            .filter(c => !existingLabels.has(c))
-            .map(c => ({ label: c, count: 4, layout: "grid", visible: true, subcategories: [] }));
-          setSections([...parsed, ...newFromDb]);
-          setLoading(false);
-          return;
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            setSections(parsed);
+            setLoading(false);
+            return;
+          }
         }
       } catch {}
 
-      // Use defaults + merge DB cats
-      const existingLabels = new Set(DEFAULT_SECTIONS.map(s => s.label));
-      const newFromDb = (uniqueCats as string[])
-        .filter(c => !existingLabels.has(c))
-        .map(c => ({ label: c, count: 4, layout: "grid", visible: true, subcategories: [] }));
-      setSections([...DEFAULT_SECTIONS, ...newFromDb]);
+      // Use defaults only
+      setSections([...DEFAULT_SECTIONS]);
       setLoading(false);
     };
     load();
