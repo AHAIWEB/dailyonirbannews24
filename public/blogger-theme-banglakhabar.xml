@@ -714,9 +714,9 @@ h1,h2,h3,h4,h5,h6 { font-family: 'Noto Sans Bengali', sans-serif; }
   <div class='container flex items-center justify-between'>
     <div class='flex items-center gap-3'>
       <a expr:href='data:blog.homepageUrl'>
-        <div class='logo-sm'>বা</div>
+        <div class='logo-sm'>অ</div>
       </a>
-      <span style='color:#fff;font-weight:700;font-size:14px;'>বাংলাখবর</span>
+      <span style='color:#fff;font-weight:700;font-size:14px;'>দৈনিক অনির্বাণ নিউজ ২৪</span>
     </div>
     <div class='flex items-center gap-2'>
       <button class='mobile-menu-btn' onclick='toggleMobileMenu()' style='color:#fff;font-size:20px;'>☰</button>
