@@ -29,7 +29,7 @@ export default function ShareButtons({ data, generateHtml, selectedLabels }: Sha
       const content50 = paragraphs.slice(0, half).join("\n\n");
 
       const category = selectedLabels[0] || "জাতীয়";
-      const { error } = await supabase.from("rss_articles").insert({
+      const { error } = await supabase.from("rss_articles").upsert({
         title: data.title,
         content: content50,
         image_url: data.image || null,
@@ -38,7 +38,7 @@ export default function ShareButtons({ data, generateHtml, selectedLabels }: Sha
         category,
         is_published: true,
         is_featured: false,
-      } as any);
+      } as any, { onConflict: 'source_url' });
       if (error) throw error;
       toast.success(`"${category}" ক্যাটাগরিতে পোস্ট হয়েছে!`);
     } catch (err: any) {
