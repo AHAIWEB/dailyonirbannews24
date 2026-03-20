@@ -48,6 +48,7 @@ export default function RssFeedManager() {
   useEffect(() => {
     loadFeeds();
     loadArticles();
+    loadCategories();
   }, []);
 
   useEffect(() => {
