@@ -25,8 +25,10 @@ const LAYOUT_OPTIONS = [
 
 const SPECIAL_SECTIONS = ["ওয়েব স্টোরি", "কালের কন্ঠ", "বিনোদন", "দেশ বাংলা", "লাইফস্টাইল", "মতামত", "ভিডিও"];
 
+// শীর্ষ সংবাদ is NOT a category — it's a fixed featured section at the top, always visible
+// It shows is_featured articles from ANY category. Not shown in customizer.
+
 const DEFAULT_SECTIONS: SectionConfig[] = [
-  { label: "শীর্ষ সংবাদ", count: 6, layout: "highlight", visible: true },
   { label: "হাইলাইটস", count: 6, layout: "highlight", visible: true },
   { label: "জাতীয়", count: 8, layout: "grid", visible: true },
   { label: "ওয়েব স্টোরি", count: 9, layout: "webstory", visible: true },

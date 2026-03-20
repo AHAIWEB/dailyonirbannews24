@@ -119,7 +119,9 @@ const Index = () => {
           <main className="lg:col-span-7 space-y-6 order-1 lg:order-2">
             <TopNews />
             <NewsCarousel />
-            {sections.map((sec) => renderSection(sec))}
+            {sections
+              .filter(sec => sec.label !== "শীর্ষ সংবাদ")
+              .map((sec) => renderSection(sec))}
           </main>
 
           {/* Right Sidebar */}
