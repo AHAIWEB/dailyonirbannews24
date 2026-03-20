@@ -67,6 +67,16 @@ export default function RssFeedManager() {
     setArticles((data as any[]) || []);
   };
 
+  const loadCategories = async () => {
+    // Fetch unique categories from articles + feeds
+    const { data: articleCats } = await supabase.from("rss_articles").select("category");
+    const { data: feedCats } = await supabase.from("rss_feeds").select("category");
+    const allCats = new Set(DEFAULT_CATEGORIES);
+    articleCats?.forEach((a: any) => { if (a.category) allCats.add(a.category); });
+    feedCats?.forEach((f: any) => { if (f.category) allCats.add(f.category); });
+    setCategories(Array.from(allCats));
+  };
+
   const addFeed = async () => {
     if (!newFeed.name || !newFeed.url) { toast.error("নাম ও URL দিন"); return; }
     const { error } = await supabase.from("rss_feeds").insert({ name: newFeed.name, url: newFeed.url, category: newFeed.category, created_by: user?.id } as any);
