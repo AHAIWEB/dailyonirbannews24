@@ -158,13 +158,13 @@ export default function Header() {
           <div className="container mx-auto flex items-center justify-between py-3 md:py-4">
             <Link to="/" className="flex items-center gap-2 md:gap-3">
               <div className="w-10 h-10 md:w-12 md:h-12 rounded-lg bg-primary flex items-center justify-center">
-                <span className="text-primary-foreground font-black text-lg md:text-xl">বা</span>
+                <span className="text-primary-foreground font-black text-lg md:text-xl">অ</span>
               </div>
               <div>
                 <h1 className="text-xl md:text-3xl font-black text-foreground leading-tight">
-                  বাংলা<span className="text-primary">খবর</span>
+                  দৈনিক অনির্বাণ <span className="text-primary">নিউজ ২৪</span>
                 </h1>
-                <p className="text-[8px] md:text-[10px] text-muted-foreground tracking-widest">সত্যের সন্ধানে নিরন্তর</p>
+                <p className="text-[8px] md:text-[10px] text-muted-foreground tracking-widest">স্বাধীন বাংলার স্বাধীন কথা</p>
               </div>
             </Link>
 
@@ -307,9 +307,9 @@ export default function Header() {
             <div className="flex items-center gap-3">
               <Link to="/" className="flex items-center gap-2 py-2">
                 <div className="w-8 h-8 rounded bg-primary-foreground/20 flex items-center justify-center">
-                  <span className="text-primary-foreground font-black text-sm">বা</span>
+                  <span className="text-primary-foreground font-black text-sm">অ</span>
                 </div>
-                <span className="text-primary-foreground font-bold text-sm hidden sm:inline">বাংলাখবর</span>
+                <span className="text-primary-foreground font-bold text-sm hidden sm:inline">দৈনিক অনির্বাণ নিউজ ২৪</span>
               </Link>
               <div className="hidden lg:flex items-stretch">
                 {navItems.slice(0, 8).map((item) => (

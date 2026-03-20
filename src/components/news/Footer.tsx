@@ -21,11 +21,11 @@ export default function Footer() {
           <div>
             <div className="flex items-center gap-2 mb-3">
               <div className="w-10 h-10 rounded bg-primary flex items-center justify-center">
-                <span className="text-primary-foreground font-black text-lg">বা</span>
+                <span className="text-primary-foreground font-black text-lg">অ</span>
               </div>
               <div>
-                <h3 className="text-lg font-black">বাংলাখবর</h3>
-                <p className="text-[10px] text-secondary-foreground/60">সত্যের সন্ধানে নিরন্তর</p>
+                <h3 className="text-lg font-black">দৈনিক অনির্বাণ নিউজ ২৪</h3>
+                <p className="text-[10px] text-secondary-foreground/60">স্বাধীন বাংলার স্বাধীন কথা</p>
               </div>
             </div>
             <p className="text-xs text-secondary-foreground/70 leading-relaxed">
@@ -48,7 +48,7 @@ export default function Footer() {
           ))}
         </div>
         <div className="border-t border-secondary-foreground/20 mt-6 pt-4 text-center text-[10px] text-secondary-foreground/50">
-          © ২০২৬ বাংলাখবর। সর্বস্বত্ব সংরক্ষিত।
+          © ২০২৬ দৈনিক অনির্বাণ নিউজ ২৪। সর্বস্বত্ব সংরক্ষিত।
         </div>
       </div>
     </footer>

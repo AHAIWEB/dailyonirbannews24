@@ -55,23 +55,12 @@ export default function SiteCustomizer() {
   const [newSubcat, setNewSubcat] = useState("");
   const [saving, setSaving] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [dbCategories, setDbCategories] = useState<string[]>([]);
   const [expandedIdx, setExpandedIdx] = useState<number | null>(null);
 
-  // Load config and fetch DB categories
+  // Load config — only from saved config or defaults, NO RSS auto-merge
   useEffect(() => {
     const load = async () => {
       setLoading(true);
-      // Fetch unique categories from rss_articles
-      const { data: catData } = await supabase
-        .from("rss_articles")
-        .select("category")
-        .eq("is_published", true);
-      
-      const uniqueCats = [...new Set((catData || []).map((r: any) => r.category))].filter(Boolean);
-      setDbCategories(uniqueCats as string[]);
-
-      // Load saved config
       try {
         const { data } = await supabase
           .from("site_settings")
@@ -82,12 +71,7 @@ export default function SiteCustomizer() {
         if (data?.value) {
           const parsed = JSON.parse(data.value);
           if (Array.isArray(parsed) && parsed.length > 0) {
-            // Merge DB categories that aren't in saved config
-            const existingLabels = new Set(parsed.map((s: SectionConfig) => s.label));
-            const newFromDb = (uniqueCats as string[])
-              .filter(c => !existingLabels.has(c))
-              .map(c => ({ label: c, count: 4, layout: "grid", visible: true, subcategories: [] }));
-            setSections([...parsed, ...newFromDb]);
+            setSections(parsed);
             setLoading(false);
             return;
           }
@@ -99,22 +83,16 @@ export default function SiteCustomizer() {
         const saved = localStorage.getItem(STORAGE_KEY);
         if (saved) {
           const parsed = JSON.parse(saved);
-          const existingLabels = new Set(parsed.map((s: SectionConfig) => s.label));
-          const newFromDb = (uniqueCats as string[])
-            .filter(c => !existingLabels.has(c))
-            .map(c => ({ label: c, count: 4, layout: "grid", visible: true, subcategories: [] }));
-          setSections([...parsed, ...newFromDb]);
-          setLoading(false);
-          return;
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            setSections(parsed);
+            setLoading(false);
+            return;
+          }
         }
       } catch {}
 
-      // Use defaults + merge DB cats
-      const existingLabels = new Set(DEFAULT_SECTIONS.map(s => s.label));
-      const newFromDb = (uniqueCats as string[])
-        .filter(c => !existingLabels.has(c))
-        .map(c => ({ label: c, count: 4, layout: "grid", visible: true, subcategories: [] }));
-      setSections([...DEFAULT_SECTIONS, ...newFromDb]);
+      // Use defaults only
+      setSections([...DEFAULT_SECTIONS]);
       setLoading(false);
     };
     load();
@@ -178,11 +156,7 @@ export default function SiteCustomizer() {
   };
 
   const resetToDefault = () => {
-    const existingLabels = new Set(DEFAULT_SECTIONS.map(s => s.label));
-    const newFromDb = dbCategories
-      .filter(c => !existingLabels.has(c))
-      .map(c => ({ label: c, count: 4, layout: "grid", visible: true, subcategories: [] }));
-    setSections([...DEFAULT_SECTIONS, ...newFromDb]);
+    setSections([...DEFAULT_SECTIONS]);
     localStorage.removeItem(STORAGE_KEY);
     toast.success("ডিফল্ট লেআউট পুনরুদ্ধার হয়েছে");
   };
@@ -360,37 +334,6 @@ export default function SiteCustomizer() {
               <Plus className="w-3 h-3 mr-1" /> যোগ
             </Button>
           </div>
-
-          {/* DB Categories hint */}
-          {dbCategories.length > 0 && (
-            <div className="pt-2">
-              <p className="text-[10px] text-muted-foreground mb-1">ডাটাবেজে পাওয়া ক্যাটাগরি:</p>
-              <div className="flex flex-wrap gap-1">
-                {dbCategories.map(cat => {
-                  const exists = sections.some(s => s.label === cat);
-                  return (
-                    <button
-                      key={cat}
-                      onClick={() => {
-                        if (!exists) {
-                          setSections(prev => [...prev, { label: cat, count: 4, layout: "grid", visible: true, subcategories: [] }]);
-                          toast.success(`"${cat}" যোগ হয়েছে`);
-                        }
-                      }}
-                      disabled={exists}
-                      className={`px-2 py-0.5 rounded-full text-[10px] border transition-colors ${
-                        exists
-                          ? "bg-primary/10 text-primary border-primary/20 cursor-default"
-                          : "bg-muted text-muted-foreground border-border hover:border-primary hover:text-primary cursor-pointer"
-                      }`}
-                    >
-                      {exists ? "✓ " : "+ "}{cat}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-          )}
         </CardContent>
       </Card>
     </div>
