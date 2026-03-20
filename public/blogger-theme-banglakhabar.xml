@@ -795,10 +795,10 @@ h1,h2,h3,h4,h5,h6 { font-family: 'Noto Sans Bengali', sans-serif; }
         <div class='header-logo'>
           <div class='container flex items-center justify-between'>
             <a class='flex items-center gap-3' expr:href='data:blog.homepageUrl'>
-              <div class='logo-icon'>অ</div>
+              <div class='logo-icon'>বে</div>
               <div class='logo-text'>
-                <h1>দৈনিক অনির্বাণ <span>নিউজ ২৪</span></h1>
-                <p>স্বাধীন বাংলার স্বাধীন কথা</p>
+                <h1>বেলাভূমি <span>NEWS</span></h1>
+                <p>Belabhumi News</p>
               </div>
             </a>
             <div class='ad-banner'>বিজ্ঞাপন — ৪৬৮×৬০</div>
