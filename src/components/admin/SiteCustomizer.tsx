@@ -23,7 +23,7 @@ const LAYOUT_OPTIONS = [
   { value: "deshbangla", label: "দেশ বাংলা", icon: Map },
 ];
 
-const SPECIAL_SECTIONS = ["ওয়েব স্টোরি", "কালের কন্ঠ", "বিনোদন", "দেশ বাংলা", "লাইফস্টাইল", "মতামত", "ভিডিও"];
+const SPECIAL_SECTIONS = ["ওয়েব স্টোরি", "বেলাভূমি কণ্ঠ", "বিনোদন", "দেশ বাংলা", "লাইফস্টাইল", "মতামত", "ভিডিও"];
 
 // শীর্ষ সংবাদ is NOT a category — it's a fixed featured section at the top, always visible
 // It shows is_featured articles from ANY category. Not shown in customizer.
