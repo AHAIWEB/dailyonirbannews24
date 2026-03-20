@@ -79,16 +79,17 @@ export default function PostManager() {
       const half = Math.ceil(halfContent.length / 2);
       const content50 = halfContent.slice(0, half).join("\n\n");
 
-      const { error } = await supabase.from("rss_articles").insert({
+      const finalSourceUrl = sourceUrl || url || `${window.location.origin}/post/manual-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+      const { error } = await supabase.from("rss_articles").upsert({
         title: title.trim(),
         content: content50 || null,
         image_url: imageUrl || null,
-        source_url: sourceUrl || url || window.location.origin,
+        source_url: finalSourceUrl,
         source_name: fetched?.siteName || location || "Manual Post",
         category,
         is_published: true,
         is_featured: false,
-      } as any);
+      } as any, { onConflict: 'source_url' });
       if (error) throw error;
       toast.success(`"${category}" ক্যাটাগরিতে পোস্ট হয়েছে!`);
       // Reset
