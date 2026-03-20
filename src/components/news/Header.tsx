@@ -94,7 +94,7 @@ export default function Header() {
         {/* Top bar */}
         <div className="bg-secondary text-secondary-foreground hidden md:block">
           <div className="container mx-auto flex items-center justify-between py-1 text-xs">
-            <span>📧 info@banglakhabar.com | ☎ +৮৮০-১৭০০-০০০০০০</span>
+            <span>📧 info@belabhuminews.com | ☎ +৮৮০-১৭০০-০০০০০০</span>
             <div className="flex items-center gap-3">
               {!loading && !user ? (
                 <>
@@ -158,13 +158,13 @@ export default function Header() {
           <div className="container mx-auto flex items-center justify-between py-3 md:py-4">
             <Link to="/" className="flex items-center gap-2 md:gap-3">
               <div className="w-10 h-10 md:w-12 md:h-12 rounded-lg bg-primary flex items-center justify-center">
-                <span className="text-primary-foreground font-black text-lg md:text-xl">অ</span>
+                <span className="text-primary-foreground font-black text-lg md:text-xl">বে</span>
               </div>
               <div>
                 <h1 className="text-xl md:text-3xl font-black text-foreground leading-tight">
-                  দৈনিক অনির্বাণ <span className="text-primary">নিউজ ২৪</span>
+                  বেলাভূমি <span className="text-primary">NEWS</span>
                 </h1>
-                <p className="text-[8px] md:text-[10px] text-muted-foreground tracking-widest">স্বাধীন বাংলার স্বাধীন কথা</p>
+                <p className="text-[8px] md:text-[10px] text-muted-foreground tracking-widest">Belabhumi News</p>
               </div>
             </Link>
 
@@ -307,9 +307,9 @@ export default function Header() {
             <div className="flex items-center gap-3">
               <Link to="/" className="flex items-center gap-2 py-2">
                 <div className="w-8 h-8 rounded bg-primary-foreground/20 flex items-center justify-center">
-                  <span className="text-primary-foreground font-black text-sm">অ</span>
+                  <span className="text-primary-foreground font-black text-sm">বে</span>
                 </div>
-                <span className="text-primary-foreground font-bold text-sm hidden sm:inline">দৈনিক অনির্বাণ নিউজ ২৪</span>
+                <span className="text-primary-foreground font-bold text-sm hidden sm:inline">বেলাভূমি NEWS</span>
               </Link>
               <div className="hidden lg:flex items-stretch">
                 {navItems.slice(0, 8).map((item) => (

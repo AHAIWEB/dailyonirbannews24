@@ -714,9 +714,9 @@ h1,h2,h3,h4,h5,h6 { font-family: 'Noto Sans Bengali', sans-serif; }
   <div class='container flex items-center justify-between'>
     <div class='flex items-center gap-3'>
       <a expr:href='data:blog.homepageUrl'>
-        <div class='logo-sm'>অ</div>
+        <div class='logo-sm'>বে</div>
       </a>
-      <span style='color:#fff;font-weight:700;font-size:14px;'>দৈনিক অনির্বাণ নিউজ ২৪</span>
+      <span style='color:#fff;font-weight:700;font-size:14px;'>বেলাভূমি NEWS</span>
     </div>
     <div class='flex items-center gap-2'>
       <button class='mobile-menu-btn' onclick='toggleMobileMenu()' style='color:#fff;font-size:20px;'>☰</button>
@@ -795,10 +795,10 @@ h1,h2,h3,h4,h5,h6 { font-family: 'Noto Sans Bengali', sans-serif; }
         <div class='header-logo'>
           <div class='container flex items-center justify-between'>
             <a class='flex items-center gap-3' expr:href='data:blog.homepageUrl'>
-              <div class='logo-icon'>অ</div>
+              <div class='logo-icon'>বে</div>
               <div class='logo-text'>
-                <h1>দৈনিক অনির্বাণ <span>নিউজ ২৪</span></h1>
-                <p>স্বাধীন বাংলার স্বাধীন কথা</p>
+                <h1>বেলাভূমি <span>NEWS</span></h1>
+                <p>Belabhumi News</p>
               </div>
             </a>
             <div class='ad-banner'>বিজ্ঞাপন — ৪৬৮×৬০</div>
@@ -1526,7 +1526,7 @@ h1,h2,h3,h4,h5,h6 { font-family: 'Noto Sans Bengali', sans-serif; }
           <div class='footer-grid'>
             <div>
               <h3>আমাদের সম্পর্কে</h3>
-              <p style='font-size:12px;color:rgba(255,255,255,.6);line-height:1.8;'>দৈনিক অনির্বাণ নিউজ ২৪ একটি নির্ভরযোগ্য সংবাদ মাধ্যম। সত্য ও নিরপেক্ষ সংবাদ পরিবেশনই আমাদের লক্ষ্য।</p>
+              <p style='font-size:12px;color:rgba(255,255,255,.6);line-height:1.8;'>বেলাভূমি NEWS একটি নির্ভরযোগ্য সংবাদ মাধ্যম। সত্য ও নিরপেক্ষ সংবাদ পরিবেশনই আমাদের লক্ষ্য।</p>
             </div>
             <div>
               <h3>বিভাগসমূহ</h3>
@@ -1554,7 +1554,7 @@ h1,h2,h3,h4,h5,h6 { font-family: 'Noto Sans Bengali', sans-serif; }
             </div>
           </div>
           <div class='footer-bottom'>
-            © ২০২৬ দৈনিক অনির্বাণ নিউজ ২৪। সর্বস্বত্ব সংরক্ষিত।
+            © ২০২৬ বেলাভূমি NEWS। সর্বস্বত্ব সংরক্ষিত।
           </div>
         </div>
       </div>
