@@ -58,8 +58,8 @@ export default function ReporterRegister() {
         const path = `${user.id}/${reporterId}.${ext}`;
         const { error: uploadErr } = await supabase.storage.from("reporter-photos").upload(path, photoFile, { upsert: true });
         if (uploadErr) throw uploadErr;
-        const { data: urlData } = supabase.storage.from("reporter-photos").getPublicUrl(path);
-        photoUrl = urlData.publicUrl;
+        // Store the path for signed URL generation later
+        photoUrl = path;
       }
 
       const { error: insertErr } = await supabase.from("reporters").insert({

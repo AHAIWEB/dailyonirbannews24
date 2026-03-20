@@ -1,5 +1,6 @@
 import { useEffect, useState, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { getReporterPhotoUrl } from "@/lib/storageUtils";
 import { useAuth } from "@/hooks/useAuth";
 import Header from "@/components/news/Header";
 import Footer from "@/components/news/Footer";
@@ -28,6 +29,7 @@ export default function ReporterIdCard() {
   const { user } = useAuth();
   const [reporter, setReporter] = useState<Reporter | null>(null);
   const [loading, setLoading] = useState(true);
+  const [photoSignedUrl, setPhotoSignedUrl] = useState("");
   const cardRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -37,8 +39,12 @@ export default function ReporterIdCard() {
       .select("*")
       .eq("user_id", user.id)
       .maybeSingle()
-      .then(({ data }) => {
+      .then(async ({ data }) => {
         setReporter(data as Reporter | null);
+        if (data?.photo_url) {
+          const url = await getReporterPhotoUrl(data.photo_url);
+          setPhotoSignedUrl(url);
+        }
         setLoading(false);
       });
   }, [user]);
@@ -117,8 +123,8 @@ export default function ReporterIdCard() {
                 {/* Photo */}
                 <div className="shrink-0">
                   <div className="w-28 h-32 rounded-lg overflow-hidden border-2 border-primary/30 bg-muted">
-                    {reporter.photo_url ? (
-                      <img src={reporter.photo_url} alt={reporter.full_name} className="w-full h-full object-cover" />
+                    {photoSignedUrl ? (
+                      <img src={photoSignedUrl} alt={reporter.full_name} className="w-full h-full object-cover" />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center text-muted-foreground text-xs">ছবি নেই</div>
                     )}
