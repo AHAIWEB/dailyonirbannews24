@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
+import { getReporterPhotoUrl } from "@/lib/storageUtils";
 import { useAuth } from "@/hooks/useAuth";
 import Header from "@/components/news/Header";
 import Footer from "@/components/news/Footer";
@@ -115,6 +116,7 @@ export default function AdminPanel() {
 /* ==================== REPORTER MANAGEMENT ==================== */
 function ReporterManagement() {
   const [reporters, setReporters] = useState<ReporterRow[]>([]);
+  const [photoUrls, setPhotoUrls] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<"pending" | "approved" | "all">("pending");
 
@@ -126,7 +128,16 @@ function ReporterManagement() {
     if (filter === "pending") query = query.eq("status", "pending");
     else if (filter === "approved") query = query.eq("status", "approved");
     const { data } = await query;
-    setReporters((data as ReporterRow[]) || []);
+    const rows = (data as ReporterRow[]) || [];
+    setReporters(rows);
+    // Resolve signed URLs for photos
+    const urls: Record<string, string> = {};
+    await Promise.all(rows.map(async (r) => {
+      if (r.photo_url) {
+        urls[r.id] = await getReporterPhotoUrl(r.photo_url);
+      }
+    }));
+    setPhotoUrls(urls);
     setLoading(false);
   };
 
@@ -161,7 +172,7 @@ function ReporterManagement() {
             {reporters.map((r) => (
               <div key={r.id} className="flex flex-col sm:flex-row items-start sm:items-center gap-3 p-3 bg-muted rounded-lg">
                 <div className="w-10 h-10 rounded-full overflow-hidden bg-border shrink-0">
-                  {r.photo_url ? <img src={r.photo_url} className="w-full h-full object-cover" alt={r.full_name} /> : <Users className="w-full h-full p-2 text-muted-foreground" />}
+                  {photoUrls[r.id] ? <img src={photoUrls[r.id]} className="w-full h-full object-cover" alt={r.full_name} /> : <Users className="w-full h-full p-2 text-muted-foreground" />}
                 </div>
                 <div className="flex-1 min-w-0">
                   <h3 className="font-bold text-sm text-foreground">{r.full_name}</h3>
