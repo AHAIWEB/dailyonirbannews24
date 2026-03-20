@@ -94,7 +94,7 @@ export default function Header() {
         {/* Top bar */}
         <div className="bg-secondary text-secondary-foreground hidden md:block">
           <div className="container mx-auto flex items-center justify-between py-1 text-xs">
-            <span>📧 info@banglakhabar.com | ☎ +৮৮০-১৭০০-০০০০০০</span>
+            <span>📧 info@belabhuminews.com | ☎ +৮৮০-১৭০০-০০০০০০</span>
             <div className="flex items-center gap-3">
               {!loading && !user ? (
                 <>
