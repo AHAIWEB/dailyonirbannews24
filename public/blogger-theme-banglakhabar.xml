@@ -1080,16 +1080,16 @@ h1,h2,h3,h4,h5,h6 { font-family: 'Noto Sans Bengali', sans-serif; }
       <!-- HOME PAGE LABEL SECTIONS (each as separate widget) -->
       <b:section class='home-sections' id='home-sections' showaddelement='yes'>
 
-        <!-- শীর্ষ সংবাদ -->
+        <!-- শীর্ষ সংবাদ — ফিচার্ড পোস্ট (সব ক্যাটাগরি থেকে সর্বশেষ) -->
         <b:widget id='HTML5' locked='false' title='শীর্ষ সংবাদ' type='HTML' version='2' visible='true'>
           <b:includable id='main'>
-            <div class='section-label'><span>শীর্ষ সংবাদ</span><a class='more' href='/search/label/শীর্ষ সংবাদ'>আরও ❯</a></div>
+            <div class='section-label'><span>শীর্ষ সংবাদ</span></div>
             <div id='topNewsSection'></div>
             <script>
             //<![CDATA[
             (function(){
               var s=document.createElement('script');
-              s.src='/feeds/posts/default/-/শীর্ষ সংবাদ?alt=json-in-script&max-results=3&callback=_bkTopNews';
+              s.src='/feeds/posts/default?alt=json-in-script&amp;max-results=6&amp;callback=_bkTopNews';
               document.body.appendChild(s);
             })();
             function _bkTopNews(d){
@@ -1097,20 +1097,38 @@ h1,h2,h3,h4,h5,h6 { font-family: 'Noto Sans Bengali', sans-serif; }
               var entries=d.feed.entry;
               var h='<div class="grid-top">';
               var e=entries[0];
-              h+='<a href="'+_gu(e)+'" class="card post-card top-main" style="display:block;">';
+              var cat=e.category?e.category[0].term:'';
+              h+='<a href="'+_gu(e)+'" class="card post-card top-main" style="display:block;position:relative;overflow:hidden;">';
               h+='<div class="overflow-hidden aspect-video"><img class="post-img" src="'+_gi(e)+'" alt="'+e.title.$t+'" style="width:100%;height:100%;object-fit:cover;"/></div>';
-              h+='<div style="padding:16px;"><span class="post-label">শীর্ষ সংবাদ</span>';
-              h+='<h2>'+e.title.$t+'</h2>';
-              h+='<p style="font-size:13px;color:var(--muted-fg);margin-top:8px;" class="line-clamp-2">'+_ge(e,120)+'</p>';
+              h+='<div style="position:absolute;bottom:0;left:0;right:0;padding:16px;background:linear-gradient(transparent,rgba(0,0,0,0.85));">';
+              h+='<span class="post-label">'+cat+'</span>';
+              h+='<h2 style="color:#fff;margin-top:8px;">'+e.title.$t+'</h2>';
+              h+='<p style="font-size:12px;color:rgba(255,255,255,0.7);margin-top:6px;" class="line-clamp-2">'+_ge(e,120)+'</p>';
               h+='</div></a>';
               h+='<div>';
               for(var i=1;i<Math.min(entries.length,3);i++){
                 var s=entries[i];
-                h+='<a href="'+_gu(s)+'" class="card post-card top-side" style="display:block;margin-bottom:16px;">';
+                var sc=s.category?s.category[0].term:'';
+                h+='<a href="'+_gu(s)+'" class="card post-card top-side" style="display:block;margin-bottom:12px;position:relative;overflow:hidden;">';
                 h+='<div class="overflow-hidden aspect-video"><img class="post-img" src="'+_gi(s)+'" alt="'+s.title.$t+'" style="width:100%;height:100%;object-fit:cover;"/></div>';
-                h+='<div style="padding:12px;"><h3 class="line-clamp-2">'+s.title.$t+'</h3></div></a>';
+                h+='<div style="position:absolute;bottom:0;left:0;right:0;padding:10px;background:linear-gradient(transparent,rgba(0,0,0,0.75));">';
+                h+='<span style="font-size:9px;background:var(--primary);color:#fff;padding:2px 6px;border-radius:3px;">'+sc+'</span>';
+                h+='<h3 class="line-clamp-2" style="color:#fff;margin-top:6px;font-size:13px;">'+s.title.$t+'</h3></div></a>';
               }
               h+='</div></div>';
+              // Bottom row
+              if(entries.length>3){
+                h+='<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:10px;">';
+                for(var j=3;j<Math.min(entries.length,6);j++){
+                  var b=entries[j];
+                  var bc=b.category?b.category[0].term:'';
+                  h+='<a href="'+_gu(b)+'" class="card post-card" style="display:block;position:relative;overflow:hidden;border-radius:var(--radius);">';
+                  h+='<div class="aspect-video"><img src="'+_gi(b)+'" alt="'+b.title.$t+'" style="width:100%;height:100%;object-fit:cover;"/></div>';
+                  h+='<div style="position:absolute;bottom:0;left:0;right:0;padding:8px;background:linear-gradient(transparent,rgba(0,0,0,0.8));">';
+                  h+='<h4 class="line-clamp-2" style="color:#fff;font-size:11px;">'+b.title.$t+'</h4></div></a>';
+                }
+                h+='</div>';
+              }
               document.getElementById('topNewsSection').innerHTML=h;
             }
             //]]>
