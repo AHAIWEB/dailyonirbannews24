@@ -48,7 +48,7 @@ export default function Footer() {
           ))}
         </div>
         <div className="border-t border-secondary-foreground/20 mt-6 pt-4 text-center text-[10px] text-secondary-foreground/50">
-          © ২০২৬ দৈনিক অনির্বাণ নিউজ ২৪। সর্বস্বত্ব সংরক্ষিত।
+          © ২০২৬ বেলাভূমি NEWS। সর্বস্বত্ব সংরক্ষিত।
         </div>
       </div>
     </footer>
