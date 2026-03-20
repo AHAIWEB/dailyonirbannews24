@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Save, Plus, Trash2, Eye, EyeOff, ArrowUp, ArrowDown } from "lucide-react";
+import { Save, Plus, Trash2, Eye, EyeOff, ArrowUp, ArrowDown, RefreshCw, LayoutGrid, List, Columns, Image, Map, Tv, FolderTree, ChevronDown, ChevronRight, GripVertical } from "lucide-react";
 import { toast } from "sonner";
 
 interface SectionConfig {
@@ -10,13 +10,27 @@ interface SectionConfig {
   count: number;
   layout: string;
   visible: boolean;
+  subcategories?: string[];
 }
 
+const LAYOUT_OPTIONS = [
+  { value: "list", label: "লিস্ট", icon: List },
+  { value: "grid", label: "গ্রিড", icon: LayoutGrid },
+  { value: "highlight", label: "হাইলাইট", icon: Columns },
+  { value: "magazine", label: "ম্যাগাজিন", icon: Image },
+  { value: "webstory", label: "ওয়েব স্টোরি", icon: Tv },
+  { value: "fotocard", label: "ফটো কার্ড", icon: Image },
+  { value: "deshbangla", label: "দেশ বাংলা", icon: Map },
+];
+
+const SPECIAL_SECTIONS = ["ওয়েব স্টোরি", "কালের কন্ঠ", "বিনোদন", "দেশ বাংলা", "লাইফস্টাইল", "মতামত", "ভিডিও"];
+
 const DEFAULT_SECTIONS: SectionConfig[] = [
+  { label: "শীর্ষ সংবাদ", count: 6, layout: "highlight", visible: true },
   { label: "হাইলাইটস", count: 6, layout: "highlight", visible: true },
   { label: "জাতীয়", count: 8, layout: "grid", visible: true },
   { label: "ওয়েব স্টোরি", count: 9, layout: "webstory", visible: true },
-  { label: "রাজনীতি", count: 4, layout: "list", visible: true },
+  { label: "রাজনীতি", count: 4, layout: "magazine", visible: true },
   { label: "আন্তর্জাতিক", count: 5, layout: "highlight", visible: true },
   { label: "কালের কন্ঠ", count: 6, layout: "fotocard", visible: true },
   { label: "বিনোদন", count: 6, layout: "grid", visible: true },
@@ -25,26 +39,88 @@ const DEFAULT_SECTIONS: SectionConfig[] = [
   { label: "স্বাস্থ্যসেবা", count: 5, layout: "list", visible: true },
   { label: "মতামত", count: 4, layout: "grid", visible: true },
   { label: "ভিডিও", count: 4, layout: "grid", visible: true },
+  { label: "অর্থনীতি", count: 4, layout: "grid", visible: true },
+  { label: "খেলাধুলা", count: 4, layout: "grid", visible: true },
+  { label: "প্রযুক্তি", count: 4, layout: "list", visible: true },
+  { label: "শিক্ষা", count: 4, layout: "list", visible: true },
 ];
 
 const STORAGE_KEY = "site-layout-config";
 
 export default function SiteCustomizer() {
-  const [sections, setSections] = useState<SectionConfig[]>(() => {
-    try {
-      const saved = localStorage.getItem(STORAGE_KEY);
-      return saved ? JSON.parse(saved) : DEFAULT_SECTIONS;
-    } catch {
-      return DEFAULT_SECTIONS;
-    }
-  });
+  const [sections, setSections] = useState<SectionConfig[]>(DEFAULT_SECTIONS);
   const [newLabel, setNewLabel] = useState("");
+  const [newSubcat, setNewSubcat] = useState("");
   const [saving, setSaving] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [dbCategories, setDbCategories] = useState<string[]>([]);
+  const [expandedIdx, setExpandedIdx] = useState<number | null>(null);
+
+  // Load config and fetch DB categories
+  useEffect(() => {
+    const load = async () => {
+      setLoading(true);
+      // Fetch unique categories from rss_articles
+      const { data: catData } = await supabase
+        .from("rss_articles")
+        .select("category")
+        .eq("is_published", true);
+      
+      const uniqueCats = [...new Set((catData || []).map((r: any) => r.category))].filter(Boolean);
+      setDbCategories(uniqueCats as string[]);
+
+      // Load saved config
+      try {
+        const { data } = await supabase
+          .from("site_settings")
+          .select("value")
+          .eq("key", "layout_config")
+          .maybeSingle();
+        
+        if (data?.value) {
+          const parsed = JSON.parse(data.value);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            // Merge DB categories that aren't in saved config
+            const existingLabels = new Set(parsed.map((s: SectionConfig) => s.label));
+            const newFromDb = (uniqueCats as string[])
+              .filter(c => !existingLabels.has(c))
+              .map(c => ({ label: c, count: 4, layout: "grid", visible: true, subcategories: [] }));
+            setSections([...parsed, ...newFromDb]);
+            setLoading(false);
+            return;
+          }
+        }
+      } catch {}
+
+      // Try localStorage fallback
+      try {
+        const saved = localStorage.getItem(STORAGE_KEY);
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          const existingLabels = new Set(parsed.map((s: SectionConfig) => s.label));
+          const newFromDb = (uniqueCats as string[])
+            .filter(c => !existingLabels.has(c))
+            .map(c => ({ label: c, count: 4, layout: "grid", visible: true, subcategories: [] }));
+          setSections([...parsed, ...newFromDb]);
+          setLoading(false);
+          return;
+        }
+      } catch {}
+
+      // Use defaults + merge DB cats
+      const existingLabels = new Set(DEFAULT_SECTIONS.map(s => s.label));
+      const newFromDb = (uniqueCats as string[])
+        .filter(c => !existingLabels.has(c))
+        .map(c => ({ label: c, count: 4, layout: "grid", visible: true, subcategories: [] }));
+      setSections([...DEFAULT_SECTIONS, ...newFromDb]);
+      setLoading(false);
+    };
+    load();
+  }, []);
 
   const saveConfig = async () => {
     setSaving(true);
     localStorage.setItem(STORAGE_KEY, JSON.stringify(sections));
-    // Also save to site_settings for persistence
     try {
       await supabase.from("site_settings").upsert({
         key: "layout_config",
@@ -76,81 +152,245 @@ export default function SiteCustomizer() {
 
   const addSection = () => {
     if (!newLabel.trim()) return;
-    setSections(prev => [...prev, { label: newLabel.trim(), count: 4, layout: "list", visible: true }]);
+    if (sections.some(s => s.label === newLabel.trim())) {
+      toast.error("এই ক্যাটাগরি আগে থেকেই আছে");
+      return;
+    }
+    setSections(prev => [...prev, { label: newLabel.trim(), count: 4, layout: "grid", visible: true, subcategories: [] }]);
     setNewLabel("");
+    toast.success(`"${newLabel.trim()}" ক্যাটাগরি যোগ হয়েছে`);
+  };
+
+  const addSubcategory = (idx: number) => {
+    if (!newSubcat.trim()) return;
+    const sec = sections[idx];
+    const subs = sec.subcategories || [];
+    if (subs.includes(newSubcat.trim())) return;
+    updateSection(idx, { subcategories: [...subs, newSubcat.trim()] });
+    setNewSubcat("");
+  };
+
+  const removeSubcategory = (idx: number, sub: string) => {
+    const sec = sections[idx];
+    updateSection(idx, { subcategories: (sec.subcategories || []).filter(s => s !== sub) });
   };
 
   const resetToDefault = () => {
-    setSections(DEFAULT_SECTIONS);
+    const existingLabels = new Set(DEFAULT_SECTIONS.map(s => s.label));
+    const newFromDb = dbCategories
+      .filter(c => !existingLabels.has(c))
+      .map(c => ({ label: c, count: 4, layout: "grid", visible: true, subcategories: [] }));
+    setSections([...DEFAULT_SECTIONS, ...newFromDb]);
     localStorage.removeItem(STORAGE_KEY);
     toast.success("ডিফল্ট লেআউট পুনরুদ্ধার হয়েছে");
   };
 
+  const getLayoutIcon = (layout: string) => {
+    const opt = LAYOUT_OPTIONS.find(o => o.value === layout);
+    return opt ? opt.icon : LayoutGrid;
+  };
+
+  if (loading) {
+    return (
+      <Card>
+        <CardContent className="py-8 text-center text-muted-foreground text-sm">
+          লোড হচ্ছে...
+        </CardContent>
+      </Card>
+    );
+  }
+
   return (
-    <Card>
-      <CardHeader className="pb-3">
-        <div className="flex items-center justify-between flex-wrap gap-2">
-          <CardTitle className="text-base">সাইট কাস্টমাইজ — লেআউট</CardTitle>
-          <div className="flex gap-2">
-            <Button size="sm" variant="outline" onClick={resetToDefault} className="text-xs">ডিফল্ট</Button>
-            <Button size="sm" onClick={saveConfig} disabled={saving} className="text-xs">
-              <Save className="w-3 h-3 mr-1" /> {saving ? "সেভ হচ্ছে..." : "সেভ"}
+    <div className="space-y-4">
+      {/* Main Layout Customizer */}
+      <Card>
+        <CardHeader className="pb-3">
+          <div className="flex items-center justify-between flex-wrap gap-2">
+            <div>
+              <CardTitle className="text-base flex items-center gap-2">
+                <LayoutGrid className="w-4 h-4 text-primary" />
+                সাইট লেআউট কাস্টমাইজার
+              </CardTitle>
+              <p className="text-[10px] text-muted-foreground mt-1">
+                সেকশন সাজান, লেআউট বদলান, পোস্ট সংখ্যা নিয়ন্ত্রণ করুন
+              </p>
+            </div>
+            <div className="flex gap-2">
+              <Button size="sm" variant="outline" onClick={resetToDefault} className="text-xs">
+                <RefreshCw className="w-3 h-3 mr-1" /> ডিফল্ট
+              </Button>
+              <Button size="sm" onClick={saveConfig} disabled={saving} className="text-xs">
+                <Save className="w-3 h-3 mr-1" /> {saving ? "সেভ হচ্ছে..." : "সেভ করুন"}
+              </Button>
+            </div>
+          </div>
+        </CardHeader>
+        <CardContent className="space-y-1.5">
+          {sections.map((sec, idx) => {
+            const LayoutIcon = getLayoutIcon(sec.layout);
+            const isExpanded = expandedIdx === idx;
+            const isSpecial = SPECIAL_SECTIONS.includes(sec.label);
+
+            return (
+              <div key={`${sec.label}-${idx}`} className="rounded-lg border border-border overflow-hidden">
+                {/* Main row */}
+                <div className={`flex items-center gap-1.5 px-2 py-2 text-xs transition-colors ${
+                  sec.visible ? "bg-card" : "bg-muted/50 opacity-60"
+                }`}>
+                  {/* Grip + Order */}
+                  <div className="flex flex-col gap-0 shrink-0">
+                    <button onClick={() => moveSection(idx, -1)} className="text-muted-foreground hover:text-primary p-0.5">
+                      <ArrowUp className="w-3 h-3" />
+                    </button>
+                    <button onClick={() => moveSection(idx, 1)} className="text-muted-foreground hover:text-primary p-0.5">
+                      <ArrowDown className="w-3 h-3" />
+                    </button>
+                  </div>
+
+                  {/* Index badge */}
+                  <span className="w-5 h-5 rounded bg-primary/10 text-primary text-[10px] font-bold flex items-center justify-center shrink-0">
+                    {idx + 1}
+                  </span>
+
+                  {/* Label */}
+                  <button
+                    onClick={() => setExpandedIdx(isExpanded ? null : idx)}
+                    className="font-bold text-foreground min-w-0 flex items-center gap-1 flex-1 text-left"
+                  >
+                    {isExpanded ? <ChevronDown className="w-3 h-3 text-primary shrink-0" /> : <ChevronRight className="w-3 h-3 text-muted-foreground shrink-0" />}
+                    <span className="truncate">{sec.label}</span>
+                    {isSpecial && (
+                      <span className="text-[8px] bg-accent text-accent-foreground px-1 py-0 rounded shrink-0">বিশেষ</span>
+                    )}
+                    {(sec.subcategories?.length || 0) > 0 && (
+                      <span className="text-[8px] bg-primary/10 text-primary px-1 py-0 rounded shrink-0">
+                        +{sec.subcategories!.length}
+                      </span>
+                    )}
+                  </button>
+
+                  {/* Layout selector */}
+                  <div className="flex items-center gap-1 shrink-0">
+                    <LayoutIcon className="w-3 h-3 text-muted-foreground" />
+                    <select
+                      value={sec.layout}
+                      onChange={e => updateSection(idx, { layout: e.target.value })}
+                      className="bg-muted border border-border rounded px-1.5 py-0.5 text-[10px] w-20"
+                    >
+                      {LAYOUT_OPTIONS.map(o => (
+                        <option key={o.value} value={o.value}>{o.label}</option>
+                      ))}
+                    </select>
+                  </div>
+
+                  {/* Count */}
+                  <div className="flex items-center gap-0.5 shrink-0">
+                    <button
+                      onClick={() => updateSection(idx, { count: Math.max(1, sec.count - 1) })}
+                      className="w-5 h-5 bg-muted border border-border rounded flex items-center justify-center text-[10px] hover:bg-accent"
+                    >−</button>
+                    <span className="text-[10px] font-bold w-4 text-center">{sec.count}</span>
+                    <button
+                      onClick={() => updateSection(idx, { count: Math.min(20, sec.count + 1) })}
+                      className="w-5 h-5 bg-muted border border-border rounded flex items-center justify-center text-[10px] hover:bg-accent"
+                    >+</button>
+                  </div>
+
+                  {/* Visibility */}
+                  <button onClick={() => updateSection(idx, { visible: !sec.visible })} className="text-muted-foreground hover:text-primary p-1">
+                    {sec.visible ? <Eye className="w-3.5 h-3.5" /> : <EyeOff className="w-3.5 h-3.5" />}
+                  </button>
+
+                  {/* Delete */}
+                  <button onClick={() => removeSection(idx)} className="text-destructive/60 hover:text-destructive p-1">
+                    <Trash2 className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+
+                {/* Expanded: Subcategories */}
+                {isExpanded && (
+                  <div className="px-3 py-2 bg-muted/30 border-t border-border space-y-2">
+                    <p className="text-[10px] text-muted-foreground font-semibold flex items-center gap-1">
+                      <FolderTree className="w-3 h-3" /> সাব-ক্যাটাগরি
+                    </p>
+                    {(sec.subcategories || []).length > 0 && (
+                      <div className="flex flex-wrap gap-1.5">
+                        {sec.subcategories!.map(sub => (
+                          <span key={sub} className="inline-flex items-center gap-1 bg-card border border-border rounded-full px-2 py-0.5 text-[10px]">
+                            {sub}
+                            <button onClick={() => removeSubcategory(idx, sub)} className="text-destructive/60 hover:text-destructive">
+                              ×
+                            </button>
+                          </span>
+                        ))}
+                      </div>
+                    )}
+                    <div className="flex gap-1.5">
+                      <input
+                        type="text"
+                        value={expandedIdx === idx ? newSubcat : ""}
+                        onChange={e => setNewSubcat(e.target.value)}
+                        onKeyDown={e => e.key === "Enter" && addSubcategory(idx)}
+                        placeholder="সাব-ক্যাটাগরি যোগ..."
+                        className="flex-1 bg-card border border-border rounded px-2 py-1 text-[10px] focus:ring-1 focus:ring-primary focus:outline-none"
+                      />
+                      <Button size="sm" variant="outline" onClick={() => addSubcategory(idx)} className="text-[10px] h-6 px-2">
+                        <Plus className="w-2.5 h-2.5 mr-0.5" /> যোগ
+                      </Button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            );
+          })}
+
+          {/* Add new category */}
+          <div className="flex gap-2 pt-3 border-t border-border">
+            <input
+              type="text"
+              value={newLabel}
+              onChange={e => setNewLabel(e.target.value)}
+              onKeyDown={e => e.key === "Enter" && addSection()}
+              placeholder="নতুন ক্যাটাগরি যোগ করুন..."
+              className="flex-1 bg-muted border border-border rounded px-3 py-2 text-xs focus:ring-1 focus:ring-primary focus:outline-none"
+            />
+            <Button size="sm" variant="outline" onClick={addSection} disabled={!newLabel.trim()} className="text-xs">
+              <Plus className="w-3 h-3 mr-1" /> যোগ
             </Button>
           </div>
-        </div>
-      </CardHeader>
-      <CardContent className="space-y-2">
-        {sections.map((sec, idx) => (
-          <div key={`${sec.label}-${idx}`}
-            className={`flex items-center gap-2 p-2 rounded border text-xs ${sec.visible ? "bg-card border-border" : "bg-muted/50 border-border/50 opacity-60"}`}>
-            {/* Order */}
-            <div className="flex flex-col gap-0.5 shrink-0">
-              <button onClick={() => moveSection(idx, -1)} className="text-muted-foreground hover:text-foreground"><ArrowUp className="w-3 h-3" /></button>
-              <button onClick={() => moveSection(idx, 1)} className="text-muted-foreground hover:text-foreground"><ArrowDown className="w-3 h-3" /></button>
-            </div>
-            {/* Label */}
-            <span className="font-bold text-foreground min-w-[80px]">{sec.label}</span>
-            {/* Layout */}
-            <select value={sec.layout} onChange={e => updateSection(idx, { layout: e.target.value })}
-              className="bg-muted border border-border rounded px-2 py-1 text-[10px] w-24">
-              <option value="list">লিস্ট</option>
-              <option value="grid">গ্রিড</option>
-              <option value="highlight">হাইলাইট</option>
-              <option value="magazine">ম্যাগাজিন</option>
-              <option value="webstory">ওয়েব স্টোরি</option>
-              <option value="fotocard">ফটো কার্ড</option>
-              <option value="deshbangla">দেশ বাংলা</option>
-            </select>
-            {/* Count */}
-            <div className="flex items-center gap-1 shrink-0">
-              <button onClick={() => updateSection(idx, { count: Math.max(1, sec.count - 1) })}
-                className="w-5 h-5 bg-muted border border-border rounded flex items-center justify-center text-[10px] hover:bg-accent">−</button>
-              <span className="text-[10px] font-bold w-4 text-center">{sec.count}</span>
-              <button onClick={() => updateSection(idx, { count: Math.min(20, sec.count + 1) })}
-                className="w-5 h-5 bg-muted border border-border rounded flex items-center justify-center text-[10px] hover:bg-accent">+</button>
-            </div>
-            {/* Toggle visibility */}
-            <button onClick={() => updateSection(idx, { visible: !sec.visible })} className="text-muted-foreground hover:text-foreground">
-              {sec.visible ? <Eye className="w-3.5 h-3.5" /> : <EyeOff className="w-3.5 h-3.5" />}
-            </button>
-            {/* Delete */}
-            <button onClick={() => removeSection(idx)} className="text-destructive/60 hover:text-destructive ml-auto">
-              <Trash2 className="w-3.5 h-3.5" />
-            </button>
-          </div>
-        ))}
 
-        {/* Add new section */}
-        <div className="flex gap-2 pt-2 border-t border-border">
-          <input type="text" value={newLabel} onChange={e => setNewLabel(e.target.value)}
-            onKeyDown={e => e.key === "Enter" && addSection()}
-            placeholder="নতুন ক্যাটাগরি যোগ করুন..."
-            className="flex-1 bg-muted border border-border rounded px-3 py-1.5 text-xs focus:ring-1 focus:ring-primary focus:outline-none" />
-          <Button size="sm" variant="outline" onClick={addSection} disabled={!newLabel.trim()} className="text-xs">
-            <Plus className="w-3 h-3 mr-1" /> যোগ
-          </Button>
-        </div>
-      </CardContent>
-    </Card>
+          {/* DB Categories hint */}
+          {dbCategories.length > 0 && (
+            <div className="pt-2">
+              <p className="text-[10px] text-muted-foreground mb-1">ডাটাবেজে পাওয়া ক্যাটাগরি:</p>
+              <div className="flex flex-wrap gap-1">
+                {dbCategories.map(cat => {
+                  const exists = sections.some(s => s.label === cat);
+                  return (
+                    <button
+                      key={cat}
+                      onClick={() => {
+                        if (!exists) {
+                          setSections(prev => [...prev, { label: cat, count: 4, layout: "grid", visible: true, subcategories: [] }]);
+                          toast.success(`"${cat}" যোগ হয়েছে`);
+                        }
+                      }}
+                      disabled={exists}
+                      className={`px-2 py-0.5 rounded-full text-[10px] border transition-colors ${
+                        exists
+                          ? "bg-primary/10 text-primary border-primary/20 cursor-default"
+                          : "bg-muted text-muted-foreground border-border hover:border-primary hover:text-primary cursor-pointer"
+                      }`}
+                    >
+                      {exists ? "✓ " : "+ "}{cat}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+    </div>
   );
 }
