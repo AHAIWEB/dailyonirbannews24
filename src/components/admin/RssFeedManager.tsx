@@ -235,6 +235,7 @@ export default function RssFeedManager() {
               className="bg-muted border border-border rounded px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:ring-1 focus:ring-primary focus:outline-none" />
             <select value={newFeed.category} onChange={(e) => setNewFeed({ ...newFeed, category: e.target.value })}
               className="bg-muted border border-border rounded px-3 py-2 text-sm text-foreground focus:ring-1 focus:ring-primary focus:outline-none">
+              <option value="" disabled>সংবাদ সূত্র নির্বাচন</option>
               {categories.map(c => <option key={c} value={c}>{c}</option>)}
             </select>
           </div>
@@ -272,6 +273,7 @@ export default function RssFeedManager() {
                       className="bg-muted border border-border rounded px-2 py-1.5 text-sm text-foreground focus:ring-1 focus:ring-primary focus:outline-none" />
                     <select value={editFeedData.category} onChange={(e) => setEditFeedData({ ...editFeedData, category: e.target.value })}
                       className="bg-muted border border-border rounded px-2 py-1.5 text-sm text-foreground focus:ring-1 focus:ring-primary focus:outline-none">
+                      <option value="" disabled>সংবাদ সূত্র</option>
                       {categories.map(c => <option key={c} value={c}>{c}</option>)}
                     </select>
                   </div>
@@ -290,7 +292,7 @@ export default function RssFeedManager() {
                     <div className="flex items-center gap-2">
                       <Globe className="w-4 h-4 text-primary shrink-0" />
                       <span className="text-sm font-semibold text-foreground truncate">{feed.name}</span>
-                      <span className="text-[10px] bg-primary/10 text-primary px-1.5 py-0.5 rounded shrink-0">{feed.category}</span>
+                      <span className="text-[10px] bg-primary/10 text-primary px-1.5 py-0.5 rounded shrink-0">সংবাদ সূত্র: {feed.category}</span>
                       <span className={`text-[10px] px-1.5 py-0.5 rounded shrink-0 ${feed.is_active ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"}`}>
                         {feed.is_active ? "সক্রিয়" : "নিষ্ক্রিয়"}
                       </span>
