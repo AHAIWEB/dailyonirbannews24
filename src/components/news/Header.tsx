@@ -229,9 +229,9 @@ export default function Header() {
                     {openDropdown === item && hasSub && !isDeshBangla && (
                       <div className="absolute top-full left-0 bg-card border border-border rounded-lg shadow-xl py-1 min-w-[160px] z-[200]">
                         {navSubcats[item].map(sub => (
-                          <a key={sub} href="#" className="block px-4 py-2 text-xs text-foreground hover:bg-muted transition-colors">
+                          <Link key={sub} to={`/category/${encodeURIComponent(sub)}`} className="block px-4 py-2 text-xs text-foreground hover:bg-muted transition-colors">
                             {sub}
-                          </a>
+                          </Link>
                         ))}
                       </div>
                     )}
