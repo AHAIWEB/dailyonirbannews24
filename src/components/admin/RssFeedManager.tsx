@@ -273,6 +273,7 @@ export default function RssFeedManager() {
                       className="bg-muted border border-border rounded px-2 py-1.5 text-sm text-foreground focus:ring-1 focus:ring-primary focus:outline-none" />
                     <select value={editFeedData.category} onChange={(e) => setEditFeedData({ ...editFeedData, category: e.target.value })}
                       className="bg-muted border border-border rounded px-2 py-1.5 text-sm text-foreground focus:ring-1 focus:ring-primary focus:outline-none">
+                      <option value="" disabled>সংবাদ সূত্র</option>
                       {categories.map(c => <option key={c} value={c}>{c}</option>)}
                     </select>
                   </div>
