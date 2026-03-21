@@ -320,32 +320,7 @@ export default function Header() {
                 ))}
               </div>
             </div>
-            <div className="flex items-center gap-1">
-              {!loading && !user && (
-                <Link to="/login" className="p-2 text-primary-foreground hover:bg-primary-foreground/10 rounded flex items-center gap-1">
-                  <LogIn className="w-4 h-4" />
-                  <span className="hidden sm:inline text-xs">লগইন</span>
-                </Link>
-              )}
-              {!loading && user && (
-                <div className="relative">
-                  <button onClick={() => setUserMenuOpen(!userMenuOpen)} className="p-2 text-primary-foreground hover:bg-primary-foreground/10 rounded flex items-center gap-1">
-                    <User className="w-4 h-4" />
-                  </button>
-                  {userMenuOpen && (
-                    <div className="absolute right-0 top-full mt-1 bg-card border border-border rounded-lg shadow-lg py-1 min-w-[180px] z-[300]">
-                      {isAdmin && (
-                        <Link to="/admin" onClick={() => setUserMenuOpen(false)} className="flex items-center gap-2 px-4 py-2 text-xs text-foreground hover:bg-muted">
-                          <Shield className="w-3.5 h-3.5 text-primary" /> এডমিন প্যানেল
-                        </Link>
-                      )}
-                      <button onClick={handleSignOut} className="flex items-center gap-2 px-4 py-2 text-xs text-destructive hover:bg-muted w-full text-left">
-                        <LogOut className="w-3.5 h-3.5" /> লগআউট
-                      </button>
-                    </div>
-                  )}
-                </div>
-              )}
+            <div className="flex items-center gap-2">
               <button className="p-2 text-primary-foreground hover:bg-primary-foreground/10 rounded">
                 <Search className="w-4 h-4" />
               </button>
