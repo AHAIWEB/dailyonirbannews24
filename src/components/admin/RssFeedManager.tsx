@@ -62,7 +62,8 @@ export default function RssFeedManager() {
   const [editingFeed, setEditingFeed] = useState<string | null>(null);
   const [editFeedData, setEditFeedData] = useState<{ name: string; url: string; category: string }>({ name: "", url: "", category: "" });
 
-  useEffect(() => { loadFeeds(); loadArticles(); loadCategories(); }, []);
+  useEffect(() => { loadFeeds(); loadCategories(); }, []);
+  useEffect(() => { loadArticles(); }, [articleFilter, dateFrom, dateTo, articlePage]);
   useEffect(() => {
     const interval = setInterval(() => { handleFetchAll(); }, 60000);
     return () => clearInterval(interval);
