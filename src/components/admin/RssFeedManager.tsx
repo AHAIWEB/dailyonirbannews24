@@ -291,7 +291,7 @@ export default function RssFeedManager() {
                     <div className="flex items-center gap-2">
                       <Globe className="w-4 h-4 text-primary shrink-0" />
                       <span className="text-sm font-semibold text-foreground truncate">{feed.name}</span>
-                      <span className="text-[10px] bg-primary/10 text-primary px-1.5 py-0.5 rounded shrink-0">{feed.category}</span>
+                      <span className="text-[10px] bg-primary/10 text-primary px-1.5 py-0.5 rounded shrink-0">সংবাদ সূত্র: {feed.category}</span>
                       <span className={`text-[10px] px-1.5 py-0.5 rounded shrink-0 ${feed.is_active ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"}`}>
                         {feed.is_active ? "সক্রিয়" : "নিষ্ক্রিয়"}
                       </span>
