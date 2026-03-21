@@ -209,6 +209,7 @@ export default function Header() {
               {navItems.slice(0, 12).map((item) => {
                 const hasSub = navSubcats[item]?.length > 0;
                 const isDeshBangla = item === DESH_BANGLA_LABEL;
+                const categoryUrl = `/category/${encodeURIComponent(item)}`;
 
                 return (
                   <div
@@ -217,20 +218,20 @@ export default function Header() {
                     onMouseEnter={() => setOpenDropdown(item)}
                     onMouseLeave={() => { setOpenDropdown(null); setSelectedDiv(null); setSelectedDist(null); }}
                   >
-                    <a href="#"
+                    <Link to={categoryUrl}
                       className="px-3 py-2.5 text-primary-foreground text-sm font-medium hover:bg-primary-foreground/10 transition-colors text-center border-r border-primary-foreground/10 last:border-0 flex items-center gap-1 h-full"
                     >
                       {item}
                       {(hasSub || isDeshBangla) && <ChevronDown className="w-3 h-3" />}
-                    </a>
+                    </Link>
 
                     {/* Subcategory dropdown */}
                     {openDropdown === item && hasSub && !isDeshBangla && (
                       <div className="absolute top-full left-0 bg-card border border-border rounded-lg shadow-xl py-1 min-w-[160px] z-[200]">
                         {navSubcats[item].map(sub => (
-                          <a key={sub} href="#" className="block px-4 py-2 text-xs text-foreground hover:bg-muted transition-colors">
+                          <Link key={sub} to={`/category/${encodeURIComponent(sub)}`} className="block px-4 py-2 text-xs text-foreground hover:bg-muted transition-colors">
                             {sub}
-                          </a>
+                          </Link>
                         ))}
                       </div>
                     )}
@@ -313,9 +314,9 @@ export default function Header() {
               </Link>
               <div className="hidden lg:flex items-stretch">
                 {navItems.slice(0, 8).map((item) => (
-                  <a key={item} href="#" className="px-2.5 py-2.5 text-primary-foreground text-xs font-medium hover:bg-primary-foreground/10 transition-colors">
+                  <Link key={item} to={`/category/${encodeURIComponent(item)}`} className="px-2.5 py-2.5 text-primary-foreground text-xs font-medium hover:bg-primary-foreground/10 transition-colors">
                     {item}
-                  </a>
+                  </Link>
                 ))}
               </div>
             </div>
@@ -357,15 +358,17 @@ export default function Header() {
 
                 return (
                   <div key={item}>
-                    <button
-                      onClick={() => setOpenDropdown(isOpen ? null : item)}
-                      className="flex items-center justify-between w-full px-4 py-3 text-sm text-foreground hover:bg-muted transition-colors border-b border-border/50"
-                    >
-                      <span>{item}</span>
+                    <div className="flex items-center border-b border-border/50">
+                      <Link to={`/category/${encodeURIComponent(item)}`} onClick={() => setMenuOpen(false)}
+                        className="flex-1 px-4 py-3 text-sm text-foreground hover:bg-muted transition-colors">
+                        {item}
+                      </Link>
                       {(hasSub || isDeshBangla) && (
-                        <ChevronDown className={`w-3 h-3 text-muted-foreground transition-transform ${isOpen ? "rotate-180" : ""}`} />
+                        <button onClick={() => setOpenDropdown(isOpen ? null : item)} className="px-3 py-3">
+                          <ChevronDown className={`w-3 h-3 text-muted-foreground transition-transform ${isOpen ? "rotate-180" : ""}`} />
+                        </button>
                       )}
-                    </button>
+                    </div>
 
                     {/* Mobile subcategories */}
                     {isOpen && hasSub && !isDeshBangla && (

@@ -5,7 +5,7 @@ import { getReporterPhotoUrl } from "@/lib/storageUtils";
 import { useAuth } from "@/hooks/useAuth";
 import Header from "@/components/news/Header";
 import Footer from "@/components/news/Footer";
-import { Shield, Users, CheckCircle2, XCircle, FileText, Settings, UserCog, Eye, Trash2, Save, RefreshCw, Rss, LayoutDashboard, Send, Palette } from "lucide-react";
+import { Shield, Users, CheckCircle2, XCircle, FileText, Settings, UserCog, Eye, Trash2, Save, RefreshCw, Rss, LayoutDashboard, Send, Palette, Image } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import RssFeedManager from "@/components/admin/RssFeedManager";
 import AdminDashboardStats from "@/components/admin/AdminDashboardStats";
@@ -67,6 +67,10 @@ export default function AdminPanel() {
           <div className="flex items-center gap-2">
             <a href="/" className="flex items-center gap-1.5 bg-primary text-primary-foreground px-3 py-1.5 rounded text-xs font-semibold hover:opacity-90 transition-opacity">
               🏠 হোম পেইজ
+            </a>
+            <a href="/photo-card"
+              className="flex items-center gap-1.5 bg-accent text-accent-foreground px-3 py-1.5 rounded text-xs font-semibold hover:opacity-90 transition-opacity">
+              🖼️ ফটো কার্ড
             </a>
             <a href="https://belabhuminews.lovable.app" target="_blank" rel="noopener noreferrer"
               className="flex items-center gap-1.5 bg-secondary text-secondary-foreground px-3 py-1.5 rounded text-xs font-semibold hover:opacity-90 transition-opacity">

@@ -48,6 +48,11 @@ export default function RssFeedManager() {
   const [showAddForm, setShowAddForm] = useState(false);
   const [activeTab, setActiveTab] = useState<"feeds" | "articles">("feeds");
   const [articleFilter, setArticleFilter] = useState("all");
+  const [dateFrom, setDateFrom] = useState("");
+  const [dateTo, setDateTo] = useState("");
+  const [articlePage, setArticlePage] = useState(0);
+  const ARTICLE_PAGE_SIZE = 50;
+  const [totalArticles, setTotalArticles] = useState(0);
   const [editingArticle, setEditingArticle] = useState<string | null>(null);
   const [editData, setEditData] = useState<{
     title: string; content: string; category: string; sub_category: string;
@@ -57,7 +62,8 @@ export default function RssFeedManager() {
   const [editingFeed, setEditingFeed] = useState<string | null>(null);
   const [editFeedData, setEditFeedData] = useState<{ name: string; url: string; category: string }>({ name: "", url: "", category: "" });
 
-  useEffect(() => { loadFeeds(); loadArticles(); loadCategories(); }, []);
+  useEffect(() => { loadFeeds(); loadCategories(); }, []);
+  useEffect(() => { loadArticles(); }, [articleFilter, dateFrom, dateTo, articlePage]);
   useEffect(() => {
     const interval = setInterval(() => { handleFetchAll(); }, 60000);
     return () => clearInterval(interval);
@@ -70,8 +76,15 @@ export default function RssFeedManager() {
   };
 
   const loadArticles = async () => {
-    const { data } = await supabase.from("rss_articles").select("*").order("published_at", { ascending: false }).limit(100);
+    let query = supabase.from("rss_articles").select("*", { count: "exact" }).order("published_at", { ascending: false });
+    if (articleFilter !== "all") query = query.eq("category", articleFilter);
+    if (dateFrom) query = query.gte("published_at", new Date(dateFrom).toISOString());
+    if (dateTo) query = query.lte("published_at", new Date(dateTo + "T23:59:59").toISOString());
+    const from = articlePage * ARTICLE_PAGE_SIZE;
+    query = query.range(from, from + ARTICLE_PAGE_SIZE - 1);
+    const { data, count } = await query;
     setArticles((data as any[]) || []);
+    setTotalArticles(count || 0);
   };
 
   const loadCategories = async () => {
@@ -171,7 +184,7 @@ export default function RssFeedManager() {
 
   const deleteArticle = async (id: string) => { await supabase.from("rss_articles").delete().eq("id", id); toast.success("আর্টিকেল মুছে ফেলা হয়েছে"); loadArticles(); };
 
-  const filteredArticles = articleFilter === "all" ? articles : articles.filter(a => a.category === articleFilter);
+  const filteredArticles = articles; // filtering is now done server-side
 
   // Location helpers
   const divisions = getAllDivisions();
@@ -240,7 +253,7 @@ export default function RssFeedManager() {
         </button>
         <button onClick={() => setActiveTab("articles")}
           className={`px-4 py-2 text-sm font-semibold border-b-2 transition-colors ${activeTab === "articles" ? "border-primary text-primary" : "border-transparent text-muted-foreground hover:text-foreground"}`}>
-          আর্টিকেল ({articles.length})
+          আর্টিকেল ({totalArticles})
         </button>
       </div>
 
@@ -301,17 +314,31 @@ export default function RssFeedManager() {
       {/* Articles List */}
       {activeTab === "articles" && (
         <div className="space-y-3">
-          <div className="flex flex-wrap gap-1.5">
-            <button onClick={() => setArticleFilter("all")}
+          <div className="flex flex-wrap gap-1.5 items-center">
+            <button onClick={() => { setArticleFilter("all"); setArticlePage(0); }}
               className={`text-[10px] px-2 py-1 rounded ${articleFilter === "all" ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"}`}>
               সব
             </button>
             {categories.map(c => (
-              <button key={c} onClick={() => setArticleFilter(c)}
+              <button key={c} onClick={() => { setArticleFilter(c); setArticlePage(0); }}
                 className={`text-[10px] px-2 py-1 rounded ${articleFilter === c ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"}`}>
                 {c}
               </button>
             ))}
+          </div>
+
+          {/* Date filter */}
+          <div className="flex flex-wrap gap-2 items-center">
+            <span className="text-[10px] text-muted-foreground">তারিখ:</span>
+            <input type="date" value={dateFrom} onChange={e => { setDateFrom(e.target.value); setArticlePage(0); }}
+              className="bg-muted border border-border rounded px-2 py-1 text-[10px] text-foreground focus:outline-none" />
+            <span className="text-[10px] text-muted-foreground">থেকে</span>
+            <input type="date" value={dateTo} onChange={e => { setDateTo(e.target.value); setArticlePage(0); }}
+              className="bg-muted border border-border rounded px-2 py-1 text-[10px] text-foreground focus:outline-none" />
+            {(dateFrom || dateTo) && (
+              <button onClick={() => { setDateFrom(""); setDateTo(""); setArticlePage(0); }}
+                className="text-[10px] text-destructive hover:underline">রিসেট</button>
+            )}
           </div>
 
           {filteredArticles.length === 0 && <p className="text-center text-muted-foreground py-8 text-sm">কোনো আর্টিকেল পাওয়া যায়নি।</p>}
@@ -458,6 +485,19 @@ export default function RssFeedManager() {
               )}
             </div>
           ))}
+
+          {/* Pagination */}
+          {totalArticles > ARTICLE_PAGE_SIZE && (
+            <div className="flex items-center justify-between py-3 border-t border-border mt-2">
+              <button onClick={() => setArticlePage(p => Math.max(0, p - 1))} disabled={articlePage === 0}
+                className="text-xs bg-muted text-foreground px-3 py-1.5 rounded disabled:opacity-40">← আগের</button>
+              <span className="text-[10px] text-muted-foreground">
+                {articlePage * ARTICLE_PAGE_SIZE + 1}-{Math.min((articlePage + 1) * ARTICLE_PAGE_SIZE, totalArticles)} / {totalArticles}
+              </span>
+              <button onClick={() => setArticlePage(p => p + 1)} disabled={(articlePage + 1) * ARTICLE_PAGE_SIZE >= totalArticles}
+                className="text-xs bg-muted text-foreground px-3 py-1.5 rounded disabled:opacity-40">পরের →</button>
+            </div>
+          )}
         </div>
       )}
     </div>

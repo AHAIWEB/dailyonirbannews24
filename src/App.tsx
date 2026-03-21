@@ -14,6 +14,8 @@ import ResetPassword from "./pages/ResetPassword";
 import ReporterRegister from "./pages/ReporterRegister";
 import ReporterIdCard from "./pages/ReporterIdCard";
 import AdminPanel from "./pages/AdminPanel";
+import CategoryPage from "./pages/CategoryPage";
+import PhotoCardGenerator from "./pages/PhotoCardGenerator";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -28,6 +30,8 @@ const App = () => (
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/post/:id" element={<PostPage />} />
+            <Route path="/category/:name" element={<CategoryPage />} />
+            <Route path="/photo-card" element={<PhotoCardGenerator />} />
             <Route path="/quick-post" element={<QuickPost />} />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />

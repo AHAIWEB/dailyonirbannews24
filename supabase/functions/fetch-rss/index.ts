@@ -30,10 +30,13 @@ function truncateContent(text: string, percent: number = 50): string {
 function parseRSSItems(xml: string): any[] {
   const items: any[] = [];
   
-  // Try RSS 2.0 format
+  // Try RSS 2.0 format — get ALL items
   const rssItemRegex = /<item>([\s\S]*?)<\/item>/gi;
   let match;
-  while ((match = rssItemRegex.exec(xml)) !== null) {
+  let count = 0;
+  const MAX_ITEMS = 200; // increased from default
+  while ((match = rssItemRegex.exec(xml)) !== null && count < MAX_ITEMS) {
+    count++;
     const itemXml = match[1];
     const title = itemXml.match(/<title[^>]*>(?:<!\[CDATA\[)?([\s\S]*?)(?:\]\]>)?<\/title>/i)?.[1]?.trim() || '';
     const link = itemXml.match(/<link[^>]*>(?:<!\[CDATA\[)?([\s\S]*?)(?:\]\]>)?<\/link>/i)?.[1]?.trim() || '';
