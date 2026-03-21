@@ -358,15 +358,17 @@ export default function Header() {
 
                 return (
                   <div key={item}>
-                    <button
-                      onClick={() => setOpenDropdown(isOpen ? null : item)}
-                      className="flex items-center justify-between w-full px-4 py-3 text-sm text-foreground hover:bg-muted transition-colors border-b border-border/50"
-                    >
-                      <span>{item}</span>
+                    <div className="flex items-center border-b border-border/50">
+                      <Link to={`/category/${encodeURIComponent(item)}`} onClick={() => setMenuOpen(false)}
+                        className="flex-1 px-4 py-3 text-sm text-foreground hover:bg-muted transition-colors">
+                        {item}
+                      </Link>
                       {(hasSub || isDeshBangla) && (
-                        <ChevronDown className={`w-3 h-3 text-muted-foreground transition-transform ${isOpen ? "rotate-180" : ""}`} />
+                        <button onClick={() => setOpenDropdown(isOpen ? null : item)} className="px-3 py-3">
+                          <ChevronDown className={`w-3 h-3 text-muted-foreground transition-transform ${isOpen ? "rotate-180" : ""}`} />
+                        </button>
                       )}
-                    </button>
+                    </div>
 
                     {/* Mobile subcategories */}
                     {isOpen && hasSub && !isDeshBangla && (
