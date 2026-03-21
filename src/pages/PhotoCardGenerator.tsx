@@ -1,10 +1,11 @@
-import { useState, useRef, useCallback } from "react";
+import { useState, useRef } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import Header from "@/components/news/Header";
 import Footer from "@/components/news/Footer";
-import { Download, Share2, Eye, Image, Type, Quote, QrCode, Upload, X, Plus } from "lucide-react";
+import CardPreview from "@/components/photocard/CardPreview";
+import { PRESET_TEMPLATES, type CardTemplate } from "@/components/photocard/CardTemplates";
+import { Download, Share2, Eye, Image, Type, Quote, QrCode, Upload, X, Plus, Palette, LayoutTemplate } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { QRCodeSVG } from "qrcode.react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
@@ -18,25 +19,45 @@ export default function PhotoCardGenerator() {
   const { user, isAdmin } = useAuth();
   const canvasRef = useRef<HTMLDivElement>(null);
 
+  const [selectedTemplate, setSelectedTemplate] = useState<CardTemplate>(PRESET_TEMPLATES[0]);
   const [title, setTitle] = useState("");
   const [quote, setQuote] = useState("");
   const [images, setImages] = useState<CardImage[]>([]);
   const [qrUrl, setQrUrl] = useState("https://belabhuminews.lovable.app");
   const [showQr, setShowQr] = useState(true);
   const [showLogo, setShowLogo] = useState(true);
-  const [bgColor, setBgColor] = useState("#0ea5e9");
-  const [textColor, setTextColor] = useState("#ffffff");
-  const [category, setCategory] = useState("বেলাভূমি কণ্ঠ");
   const [saving, setSaving] = useState(false);
+  const [customBgImage, setCustomBgImage] = useState<string>("");
+  const [category, setCategory] = useState("বেলাভূমি কণ্ঠ");
+
+  // Custom template overrides
+  const [customLogoText, setCustomLogoText] = useState("");
+  const [customSubtitle, setCustomSubtitle] = useState("");
+  const [customFooterLabel, setCustomFooterLabel] = useState("");
+  const [customFooterUrl, setCustomFooterUrl] = useState("");
+  const [customBgColor, setCustomBgColor] = useState("#0ea5e9");
+  const [customTextColor, setCustomTextColor] = useState("#ffffff");
+
+  const isCustom = selectedTemplate.id === "custom";
+
+  const activeTemplate: CardTemplate = isCustom
+    ? {
+        ...selectedTemplate,
+        bgColor: customBgColor,
+        textColor: customTextColor,
+        logoText: customLogoText || "কাস্টম",
+        subtitleText: customSubtitle,
+        footerLabel: customFooterLabel,
+        footerUrl: customFooterUrl,
+      }
+    : selectedTemplate;
 
   const addImages = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files) return;
-    const newImages: CardImage[] = [];
     Array.from(files).forEach(file => {
-      newImages.push({ file, preview: URL.createObjectURL(file), caption: "" });
+      setImages(prev => [...prev, { file, preview: URL.createObjectURL(file), caption: "" }]);
     });
-    setImages(prev => [...prev, ...newImages]);
   };
 
   const removeImage = (idx: number) => {
@@ -47,7 +68,12 @@ export default function PhotoCardGenerator() {
   };
 
   const updateCaption = (idx: number, caption: string) => {
-    setImages(prev => prev.map((img, i) => i === idx ? { ...img, caption } : img));
+    setImages(prev => prev.map((img, i) => (i === idx ? { ...img, caption } : img)));
+  };
+
+  const handleBgImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) setCustomBgImage(URL.createObjectURL(file));
   };
 
   const downloadCard = async () => {
@@ -88,18 +114,31 @@ export default function PhotoCardGenerator() {
     if (!title.trim()) { toast.error("শিরোনাম দিন"); return; }
     setSaving(true);
     try {
+      let imgUrl: string | null = null;
+
+      // Upload first image to storage
+      if (images[0]) {
+        const ext = images[0].file.name.split(".").pop() || "jpg";
+        const path = `photocard/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
+        const { error: uploadErr } = await supabase.storage
+          .from("post-images")
+          .upload(path, images[0].file, { contentType: images[0].file.type });
+        if (uploadErr) throw uploadErr;
+        const { data: urlData } = supabase.storage.from("post-images").getPublicUrl(path);
+        imgUrl = urlData.publicUrl;
+      }
+
       const sourceUrl = `${window.location.origin}/post/fotocard-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
-      const imgUrl = images[0]?.preview || null;
-      
-      const { error } = await supabase.from("rss_articles").upsert({
+
+      const { error } = await supabase.from("rss_articles").insert({
         title: title.trim(),
         content: quote || null,
         image_url: imgUrl,
         source_url: sourceUrl,
-        source_name: "বেলাভূমি কণ্ঠ",
+        source_name: activeTemplate.footerLabel || "বেলাভূমি কণ্ঠ",
         category,
         is_published: true,
-      } as any, { onConflict: 'source_url' });
+      });
       if (error) throw error;
       toast.success("ফটো কার্ড পোস্ট হয়েছে!");
     } catch (err: any) {
@@ -124,59 +163,154 @@ export default function PhotoCardGenerator() {
   return (
     <div className="min-h-screen bg-background font-bangla">
       <Header />
-      <div className="container mx-auto py-6">
-        <h2 className="text-xl font-black text-foreground mb-6 flex items-center gap-2">
+      <div className="container mx-auto py-6 px-3">
+        <h2 className="text-xl font-black text-foreground mb-4 flex items-center gap-2">
           <Image className="w-6 h-6 text-primary" /> কুইক ফটো কার্ড জেনারেটর
         </h2>
 
+        {/* Template Selector */}
+        <div className="mb-4">
+          <p className="text-xs font-bold text-muted-foreground mb-2 flex items-center gap-1">
+            <LayoutTemplate className="w-3 h-3" /> টেম্পলেট নির্বাচন
+          </p>
+          <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
+            {PRESET_TEMPLATES.map(t => (
+              <button
+                key={t.id}
+                onClick={() => {
+                  setSelectedTemplate(t);
+                  if (t.id !== "custom") {
+                    setCustomBgColor(t.bgColor);
+                    setCustomTextColor(t.textColor);
+                  }
+                }}
+                className={`flex-shrink-0 px-3 py-2 rounded-lg text-xs font-bold border-2 transition-all ${
+                  selectedTemplate.id === t.id
+                    ? "border-primary ring-2 ring-primary/30 scale-105"
+                    : "border-border hover:border-primary/50"
+                }`}
+                style={{
+                  backgroundColor: t.bgColor,
+                  color: t.textColor,
+                }}
+              >
+                {t.name}
+              </button>
+            ))}
+          </div>
+        </div>
+
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Editor */}
-          <div className="space-y-4">
+          <div className="space-y-3">
             <div>
-              <label className="text-xs font-bold text-muted-foreground mb-1 block"><Type className="w-3 h-3 inline mr-1" />শিরোনাম</label>
+              <label className="text-xs font-bold text-muted-foreground mb-1 block">
+                <Type className="w-3 h-3 inline mr-1" />শিরোনাম
+              </label>
               <input type="text" value={title} onChange={e => setTitle(e.target.value)} placeholder="নিউজ শিরোনাম লিখুন..."
                 className="w-full bg-muted border border-border rounded px-3 py-2 text-sm text-foreground focus:ring-1 focus:ring-primary focus:outline-none" />
             </div>
 
             <div>
-              <label className="text-xs font-bold text-muted-foreground mb-1 block"><Quote className="w-3 h-3 inline mr-1" />কোটেশন</label>
-              <textarea value={quote} onChange={e => setQuote(e.target.value)} placeholder="❝ কোটেশন লিখুন... ❞" rows={3}
+              <label className="text-xs font-bold text-muted-foreground mb-1 block">
+                <Quote className="w-3 h-3 inline mr-1" />কোটেশন
+              </label>
+              <textarea value={quote} onChange={e => setQuote(e.target.value)} placeholder="❝ কোটেশন লিখুন... ❞" rows={2}
                 className="w-full bg-muted border border-border rounded px-3 py-2 text-sm text-foreground focus:ring-1 focus:ring-primary focus:outline-none resize-y" />
             </div>
 
-            {/* Multiple Image Upload */}
+            {/* Image Upload */}
             <div>
-              <label className="text-xs font-bold text-muted-foreground mb-1 block"><Upload className="w-3 h-3 inline mr-1" />ছবি আপলোড (মাল্টিপল)</label>
+              <label className="text-xs font-bold text-muted-foreground mb-1 block">
+                <Upload className="w-3 h-3 inline mr-1" />ছবি আপলোড (মাল্টিপল)
+              </label>
               <input type="file" accept="image/*" multiple onChange={addImages}
                 className="w-full bg-muted border border-border rounded px-3 py-2 text-xs text-foreground file:mr-2 file:px-2 file:py-1 file:rounded file:border-0 file:bg-primary file:text-primary-foreground file:text-xs file:font-semibold" />
               {images.length > 0 && (
-                <div className="grid grid-cols-3 gap-2 mt-2">
+                <div className="grid grid-cols-4 gap-1.5 mt-2">
                   {images.map((img, idx) => (
                     <div key={idx} className="relative">
                       <img src={img.preview} alt="" className="w-full aspect-square object-cover rounded-lg border border-border" />
-                      <button onClick={() => removeImage(idx)} className="absolute top-1 right-1 bg-destructive text-white rounded-full w-5 h-5 flex items-center justify-center">
-                        <X className="w-3 h-3" />
+                      <button onClick={() => removeImage(idx)} className="absolute top-0.5 right-0.5 bg-destructive text-white rounded-full w-4 h-4 flex items-center justify-center">
+                        <X className="w-2.5 h-2.5" />
                       </button>
                       <input type="text" value={img.caption} onChange={e => updateCaption(idx, e.target.value)}
-                        placeholder="ক্যাপশন..."
-                        className="w-full mt-1 bg-muted border border-border rounded px-2 py-1 text-[10px] text-foreground focus:outline-none" />
+                        placeholder="ক্যাপশন"
+                        className="w-full mt-0.5 bg-muted border border-border rounded px-1 py-0.5 text-[9px] text-foreground focus:outline-none" />
                     </div>
                   ))}
                 </div>
               )}
             </div>
 
-            {/* Settings */}
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <label className="text-[10px] font-bold text-muted-foreground mb-1 block">ব্যাকগ্রাউন্ড</label>
-                <input type="color" value={bgColor} onChange={e => setBgColor(e.target.value)} className="w-full h-8 rounded border border-border cursor-pointer" />
-              </div>
-              <div>
-                <label className="text-[10px] font-bold text-muted-foreground mb-1 block">টেক্সট কালার</label>
-                <input type="color" value={textColor} onChange={e => setTextColor(e.target.value)} className="w-full h-8 rounded border border-border cursor-pointer" />
+            {/* Background Template Upload */}
+            <div>
+              <label className="text-xs font-bold text-muted-foreground mb-1 block">
+                <Palette className="w-3 h-3 inline mr-1" />ব্যাকগ্রাউন্ড টেম্পলেট আপলোড
+              </label>
+              <div className="flex gap-2 items-center">
+                <input type="file" accept="image/*" onChange={handleBgImageUpload}
+                  className="flex-1 bg-muted border border-border rounded px-3 py-1.5 text-xs text-foreground file:mr-2 file:px-2 file:py-0.5 file:rounded file:border-0 file:bg-accent file:text-accent-foreground file:text-xs" />
+                {customBgImage && (
+                  <button onClick={() => setCustomBgImage("")} className="text-destructive text-xs underline">রিমুভ</button>
+                )}
               </div>
             </div>
+
+            {/* Custom Template Options */}
+            {isCustom && (
+              <div className="space-y-2 p-3 bg-muted rounded-lg border border-border">
+                <p className="text-xs font-bold text-foreground">✨ কাস্টম টেম্পলেট সেটিংস</p>
+                <div className="grid grid-cols-2 gap-2">
+                  <div>
+                    <label className="text-[10px] text-muted-foreground">লোগো টেক্সট</label>
+                    <input type="text" value={customLogoText} onChange={e => setCustomLogoText(e.target.value)} placeholder="লোগো"
+                      className="w-full bg-background border border-border rounded px-2 py-1 text-xs" />
+                  </div>
+                  <div>
+                    <label className="text-[10px] text-muted-foreground">সাবটাইটেল</label>
+                    <input type="text" value={customSubtitle} onChange={e => setCustomSubtitle(e.target.value)} placeholder="Subtitle"
+                      className="w-full bg-background border border-border rounded px-2 py-1 text-xs" />
+                  </div>
+                  <div>
+                    <label className="text-[10px] text-muted-foreground">ফুটার লেবেল</label>
+                    <input type="text" value={customFooterLabel} onChange={e => setCustomFooterLabel(e.target.value)}
+                      className="w-full bg-background border border-border rounded px-2 py-1 text-xs" />
+                  </div>
+                  <div>
+                    <label className="text-[10px] text-muted-foreground">ফুটার URL</label>
+                    <input type="text" value={customFooterUrl} onChange={e => setCustomFooterUrl(e.target.value)}
+                      className="w-full bg-background border border-border rounded px-2 py-1 text-xs" />
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-2">
+                  <div>
+                    <label className="text-[10px] text-muted-foreground">ব্যাকগ্রাউন্ড</label>
+                    <input type="color" value={customBgColor} onChange={e => setCustomBgColor(e.target.value)} className="w-full h-7 rounded border border-border cursor-pointer" />
+                  </div>
+                  <div>
+                    <label className="text-[10px] text-muted-foreground">টেক্সট কালার</label>
+                    <input type="color" value={customTextColor} onChange={e => setCustomTextColor(e.target.value)} className="w-full h-7 rounded border border-border cursor-pointer" />
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Color override for presets */}
+            {!isCustom && (
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="text-[10px] font-bold text-muted-foreground mb-1 block">ব্যাকগ্রাউন্ড</label>
+                  <input type="color" value={selectedTemplate.bgColor} onChange={e => setSelectedTemplate(prev => ({ ...prev, bgColor: e.target.value }))}
+                    className="w-full h-7 rounded border border-border cursor-pointer" />
+                </div>
+                <div>
+                  <label className="text-[10px] font-bold text-muted-foreground mb-1 block">টেক্সট কালার</label>
+                  <input type="color" value={selectedTemplate.textColor} onChange={e => setSelectedTemplate(prev => ({ ...prev, textColor: e.target.value }))}
+                    className="w-full h-7 rounded border border-border cursor-pointer" />
+                </div>
+              </div>
+            )}
 
             <div className="flex flex-wrap gap-3">
               <label className="flex items-center gap-1.5 text-xs cursor-pointer">
@@ -195,12 +329,22 @@ export default function PhotoCardGenerator() {
                 className="w-full bg-muted border border-border rounded px-3 py-1.5 text-xs text-foreground focus:outline-none" />
             </div>
 
+            <div>
+              <label className="text-[10px] font-bold text-muted-foreground mb-1 block">পোস্ট ক্যাটাগরি</label>
+              <select value={category} onChange={e => setCategory(e.target.value)}
+                className="w-full bg-muted border border-border rounded px-3 py-1.5 text-xs text-foreground">
+                {["বেলাভূমি কণ্ঠ", "জাতীয়", "আন্তর্জাতিক", "রাজনীতি", "খেলা", "বিনোদন", "প্রযুক্তি", "লাইফস্টাইল", "স্বাস্থ্যসেবা", "শিক্ষা", "অর্থনীতি"].map(c => (
+                  <option key={c} value={c}>{c}</option>
+                ))}
+              </select>
+            </div>
+
             {/* Actions */}
             <div className="flex flex-wrap gap-2">
               <Button onClick={downloadCard} size="sm" className="gap-1"><Download className="w-4 h-4" /> ডাউনলোড</Button>
               <Button onClick={shareCard} size="sm" variant="outline" className="gap-1"><Share2 className="w-4 h-4" /> শেয়ার</Button>
               <Button onClick={saveToDb} size="sm" variant="secondary" className="gap-1" disabled={saving}>
-                <Plus className="w-4 h-4" /> {saving ? "পোস্ট হচ্ছে..." : "পোস্ট করুন"}
+                <Plus className="w-4 h-4" /> {saving ? "পোস্ট হচ্ছে..." : "সাইটে পোস্ট"}
               </Button>
             </div>
           </div>
@@ -208,86 +352,17 @@ export default function PhotoCardGenerator() {
           {/* Preview */}
           <div>
             <p className="text-xs font-bold text-muted-foreground mb-2 flex items-center gap-1"><Eye className="w-3 h-3" /> প্রিভিউ</p>
-            <div ref={canvasRef} className="rounded-2xl overflow-hidden shadow-2xl max-w-[400px] mx-auto" style={{ backgroundColor: bgColor }}>
-              {/* Header */}
-              <div className="px-4 pt-4 pb-2 flex items-center justify-between">
-                {showLogo && (
-                  <div className="flex items-center gap-2">
-                    <div className="w-8 h-8 rounded-lg bg-white/20 flex items-center justify-center">
-                      <span className="font-black text-sm" style={{ color: textColor }}>বে</span>
-                    </div>
-                    <div>
-                      <p className="text-sm font-black leading-tight" style={{ color: textColor }}>বেলাভূমি NEWS</p>
-                      <p className="text-[7px] opacity-60" style={{ color: textColor }}>Belabhumi News</p>
-                    </div>
-                  </div>
-                )}
-                <span className="text-[8px] opacity-50" style={{ color: textColor }}>
-                  {new Date().toLocaleDateString("bn-BD", { day: "numeric", month: "long", year: "numeric" })}
-                </span>
-              </div>
-
-              {/* Image */}
-              {images[0] && (
-                <div className="px-3">
-                  <div className="rounded-xl overflow-hidden aspect-[4/3]">
-                    <img src={images[0].preview} alt="" className="w-full h-full object-cover" />
-                  </div>
-                  {images[0].caption && (
-                    <p className="text-[9px] mt-1 opacity-60 text-center" style={{ color: textColor }}>{images[0].caption}</p>
-                  )}
-                </div>
-              )}
-
-              {/* Title */}
-              {title && (
-                <div className="px-4 pt-3">
-                  <h3 className="text-base font-black leading-relaxed" style={{ color: textColor }}>
-                    {title}
-                  </h3>
-                </div>
-              )}
-
-              {/* Quote */}
-              {quote && (
-                <div className="px-4 pt-2">
-                  <div className="border-r-2 pr-3" style={{ borderColor: `${textColor}40` }}>
-                    <p className="text-xs italic leading-relaxed opacity-80" style={{ color: textColor }}>
-                      ❝ {quote} ❞
-                    </p>
-                  </div>
-                </div>
-              )}
-
-              {/* Footer */}
-              <div className="px-4 pt-3 pb-4 flex items-end justify-between">
-                <div>
-                  <p className="text-[8px] font-bold opacity-60" style={{ color: textColor }}>বেলাভূমি কণ্ঠ</p>
-                  <p className="text-[7px] opacity-40" style={{ color: textColor }}>belabhuminews.lovable.app</p>
-                </div>
-                {showQr && (
-                  <div className="bg-white rounded-lg p-1.5">
-                    <QRCodeSVG value={qrUrl} size={48} />
-                  </div>
-                )}
-              </div>
-
-              {/* Additional images grid */}
-              {images.length > 1 && (
-                <div className="px-3 pb-3 grid grid-cols-3 gap-1.5">
-                  {images.slice(1, 4).map((img, idx) => (
-                    <div key={idx} className="rounded-lg overflow-hidden aspect-square relative">
-                      <img src={img.preview} alt="" className="w-full h-full object-cover" />
-                      {img.caption && (
-                        <div className="absolute bottom-0 left-0 right-0 bg-black/60 px-1 py-0.5">
-                          <p className="text-[7px] text-white truncate">{img.caption}</p>
-                        </div>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
+            <CardPreview
+              ref={canvasRef}
+              template={activeTemplate}
+              title={title}
+              quote={quote}
+              images={images}
+              showQr={showQr}
+              showLogo={showLogo}
+              qrUrl={qrUrl}
+              bgImage={customBgImage}
+            />
           </div>
         </div>
       </div>
