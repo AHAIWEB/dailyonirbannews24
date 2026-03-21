@@ -756,7 +756,7 @@ h1,h2,h3,h4,h5,h6 { font-family: 'Noto Sans Bengali', sans-serif; }
         <!-- Top bar -->
         <div class='top-bar'>
           <div class='container flex items-center justify-between'>
-            <span>📧 info@banglakhabar.com | ☎ +৮৮০-১৭০০-০০০০০০</span>
+            <span>📧 info@belabhuminews.com | ☎ +৮৮০-১৭০০-০০০০০০</span>
             <span>👤 লগইন | 🔔 নোটিফিকেশন</span>
           </div>
         </div>
@@ -1550,7 +1550,7 @@ h1,h2,h3,h4,h5,h6 { font-family: 'Noto Sans Bengali', sans-serif; }
             </div>
             <div>
               <h3>যোগাযোগ</h3>
-              <p style='font-size:12px;color:rgba(255,255,255,.6);line-height:1.8;'>📧 info@banglakhabar.com<br/>☎ +৮৮০-১৭০০-০০০০০০<br/>📍 ঢাকা, বাংলাদেশ</p>
+              <p style='font-size:12px;color:rgba(255,255,255,.6);line-height:1.8;'>📧 info@belabhuminews.com<br/>☎ +৮৮০-১৭০০-০০০০০০<br/>📍 ঢাকা, বাংলাদেশ</p>
             </div>
           </div>
           <div class='footer-bottom'>
