@@ -235,6 +235,7 @@ export default function RssFeedManager() {
               className="bg-muted border border-border rounded px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:ring-1 focus:ring-primary focus:outline-none" />
             <select value={newFeed.category} onChange={(e) => setNewFeed({ ...newFeed, category: e.target.value })}
               className="bg-muted border border-border rounded px-3 py-2 text-sm text-foreground focus:ring-1 focus:ring-primary focus:outline-none">
+              <option value="" disabled>সংবাদ সূত্র নির্বাচন</option>
               {categories.map(c => <option key={c} value={c}>{c}</option>)}
             </select>
           </div>
