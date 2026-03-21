@@ -485,6 +485,19 @@ export default function RssFeedManager() {
               )}
             </div>
           ))}
+
+          {/* Pagination */}
+          {totalArticles > ARTICLE_PAGE_SIZE && (
+            <div className="flex items-center justify-between py-3 border-t border-border mt-2">
+              <button onClick={() => setArticlePage(p => Math.max(0, p - 1))} disabled={articlePage === 0}
+                className="text-xs bg-muted text-foreground px-3 py-1.5 rounded disabled:opacity-40">← আগের</button>
+              <span className="text-[10px] text-muted-foreground">
+                {articlePage * ARTICLE_PAGE_SIZE + 1}-{Math.min((articlePage + 1) * ARTICLE_PAGE_SIZE, totalArticles)} / {totalArticles}
+              </span>
+              <button onClick={() => setArticlePage(p => p + 1)} disabled={(articlePage + 1) * ARTICLE_PAGE_SIZE >= totalArticles}
+                className="text-xs bg-muted text-foreground px-3 py-1.5 rounded disabled:opacity-40">পরের →</button>
+            </div>
+          )}
         </div>
       )}
     </div>
