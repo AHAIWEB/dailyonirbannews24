@@ -48,6 +48,11 @@ export default function RssFeedManager() {
   const [showAddForm, setShowAddForm] = useState(false);
   const [activeTab, setActiveTab] = useState<"feeds" | "articles">("feeds");
   const [articleFilter, setArticleFilter] = useState("all");
+  const [dateFrom, setDateFrom] = useState("");
+  const [dateTo, setDateTo] = useState("");
+  const [articlePage, setArticlePage] = useState(0);
+  const ARTICLE_PAGE_SIZE = 50;
+  const [totalArticles, setTotalArticles] = useState(0);
   const [editingArticle, setEditingArticle] = useState<string | null>(null);
   const [editData, setEditData] = useState<{
     title: string; content: string; category: string; sub_category: string;
