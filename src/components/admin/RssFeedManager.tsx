@@ -75,8 +75,15 @@ export default function RssFeedManager() {
   };
 
   const loadArticles = async () => {
-    const { data } = await supabase.from("rss_articles").select("*").order("published_at", { ascending: false }).limit(100);
+    let query = supabase.from("rss_articles").select("*", { count: "exact" }).order("published_at", { ascending: false });
+    if (articleFilter !== "all") query = query.eq("category", articleFilter);
+    if (dateFrom) query = query.gte("published_at", new Date(dateFrom).toISOString());
+    if (dateTo) query = query.lte("published_at", new Date(dateTo + "T23:59:59").toISOString());
+    const from = articlePage * ARTICLE_PAGE_SIZE;
+    query = query.range(from, from + ARTICLE_PAGE_SIZE - 1);
+    const { data, count } = await query;
     setArticles((data as any[]) || []);
+    setTotalArticles(count || 0);
   };
 
   const loadCategories = async () => {
