@@ -314,17 +314,31 @@ export default function RssFeedManager() {
       {/* Articles List */}
       {activeTab === "articles" && (
         <div className="space-y-3">
-          <div className="flex flex-wrap gap-1.5">
-            <button onClick={() => setArticleFilter("all")}
+          <div className="flex flex-wrap gap-1.5 items-center">
+            <button onClick={() => { setArticleFilter("all"); setArticlePage(0); }}
               className={`text-[10px] px-2 py-1 rounded ${articleFilter === "all" ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"}`}>
               সব
             </button>
             {categories.map(c => (
-              <button key={c} onClick={() => setArticleFilter(c)}
+              <button key={c} onClick={() => { setArticleFilter(c); setArticlePage(0); }}
                 className={`text-[10px] px-2 py-1 rounded ${articleFilter === c ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"}`}>
                 {c}
               </button>
             ))}
+          </div>
+
+          {/* Date filter */}
+          <div className="flex flex-wrap gap-2 items-center">
+            <span className="text-[10px] text-muted-foreground">তারিখ:</span>
+            <input type="date" value={dateFrom} onChange={e => { setDateFrom(e.target.value); setArticlePage(0); }}
+              className="bg-muted border border-border rounded px-2 py-1 text-[10px] text-foreground focus:outline-none" />
+            <span className="text-[10px] text-muted-foreground">থেকে</span>
+            <input type="date" value={dateTo} onChange={e => { setDateTo(e.target.value); setArticlePage(0); }}
+              className="bg-muted border border-border rounded px-2 py-1 text-[10px] text-foreground focus:outline-none" />
+            {(dateFrom || dateTo) && (
+              <button onClick={() => { setDateFrom(""); setDateTo(""); setArticlePage(0); }}
+                className="text-[10px] text-destructive hover:underline">রিসেট</button>
+            )}
           </div>
 
           {filteredArticles.length === 0 && <p className="text-center text-muted-foreground py-8 text-sm">কোনো আর্টিকেল পাওয়া যায়নি।</p>}
