@@ -209,6 +209,7 @@ export default function Header() {
               {navItems.slice(0, 12).map((item) => {
                 const hasSub = navSubcats[item]?.length > 0;
                 const isDeshBangla = item === DESH_BANGLA_LABEL;
+                const categoryUrl = `/category/${encodeURIComponent(item)}`;
 
                 return (
                   <div
@@ -217,12 +218,12 @@ export default function Header() {
                     onMouseEnter={() => setOpenDropdown(item)}
                     onMouseLeave={() => { setOpenDropdown(null); setSelectedDiv(null); setSelectedDist(null); }}
                   >
-                    <a href="#"
+                    <Link to={categoryUrl}
                       className="px-3 py-2.5 text-primary-foreground text-sm font-medium hover:bg-primary-foreground/10 transition-colors text-center border-r border-primary-foreground/10 last:border-0 flex items-center gap-1 h-full"
                     >
                       {item}
                       {(hasSub || isDeshBangla) && <ChevronDown className="w-3 h-3" />}
-                    </a>
+                    </Link>
 
                     {/* Subcategory dropdown */}
                     {openDropdown === item && hasSub && !isDeshBangla && (
