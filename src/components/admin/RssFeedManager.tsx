@@ -253,7 +253,7 @@ export default function RssFeedManager() {
         </button>
         <button onClick={() => setActiveTab("articles")}
           className={`px-4 py-2 text-sm font-semibold border-b-2 transition-colors ${activeTab === "articles" ? "border-primary text-primary" : "border-transparent text-muted-foreground hover:text-foreground"}`}>
-          আর্টিকেল ({articles.length})
+          আর্টিকেল ({totalArticles})
         </button>
       </div>
 
