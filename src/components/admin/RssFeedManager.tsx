@@ -184,7 +184,7 @@ export default function RssFeedManager() {
 
   const deleteArticle = async (id: string) => { await supabase.from("rss_articles").delete().eq("id", id); toast.success("আর্টিকেল মুছে ফেলা হয়েছে"); loadArticles(); };
 
-  const filteredArticles = articleFilter === "all" ? articles : articles.filter(a => a.category === articleFilter);
+  const filteredArticles = articles; // filtering is now done server-side
 
   // Location helpers
   const divisions = getAllDivisions();
