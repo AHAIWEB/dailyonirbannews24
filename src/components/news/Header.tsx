@@ -314,9 +314,9 @@ export default function Header() {
               </Link>
               <div className="hidden lg:flex items-stretch">
                 {navItems.slice(0, 8).map((item) => (
-                  <a key={item} href="#" className="px-2.5 py-2.5 text-primary-foreground text-xs font-medium hover:bg-primary-foreground/10 transition-colors">
+                  <Link key={item} to={`/category/${encodeURIComponent(item)}`} className="px-2.5 py-2.5 text-primary-foreground text-xs font-medium hover:bg-primary-foreground/10 transition-colors">
                     {item}
-                  </a>
+                  </Link>
                 ))}
               </div>
             </div>
