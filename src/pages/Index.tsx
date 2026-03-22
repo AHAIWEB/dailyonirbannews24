@@ -96,9 +96,9 @@ function renderSection(config: SectionConfig) {
 
 const Index = () => {
   const [sections, setSections] = useState<SectionConfig[]>(DEFAULT_SECTIONS);
+  const [sidebar, setSidebar] = useState<SidebarConfig>(DEFAULT_SIDEBAR);
 
   useEffect(() => {
-    // Load layout config from site_settings
     const loadConfig = async () => {
       try {
         const { data } = await supabase
@@ -113,9 +113,22 @@ const Index = () => {
             setSections(parsed);
           }
         }
-      } catch {
-        // Use defaults on error
-      }
+      } catch {}
+
+      // Load sidebar config
+      try {
+        const { data: sData } = await supabase
+          .from("site_settings")
+          .select("value")
+          .eq("key", "sidebar_config")
+          .maybeSingle();
+        if (sData?.value) {
+          const parsed = JSON.parse(sData.value);
+          if (parsed && typeof parsed === "object") {
+            setSidebar({ ...DEFAULT_SIDEBAR, ...parsed });
+          }
+        }
+      } catch {}
     };
     loadConfig();
   }, []);
