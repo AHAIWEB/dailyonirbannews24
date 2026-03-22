@@ -184,6 +184,17 @@ export default function RssFeedManager() {
 
   const deleteArticle = async (id: string) => { await supabase.from("rss_articles").delete().eq("id", id); toast.success("আর্টিকেল মুছে ফেলা হয়েছে"); loadArticles(); };
 
+  const postToBlogger = (article: RssArticle) => {
+    const body = `<div style="font-family:'Hind Siliguri',sans-serif">` +
+      (article.image_url ? `<div style="text-align:center;margin-bottom:16px"><img src="${article.image_url}" alt="${article.title}" style="max-width:100%;border-radius:8px"/></div>` : "") +
+      `<p>${(article.content || "").replace(/\n/g, "<br/>")}</p>` +
+      `<p style="margin-top:16px;font-size:13px;color:#666">সূত্র: <a href="${article.source_url}" target="_blank" rel="noopener">${article.source_name || "বেলাভূমি নিউজ"}</a></p>` +
+      `</div>`;
+    const bloggerUrl = `https://www.blogger.com/blog/post/edit/preview?content=${encodeURIComponent(body)}&title=${encodeURIComponent(article.title)}`;
+    window.open(bloggerUrl, "_blank");
+    toast.success("ব্লগার এডিটর ওপেন হয়েছে");
+  };
+
   const filteredArticles = articles; // filtering is now done server-side
 
   // Location helpers
