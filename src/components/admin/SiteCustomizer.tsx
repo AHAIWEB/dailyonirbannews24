@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Save, Plus, Trash2, Eye, EyeOff, ArrowUp, ArrowDown, RefreshCw, LayoutGrid, List, Columns, Image, Map, Tv, FolderTree, ChevronDown, ChevronRight, GripVertical } from "lucide-react";
+import { Save, Plus, Trash2, Eye, EyeOff, ArrowUp, ArrowDown, RefreshCw, LayoutGrid, List, Columns, Image, Map, Tv, FolderTree, ChevronDown, ChevronRight, Sidebar } from "lucide-react";
 import { toast } from "sonner";
 
 interface SectionConfig {
@@ -11,6 +11,25 @@ interface SectionConfig {
   layout: string;
   visible: boolean;
   subcategories?: string[];
+}
+
+interface SidebarTabConfig {
+  label: string;
+  postLabel: string;
+  count: number;
+}
+
+interface SidebarWidgetConfig {
+  label: string;
+  title: string;
+}
+
+interface SidebarConfig {
+  leftTabs: SidebarTabConfig[];
+  rightTabs: SidebarTabConfig[];
+  leftWidgets: SidebarWidgetConfig[];
+  rightWidgets: SidebarWidgetConfig[];
+  rightExtraTabs: SidebarTabConfig[];
 }
 
 const LAYOUT_OPTIONS = [
@@ -24,9 +43,6 @@ const LAYOUT_OPTIONS = [
 ];
 
 const SPECIAL_SECTIONS = ["ওয়েব স্টোরি", "বেলাভূমি কণ্ঠ", "বিনোদন", "দেশ বাংলা", "লাইফস্টাইল", "মতামত", "ভিডিও"];
-
-// শীর্ষ সংবাদ is NOT a category — it's a fixed featured section at the top, always visible
-// It shows is_featured articles from ANY category. Not shown in customizer.
 
 const DEFAULT_SECTIONS: SectionConfig[] = [
   { label: "হাইলাইটস", count: 6, layout: "highlight", visible: true },
@@ -47,52 +63,70 @@ const DEFAULT_SECTIONS: SectionConfig[] = [
   { label: "শিক্ষা", count: 4, layout: "list", visible: true },
 ];
 
+const DEFAULT_SIDEBAR: SidebarConfig = {
+  leftTabs: [
+    { label: "পিপল", postLabel: "পিপল", count: 7 },
+    { label: "একটু থামুন", postLabel: "একটু থামুন", count: 7 },
+  ],
+  rightTabs: [
+    { label: "আলোচিত", postLabel: "আলোচিত", count: 7 },
+    { label: "স্পট লাইট", postLabel: "স্পট লাইট", count: 7 },
+  ],
+  leftWidgets: [{ label: "ভাইরাল", title: "ভাইরাল" }],
+  rightWidgets: [{ label: "জটিল", title: "জটিল" }],
+  rightExtraTabs: [{ label: "জনপ্রিয়", postLabel: "জনপ্রিয়", count: 7 }],
+};
+
 const STORAGE_KEY = "site-layout-config";
 
 export default function SiteCustomizer() {
   const [sections, setSections] = useState<SectionConfig[]>(DEFAULT_SECTIONS);
+  const [sidebarConfig, setSidebarConfig] = useState<SidebarConfig>(DEFAULT_SIDEBAR);
   const [newLabel, setNewLabel] = useState("");
   const [newSubcat, setNewSubcat] = useState("");
+  const [newSidebarItem, setNewSidebarItem] = useState("");
   const [saving, setSaving] = useState(false);
   const [loading, setLoading] = useState(true);
   const [expandedIdx, setExpandedIdx] = useState<number | null>(null);
+  const [showSidebar, setShowSidebar] = useState(false);
 
-  // Load config — only from saved config or defaults, NO RSS auto-merge
   useEffect(() => {
     const load = async () => {
       setLoading(true);
       try {
         const { data } = await supabase
           .from("site_settings")
-          .select("value")
-          .eq("key", "layout_config")
-          .maybeSingle();
-        
-        if (data?.value) {
-          const parsed = JSON.parse(data.value);
-          if (Array.isArray(parsed) && parsed.length > 0) {
-            setSections(parsed);
-            setLoading(false);
-            return;
+          .select("value, key")
+          .in("key", ["layout_config", "sidebar_config"]);
+
+        if (data) {
+          const layoutRow = data.find(d => d.key === "layout_config");
+          if (layoutRow?.value) {
+            const parsed = JSON.parse(layoutRow.value);
+            if (Array.isArray(parsed) && parsed.length > 0) {
+              setSections(parsed);
+            }
+          }
+          const sidebarRow = data.find(d => d.key === "sidebar_config");
+          if (sidebarRow?.value) {
+            const parsed = JSON.parse(sidebarRow.value);
+            if (parsed && typeof parsed === "object") {
+              setSidebarConfig({ ...DEFAULT_SIDEBAR, ...parsed });
+            }
           }
         }
       } catch {}
 
-      // Try localStorage fallback
       try {
         const saved = localStorage.getItem(STORAGE_KEY);
         if (saved) {
           const parsed = JSON.parse(saved);
-          if (Array.isArray(parsed) && parsed.length > 0) {
+          if (Array.isArray(parsed) && parsed.length > 0 && sections.length === DEFAULT_SECTIONS.length) {
             setSections(parsed);
-            setLoading(false);
-            return;
           }
         }
       } catch {}
 
-      // Use defaults only
-      setSections([...DEFAULT_SECTIONS]);
       setLoading(false);
     };
     load();
@@ -107,7 +141,12 @@ export default function SiteCustomizer() {
         value: JSON.stringify(sections),
         updated_at: new Date().toISOString(),
       } as any, { onConflict: "key" });
-      toast.success("লেআউট কনফিগ সেভ হয়েছে!");
+      await supabase.from("site_settings").upsert({
+        key: "sidebar_config",
+        value: JSON.stringify(sidebarConfig),
+        updated_at: new Date().toISOString(),
+      } as any, { onConflict: "key" });
+      toast.success("লেআউট ও সাইডবার কনফিগ সেভ হয়েছে!");
     } catch {
       toast.success("লোকালি সেভ হয়েছে");
     }
@@ -157,8 +196,31 @@ export default function SiteCustomizer() {
 
   const resetToDefault = () => {
     setSections([...DEFAULT_SECTIONS]);
+    setSidebarConfig({ ...DEFAULT_SIDEBAR });
     localStorage.removeItem(STORAGE_KEY);
     toast.success("ডিফল্ট লেআউট পুনরুদ্ধার হয়েছে");
+  };
+
+  // Sidebar helpers
+  const addSidebarTab = (side: "leftTabs" | "rightTabs" | "rightExtraTabs") => {
+    if (!newSidebarItem.trim()) return;
+    const item: SidebarTabConfig = { label: newSidebarItem.trim(), postLabel: newSidebarItem.trim(), count: 7 };
+    setSidebarConfig(prev => ({ ...prev, [side]: [...prev[side], item] }));
+    setNewSidebarItem("");
+  };
+
+  const removeSidebarTab = (side: "leftTabs" | "rightTabs" | "rightExtraTabs", idx: number) => {
+    setSidebarConfig(prev => ({ ...prev, [side]: prev[side].filter((_, i) => i !== idx) }));
+  };
+
+  const addSidebarWidget = (side: "leftWidgets" | "rightWidgets") => {
+    if (!newSidebarItem.trim()) return;
+    setSidebarConfig(prev => ({ ...prev, [side]: [...prev[side], { label: newSidebarItem.trim(), title: newSidebarItem.trim() }] }));
+    setNewSidebarItem("");
+  };
+
+  const removeSidebarWidget = (side: "leftWidgets" | "rightWidgets", idx: number) => {
+    setSidebarConfig(prev => ({ ...prev, [side]: prev[side].filter((_, i) => i !== idx) }));
   };
 
   const getLayoutIcon = (layout: string) => {
@@ -192,6 +254,9 @@ export default function SiteCustomizer() {
               </p>
             </div>
             <div className="flex gap-2">
+              <Button size="sm" variant="outline" onClick={() => setShowSidebar(!showSidebar)} className="text-xs">
+                <Sidebar className="w-3 h-3 mr-1" /> সাইডবার
+              </Button>
               <Button size="sm" variant="outline" onClick={resetToDefault} className="text-xs">
                 <RefreshCw className="w-3 h-3 mr-1" /> ডিফল্ট
               </Button>
@@ -209,11 +274,9 @@ export default function SiteCustomizer() {
 
             return (
               <div key={`${sec.label}-${idx}`} className="rounded-lg border border-border overflow-hidden">
-                {/* Main row */}
                 <div className={`flex items-center gap-1.5 px-2 py-2 text-xs transition-colors ${
                   sec.visible ? "bg-card" : "bg-muted/50 opacity-60"
                 }`}>
-                  {/* Grip + Order */}
                   <div className="flex flex-col gap-0 shrink-0">
                     <button onClick={() => moveSection(idx, -1)} className="text-muted-foreground hover:text-primary p-0.5">
                       <ArrowUp className="w-3 h-3" />
@@ -223,12 +286,10 @@ export default function SiteCustomizer() {
                     </button>
                   </div>
 
-                  {/* Index badge */}
                   <span className="w-5 h-5 rounded bg-primary/10 text-primary text-[10px] font-bold flex items-center justify-center shrink-0">
                     {idx + 1}
                   </span>
 
-                  {/* Label */}
                   <button
                     onClick={() => setExpandedIdx(isExpanded ? null : idx)}
                     className="font-bold text-foreground min-w-0 flex items-center gap-1 flex-1 text-left"
@@ -245,7 +306,6 @@ export default function SiteCustomizer() {
                     )}
                   </button>
 
-                  {/* Layout selector */}
                   <div className="flex items-center gap-1 shrink-0">
                     <LayoutIcon className="w-3 h-3 text-muted-foreground" />
                     <select
@@ -259,7 +319,6 @@ export default function SiteCustomizer() {
                     </select>
                   </div>
 
-                  {/* Count */}
                   <div className="flex items-center gap-0.5 shrink-0">
                     <button
                       onClick={() => updateSection(idx, { count: Math.max(1, sec.count - 1) })}
@@ -272,18 +331,15 @@ export default function SiteCustomizer() {
                     >+</button>
                   </div>
 
-                  {/* Visibility */}
                   <button onClick={() => updateSection(idx, { visible: !sec.visible })} className="text-muted-foreground hover:text-primary p-1">
                     {sec.visible ? <Eye className="w-3.5 h-3.5" /> : <EyeOff className="w-3.5 h-3.5" />}
                   </button>
 
-                  {/* Delete */}
                   <button onClick={() => removeSection(idx)} className="text-destructive/60 hover:text-destructive p-1">
                     <Trash2 className="w-3.5 h-3.5" />
                   </button>
                 </div>
 
-                {/* Expanded: Subcategories */}
                 {isExpanded && (
                   <div className="px-3 py-2 bg-muted/30 border-t border-border space-y-2">
                     <p className="text-[10px] text-muted-foreground font-semibold flex items-center gap-1">
@@ -336,6 +392,129 @@ export default function SiteCustomizer() {
           </div>
         </CardContent>
       </Card>
+
+      {/* Sidebar Customizer */}
+      {showSidebar && (
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-base flex items-center gap-2">
+              <Sidebar className="w-4 h-4 text-primary" />
+              সাইডবার কাস্টমাইজার
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {/* Left Sidebar Tabs */}
+            <div>
+              <p className="text-xs font-bold text-foreground mb-2">◀ বাম সাইডবার ট্যাবস</p>
+              <div className="space-y-1">
+                {sidebarConfig.leftTabs.map((tab, i) => (
+                  <div key={i} className="flex items-center justify-between bg-muted rounded px-2 py-1.5 text-xs">
+                    <span className="font-semibold">{tab.label}</span>
+                    <button onClick={() => removeSidebarTab("leftTabs", i)} className="text-destructive hover:text-destructive/80">
+                      <Trash2 className="w-3 h-3" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+              <div className="flex gap-1.5 mt-1.5">
+                <input type="text" value={newSidebarItem} onChange={e => setNewSidebarItem(e.target.value)}
+                  placeholder="নতুন ট্যাব..." className="flex-1 bg-card border border-border rounded px-2 py-1 text-[10px] focus:outline-none" />
+                <Button size="sm" variant="outline" onClick={() => addSidebarTab("leftTabs")} className="text-[10px] h-6 px-2">
+                  <Plus className="w-2.5 h-2.5" />
+                </Button>
+              </div>
+            </div>
+
+            {/* Left Sidebar Widgets */}
+            <div>
+              <p className="text-xs font-bold text-foreground mb-2">◀ বাম সাইডবার উইজেট</p>
+              <div className="space-y-1">
+                {sidebarConfig.leftWidgets.map((w, i) => (
+                  <div key={i} className="flex items-center justify-between bg-muted rounded px-2 py-1.5 text-xs">
+                    <span className="font-semibold">{w.label}</span>
+                    <button onClick={() => removeSidebarWidget("leftWidgets", i)} className="text-destructive hover:text-destructive/80">
+                      <Trash2 className="w-3 h-3" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+              <div className="flex gap-1.5 mt-1.5">
+                <input type="text" value={newSidebarItem} onChange={e => setNewSidebarItem(e.target.value)}
+                  placeholder="নতুন উইজেট..." className="flex-1 bg-card border border-border rounded px-2 py-1 text-[10px] focus:outline-none" />
+                <Button size="sm" variant="outline" onClick={() => addSidebarWidget("leftWidgets")} className="text-[10px] h-6 px-2">
+                  <Plus className="w-2.5 h-2.5" />
+                </Button>
+              </div>
+            </div>
+
+            {/* Right Sidebar Tabs */}
+            <div>
+              <p className="text-xs font-bold text-foreground mb-2">▶ ডান সাইডবার ট্যাবস</p>
+              <div className="space-y-1">
+                {sidebarConfig.rightTabs.map((tab, i) => (
+                  <div key={i} className="flex items-center justify-between bg-muted rounded px-2 py-1.5 text-xs">
+                    <span className="font-semibold">{tab.label}</span>
+                    <button onClick={() => removeSidebarTab("rightTabs", i)} className="text-destructive hover:text-destructive/80">
+                      <Trash2 className="w-3 h-3" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+              <div className="flex gap-1.5 mt-1.5">
+                <input type="text" value={newSidebarItem} onChange={e => setNewSidebarItem(e.target.value)}
+                  placeholder="নতুন ট্যাব..." className="flex-1 bg-card border border-border rounded px-2 py-1 text-[10px] focus:outline-none" />
+                <Button size="sm" variant="outline" onClick={() => addSidebarTab("rightTabs")} className="text-[10px] h-6 px-2">
+                  <Plus className="w-2.5 h-2.5" />
+                </Button>
+              </div>
+            </div>
+
+            {/* Right Extra Tabs */}
+            <div>
+              <p className="text-xs font-bold text-foreground mb-2">▶ ডান অতিরিক্ত ট্যাবস</p>
+              <div className="space-y-1">
+                {sidebarConfig.rightExtraTabs.map((tab, i) => (
+                  <div key={i} className="flex items-center justify-between bg-muted rounded px-2 py-1.5 text-xs">
+                    <span className="font-semibold">{tab.label}</span>
+                    <button onClick={() => removeSidebarTab("rightExtraTabs", i)} className="text-destructive hover:text-destructive/80">
+                      <Trash2 className="w-3 h-3" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+              <div className="flex gap-1.5 mt-1.5">
+                <input type="text" value={newSidebarItem} onChange={e => setNewSidebarItem(e.target.value)}
+                  placeholder="নতুন ট্যাব..." className="flex-1 bg-card border border-border rounded px-2 py-1 text-[10px] focus:outline-none" />
+                <Button size="sm" variant="outline" onClick={() => addSidebarTab("rightExtraTabs")} className="text-[10px] h-6 px-2">
+                  <Plus className="w-2.5 h-2.5" />
+                </Button>
+              </div>
+            </div>
+
+            {/* Right Widgets */}
+            <div>
+              <p className="text-xs font-bold text-foreground mb-2">▶ ডান সাইডবার উইজেট</p>
+              <div className="space-y-1">
+                {sidebarConfig.rightWidgets.map((w, i) => (
+                  <div key={i} className="flex items-center justify-between bg-muted rounded px-2 py-1.5 text-xs">
+                    <span className="font-semibold">{w.label}</span>
+                    <button onClick={() => removeSidebarWidget("rightWidgets", i)} className="text-destructive hover:text-destructive/80">
+                      <Trash2 className="w-3 h-3" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+              <div className="flex gap-1.5 mt-1.5">
+                <input type="text" value={newSidebarItem} onChange={e => setNewSidebarItem(e.target.value)}
+                  placeholder="নতুন উইজেট..." className="flex-1 bg-card border border-border rounded px-2 py-1 text-[10px] focus:outline-none" />
+                <Button size="sm" variant="outline" onClick={() => addSidebarWidget("rightWidgets")} className="text-[10px] h-6 px-2">
+                  <Plus className="w-2.5 h-2.5" />
+                </Button>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 }
