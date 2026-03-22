@@ -40,6 +40,8 @@ export default function PhotoCardGenerator() {
   const [titleTransform, setTitleTransform] = useState<TextTransform>({ x: 0, y: 0 });
   const [quoteTransform, setQuoteTransform] = useState<TextTransform>({ x: 0, y: 0 });
   const [frameAspectRatio, setFrameAspectRatio] = useState<number | undefined>(undefined);
+  const [imageOnTop, setImageOnTop] = useState(true); // default: image on top for positioning
+  const [clipShape, setClipShape] = useState<ClipShape>("none");
 
   // Custom template overrides
   const [customLogoText, setCustomLogoText] = useState("");
