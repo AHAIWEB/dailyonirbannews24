@@ -3,9 +3,16 @@ import { QRCodeSVG } from "qrcode.react";
 import type { CardTemplate } from "./CardTemplates";
 
 interface CardImage {
-  file: File;
+  file?: File;
   preview: string;
   caption: string;
+}
+
+export interface ImageTransform {
+  x: number;
+  y: number;
+  scale: number;
+  rotate: number;
 }
 
 interface CardPreviewProps {
@@ -17,14 +24,18 @@ interface CardPreviewProps {
   showLogo: boolean;
   qrUrl: string;
   bgImage?: string;
+  bgOpacity?: number;
+  imageTransform?: ImageTransform;
 }
 
 const CardPreview = forwardRef<HTMLDivElement, CardPreviewProps>(
-  ({ template, title, quote, images, showQr, showLogo, qrUrl, bgImage }, ref) => {
+  ({ template, title, quote, images, showQr, showLogo, qrUrl, bgImage, bgOpacity = 0.4, imageTransform }, ref) => {
     const { bgColor, textColor, accentColor, borderStyle, fontStyle, logoText, subtitleText, footerLabel, footerUrl } = template;
     const today = new Date().toLocaleDateString("bn-BD", { day: "numeric", month: "long", year: "numeric" });
 
     const fontClass = fontStyle === "serif" ? "font-serif" : fontStyle === "decorative" ? "font-serif" : "";
+
+    const transform = imageTransform || { x: 0, y: 0, scale: 1, rotate: 0 };
 
     return (
       <div
@@ -38,7 +49,7 @@ const CardPreview = forwardRef<HTMLDivElement, CardPreviewProps>(
           backgroundPosition: "center",
         }}
       >
-        {bgImage && <div className="absolute inset-0 bg-black/40 rounded-2xl" />}
+        {bgImage && <div className="absolute inset-0 rounded-2xl" style={{ backgroundColor: `rgba(0,0,0,${bgOpacity})` }} />}
 
         <div className="relative z-10">
           {/* Header */}
@@ -61,7 +72,16 @@ const CardPreview = forwardRef<HTMLDivElement, CardPreviewProps>(
           {images[0] && (
             <div className="px-3">
               <div className="rounded-xl overflow-hidden aspect-[4/3]">
-                <img src={images[0].preview} alt="" className="w-full h-full object-cover" crossOrigin="anonymous" />
+                <img
+                  src={images[0].preview}
+                  alt=""
+                  className="w-full h-full object-cover"
+                  crossOrigin="anonymous"
+                  style={{
+                    transform: `translate(${transform.x}px, ${transform.y}px) scale(${transform.scale}) rotate(${transform.rotate}deg)`,
+                    transformOrigin: "center center",
+                  }}
+                />
               </div>
               {images[0].caption && (
                 <p className="text-[9px] mt-1 opacity-60 text-center" style={{ color: textColor }}>{images[0].caption}</p>

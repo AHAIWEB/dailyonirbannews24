@@ -2,15 +2,15 @@ import { useState, useRef } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import Header from "@/components/news/Header";
 import Footer from "@/components/news/Footer";
-import CardPreview from "@/components/photocard/CardPreview";
+import CardPreview, { type ImageTransform } from "@/components/photocard/CardPreview";
 import { PRESET_TEMPLATES, type CardTemplate } from "@/components/photocard/CardTemplates";
-import { Download, Share2, Eye, Image, Type, Quote, QrCode, Upload, X, Plus, Palette, LayoutTemplate } from "lucide-react";
+import { Download, Share2, Image, Type, Quote, QrCode, Upload, X, Plus, Palette, LayoutTemplate, Link2, RotateCw, Move, ZoomIn } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
 interface CardImage {
-  file: File;
+  file?: File;
   preview: string;
   caption: string;
 }
@@ -29,6 +29,14 @@ export default function PhotoCardGenerator() {
   const [saving, setSaving] = useState(false);
   const [customBgImage, setCustomBgImage] = useState<string>("");
   const [category, setCategory] = useState("বেলাভূমি কণ্ঠ");
+  const [bgOpacity, setBgOpacity] = useState(0.4);
+
+  // URL fetch
+  const [fetchUrl, setFetchUrl] = useState("");
+  const [fetching, setFetching] = useState(false);
+
+  // Image transform
+  const [imageTransform, setImageTransform] = useState<ImageTransform>({ x: 0, y: 0, scale: 1, rotate: 0 });
 
   // Custom template overrides
   const [customLogoText, setCustomLogoText] = useState("");
@@ -52,6 +60,28 @@ export default function PhotoCardGenerator() {
       }
     : selectedTemplate;
 
+  // Fetch from URL
+  const fetchFromUrl = async () => {
+    if (!fetchUrl.trim()) return;
+    setFetching(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("fetch-url-metadata", {
+        body: { url: fetchUrl.trim() },
+      });
+      if (error) throw error;
+      if (data?.title) setTitle(data.title);
+      if (data?.description) setQuote(data.description.slice(0, 200));
+      if (data?.image) {
+        setImages(prev => [{ preview: data.image, caption: "" }, ...prev]);
+      }
+      toast.success("URL থেকে তথ্য লোড হয়েছে!");
+    } catch {
+      toast.error("URL ফেচ ব্যর্থ");
+    } finally {
+      setFetching(false);
+    }
+  };
+
   const addImages = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files) return;
@@ -62,7 +92,7 @@ export default function PhotoCardGenerator() {
 
   const removeImage = (idx: number) => {
     setImages(prev => {
-      URL.revokeObjectURL(prev[idx].preview);
+      if (prev[idx].file) URL.revokeObjectURL(prev[idx].preview);
       return prev.filter((_, i) => i !== idx);
     });
   };
@@ -111,13 +141,14 @@ export default function PhotoCardGenerator() {
   };
 
   const saveToDb = async () => {
-    if (!title.trim()) { toast.error("শিরোনাম দিন"); return; }
+    // Allow posting without title - use a default
+    const postTitle = title.trim() || "ফটো কার্ড পোস্ট";
     setSaving(true);
     try {
       let imgUrl: string | null = null;
 
-      // Upload first image to storage
-      if (images[0]) {
+      // Upload first image to storage if it's a File
+      if (images[0]?.file) {
         const ext = images[0].file.name.split(".").pop() || "jpg";
         const path = `photocard/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
         const { error: uploadErr } = await supabase.storage
@@ -126,19 +157,21 @@ export default function PhotoCardGenerator() {
         if (uploadErr) throw uploadErr;
         const { data: urlData } = supabase.storage.from("post-images").getPublicUrl(path);
         imgUrl = urlData.publicUrl;
+      } else if (images[0]?.preview) {
+        imgUrl = images[0].preview;
       }
 
       const sourceUrl = `${window.location.origin}/post/fotocard-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
 
-      const { error } = await supabase.from("rss_articles").insert({
-        title: title.trim(),
+      const { error } = await supabase.from("rss_articles").upsert({
+        title: postTitle,
         content: quote || null,
         image_url: imgUrl,
         source_url: sourceUrl,
         source_name: activeTemplate.footerLabel || "বেলাভূমি কণ্ঠ",
         category,
         is_published: true,
-      });
+      }, { onConflict: "source_url" });
       if (error) throw error;
       toast.success("ফটো কার্ড পোস্ট হয়েছে!");
     } catch (err: any) {
@@ -189,10 +222,7 @@ export default function PhotoCardGenerator() {
                     ? "border-primary ring-2 ring-primary/30 scale-105"
                     : "border-border hover:border-primary/50"
                 }`}
-                style={{
-                  backgroundColor: t.bgColor,
-                  color: t.textColor,
-                }}
+                style={{ backgroundColor: t.bgColor, color: t.textColor }}
               >
                 {t.name}
               </button>
@@ -203,17 +233,32 @@ export default function PhotoCardGenerator() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Editor */}
           <div className="space-y-3">
+            {/* URL Fetch */}
+            <div>
+              <label className="text-xs font-bold text-muted-foreground mb-1 block">
+                <Link2 className="w-3 h-3 inline mr-1" />URL থেকে ফেচ করুন
+              </label>
+              <div className="flex gap-2">
+                <input type="url" value={fetchUrl} onChange={e => setFetchUrl(e.target.value)}
+                  placeholder="https://example.com/news-article"
+                  className="flex-1 bg-muted border border-border rounded px-3 py-2 text-sm text-foreground focus:ring-1 focus:ring-primary focus:outline-none" />
+                <Button onClick={fetchFromUrl} size="sm" disabled={fetching} className="gap-1">
+                  {fetching ? "লোড..." : "ফেচ"}
+                </Button>
+              </div>
+            </div>
+
             <div>
               <label className="text-xs font-bold text-muted-foreground mb-1 block">
                 <Type className="w-3 h-3 inline mr-1" />শিরোনাম
               </label>
-              <input type="text" value={title} onChange={e => setTitle(e.target.value)} placeholder="নিউজ শিরোনাম লিখুন..."
+              <input type="text" value={title} onChange={e => setTitle(e.target.value)} placeholder="নিউজ শিরোনাম লিখুন (ঐচ্ছিক)..."
                 className="w-full bg-muted border border-border rounded px-3 py-2 text-sm text-foreground focus:ring-1 focus:ring-primary focus:outline-none" />
             </div>
 
             <div>
               <label className="text-xs font-bold text-muted-foreground mb-1 block">
-                <Quote className="w-3 h-3 inline mr-1" />কোটেশন
+                <Quote className="w-3 h-3 inline mr-1" />কোটেশন / সংক্ষিপ্ত
               </label>
               <textarea value={quote} onChange={e => setQuote(e.target.value)} placeholder="❝ কোটেশন লিখুন... ❞" rows={2}
                 className="w-full bg-muted border border-border rounded px-3 py-2 text-sm text-foreground focus:ring-1 focus:ring-primary focus:outline-none resize-y" />
@@ -243,6 +288,41 @@ export default function PhotoCardGenerator() {
               )}
             </div>
 
+            {/* Image Transform Controls */}
+            {images.length > 0 && (
+              <div className="p-3 bg-muted rounded-lg border border-border space-y-2">
+                <p className="text-xs font-bold text-foreground flex items-center gap-1"><Move className="w-3 h-3" /> ছবি পজিশন ও এঙ্গেল</p>
+                <div className="grid grid-cols-2 gap-2">
+                  <div>
+                    <label className="text-[10px] text-muted-foreground">X পজিশন ({imageTransform.x}px)</label>
+                    <input type="range" min={-100} max={100} value={imageTransform.x}
+                      onChange={e => setImageTransform(p => ({ ...p, x: Number(e.target.value) }))}
+                      className="w-full h-1.5 accent-primary" />
+                  </div>
+                  <div>
+                    <label className="text-[10px] text-muted-foreground">Y পজিশন ({imageTransform.y}px)</label>
+                    <input type="range" min={-100} max={100} value={imageTransform.y}
+                      onChange={e => setImageTransform(p => ({ ...p, y: Number(e.target.value) }))}
+                      className="w-full h-1.5 accent-primary" />
+                  </div>
+                  <div>
+                    <label className="text-[10px] text-muted-foreground flex items-center gap-1"><ZoomIn className="w-3 h-3" /> স্কেল ({imageTransform.scale.toFixed(1)}x)</label>
+                    <input type="range" min={0.5} max={3} step={0.1} value={imageTransform.scale}
+                      onChange={e => setImageTransform(p => ({ ...p, scale: Number(e.target.value) }))}
+                      className="w-full h-1.5 accent-primary" />
+                  </div>
+                  <div>
+                    <label className="text-[10px] text-muted-foreground flex items-center gap-1"><RotateCw className="w-3 h-3" /> রোটেট ({imageTransform.rotate}°)</label>
+                    <input type="range" min={-180} max={180} value={imageTransform.rotate}
+                      onChange={e => setImageTransform(p => ({ ...p, rotate: Number(e.target.value) }))}
+                      className="w-full h-1.5 accent-primary" />
+                  </div>
+                </div>
+                <button onClick={() => setImageTransform({ x: 0, y: 0, scale: 1, rotate: 0 })}
+                  className="text-[10px] text-primary underline">রিসেট</button>
+              </div>
+            )}
+
             {/* Background Template Upload */}
             <div>
               <label className="text-xs font-bold text-muted-foreground mb-1 block">
@@ -256,6 +336,18 @@ export default function PhotoCardGenerator() {
                 )}
               </div>
             </div>
+
+            {/* Background Opacity */}
+            {customBgImage && (
+              <div>
+                <label className="text-[10px] font-bold text-muted-foreground mb-1 block">
+                  ব্যাকগ্রাউন্ড ওভারলে অপাসিটি ({Math.round(bgOpacity * 100)}%)
+                </label>
+                <input type="range" min={0} max={1} step={0.05} value={bgOpacity}
+                  onChange={e => setBgOpacity(Number(e.target.value))}
+                  className="w-full h-1.5 accent-primary" />
+              </div>
+            )}
 
             {/* Custom Template Options */}
             {isCustom && (
@@ -351,7 +443,9 @@ export default function PhotoCardGenerator() {
 
           {/* Preview */}
           <div>
-            <p className="text-xs font-bold text-muted-foreground mb-2 flex items-center gap-1"><Eye className="w-3 h-3" /> প্রিভিউ</p>
+            <p className="text-xs font-bold text-muted-foreground mb-2 flex items-center gap-1">
+              <Image className="w-3 h-3" /> প্রিভিউ
+            </p>
             <CardPreview
               ref={canvasRef}
               template={activeTemplate}
@@ -362,6 +456,8 @@ export default function PhotoCardGenerator() {
               showLogo={showLogo}
               qrUrl={qrUrl}
               bgImage={customBgImage}
+              bgOpacity={bgOpacity}
+              imageTransform={imageTransform}
             />
           </div>
         </div>
