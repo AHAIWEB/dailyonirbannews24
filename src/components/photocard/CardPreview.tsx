@@ -3,7 +3,7 @@ import { QRCodeSVG } from "qrcode.react";
 import type { CardTemplate } from "./CardTemplates";
 
 interface CardImage {
-  file?: File;
+  file: File;
   preview: string;
   caption: string;
 }

@@ -4,19 +4,19 @@ import Header from "@/components/news/Header";
 import Footer from "@/components/news/Footer";
 import CardPreview from "@/components/photocard/CardPreview";
 import { PRESET_TEMPLATES, type CardTemplate } from "@/components/photocard/CardTemplates";
-import { Download, Share2, Image, Type, Quote, QrCode, Upload, X, Plus, Palette, LayoutTemplate, Link2, Loader2 } from "lucide-react";
+import { Download, Share2, Eye, Image, Type, Quote, QrCode, Upload, X, Plus, Palette, LayoutTemplate } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
 interface CardImage {
-  file?: File;
+  file: File;
   preview: string;
   caption: string;
 }
 
 export default function PhotoCardGenerator() {
-  const { user, session, isAdmin } = useAuth();
+  const { user, isAdmin } = useAuth();
   const canvasRef = useRef<HTMLDivElement>(null);
 
   const [selectedTemplate, setSelectedTemplate] = useState<CardTemplate>(PRESET_TEMPLATES[0]);
@@ -29,13 +29,6 @@ export default function PhotoCardGenerator() {
   const [saving, setSaving] = useState(false);
   const [customBgImage, setCustomBgImage] = useState<string>("");
   const [category, setCategory] = useState("বেলাভূমি কণ্ঠ");
-
-  // URL fetch
-  const [fetchUrl, setFetchUrl] = useState("");
-  const [fetching, setFetching] = useState(false);
-
-  // Image from URL
-  const [imageUrl, setImageUrl] = useState("");
 
   // Custom template overrides
   const [customLogoText, setCustomLogoText] = useState("");
@@ -59,37 +52,6 @@ export default function PhotoCardGenerator() {
       }
     : selectedTemplate;
 
-  // Fetch title+image+content from URL
-  const fetchFromUrl = async () => {
-    if (!fetchUrl.trim()) return;
-    setFetching(true);
-    try {
-      const { data, error } = await supabase.functions.invoke("fetch-url-metadata", {
-        body: { url: fetchUrl.trim() },
-        headers: session?.access_token ? { Authorization: `Bearer ${session.access_token}` } : {},
-      });
-      if (error) throw error;
-      if (data?.title) setTitle(data.title);
-      if (data?.content) setQuote(data.content.substring(0, 200));
-      if (data?.image) {
-        setImages(prev => [...prev, { preview: data.image, caption: "" }]);
-      }
-      toast.success("URL থেকে ডাটা ফেচ হয়েছে!");
-    } catch (err: any) {
-      toast.error("ফেচ ব্যর্থ: " + (err.message || "অজানা সমস্যা"));
-    } finally {
-      setFetching(false);
-    }
-  };
-
-  // Add image from URL
-  const addImageFromUrl = () => {
-    if (!imageUrl.trim()) return;
-    setImages(prev => [...prev, { preview: imageUrl.trim(), caption: "" }]);
-    setImageUrl("");
-    toast.success("ইমেজ URL যুক্ত হয়েছে!");
-  };
-
   const addImages = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files) return;
@@ -100,7 +62,7 @@ export default function PhotoCardGenerator() {
 
   const removeImage = (idx: number) => {
     setImages(prev => {
-      if (prev[idx].file) URL.revokeObjectURL(prev[idx].preview);
+      URL.revokeObjectURL(prev[idx].preview);
       return prev.filter((_, i) => i !== idx);
     });
   };
@@ -154,21 +116,16 @@ export default function PhotoCardGenerator() {
     try {
       let imgUrl: string | null = null;
 
-      // Upload first image - either from file or use URL directly
+      // Upload first image to storage
       if (images[0]) {
-        if (images[0].file) {
-          const ext = images[0].file.name.split(".").pop() || "jpg";
-          const path = `photocard/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
-          const { error: uploadErr } = await supabase.storage
-            .from("post-images")
-            .upload(path, images[0].file, { contentType: images[0].file.type });
-          if (uploadErr) throw uploadErr;
-          const { data: urlData } = supabase.storage.from("post-images").getPublicUrl(path);
-          imgUrl = urlData.publicUrl;
-        } else {
-          // Image from URL - use directly
-          imgUrl = images[0].preview;
-        }
+        const ext = images[0].file.name.split(".").pop() || "jpg";
+        const path = `photocard/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
+        const { error: uploadErr } = await supabase.storage
+          .from("post-images")
+          .upload(path, images[0].file, { contentType: images[0].file.type });
+        if (uploadErr) throw uploadErr;
+        const { data: urlData } = supabase.storage.from("post-images").getPublicUrl(path);
+        imgUrl = urlData.publicUrl;
       }
 
       const sourceUrl = `${window.location.origin}/post/fotocard-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
@@ -183,7 +140,7 @@ export default function PhotoCardGenerator() {
         is_published: true,
       });
       if (error) throw error;
-      toast.success("ফটো কার্ড সাইটে পোস্ট হয়েছে!");
+      toast.success("ফটো কার্ড পোস্ট হয়েছে!");
     } catch (err: any) {
       toast.error("পোস্ট ব্যর্থ: " + err.message);
     } finally {
@@ -232,7 +189,10 @@ export default function PhotoCardGenerator() {
                     ? "border-primary ring-2 ring-primary/30 scale-105"
                     : "border-border hover:border-primary/50"
                 }`}
-                style={{ backgroundColor: t.bgColor, color: t.textColor }}
+                style={{
+                  backgroundColor: t.bgColor,
+                  color: t.textColor,
+                }}
               >
                 {t.name}
               </button>
@@ -243,23 +203,6 @@ export default function PhotoCardGenerator() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Editor */}
           <div className="space-y-3">
-
-            {/* URL Fetch */}
-            <div className="p-3 bg-accent/30 rounded-lg border border-accent space-y-2">
-              <p className="text-xs font-bold text-foreground flex items-center gap-1">
-                <Link2 className="w-3.5 h-3.5" /> URL থেকে অটো ফেচ (শিরোনাম+ছবি+কন্টেন্ট)
-              </p>
-              <div className="flex gap-2">
-                <input type="url" value={fetchUrl} onChange={e => setFetchUrl(e.target.value)}
-                  placeholder="https://example.com/news-article"
-                  className="flex-1 bg-background border border-border rounded px-3 py-1.5 text-xs text-foreground focus:outline-none focus:ring-1 focus:ring-primary" />
-                <Button onClick={fetchFromUrl} size="sm" disabled={fetching || !fetchUrl.trim()} className="gap-1">
-                  {fetching ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Link2 className="w-3.5 h-3.5" />}
-                  ফেচ
-                </Button>
-              </div>
-            </div>
-
             <div>
               <label className="text-xs font-bold text-muted-foreground mb-1 block">
                 <Type className="w-3 h-3 inline mr-1" />শিরোনাম
@@ -270,52 +213,35 @@ export default function PhotoCardGenerator() {
 
             <div>
               <label className="text-xs font-bold text-muted-foreground mb-1 block">
-                <Quote className="w-3 h-3 inline mr-1" />কোটেশন / সংক্ষেপ
+                <Quote className="w-3 h-3 inline mr-1" />কোটেশন
               </label>
-              <textarea value={quote} onChange={e => setQuote(e.target.value)} placeholder="❝ কোটেশন বা সংক্ষেপ লিখুন... ❞" rows={2}
+              <textarea value={quote} onChange={e => setQuote(e.target.value)} placeholder="❝ কোটেশন লিখুন... ❞" rows={2}
                 className="w-full bg-muted border border-border rounded px-3 py-2 text-sm text-foreground focus:ring-1 focus:ring-primary focus:outline-none resize-y" />
             </div>
 
             {/* Image Upload */}
             <div>
               <label className="text-xs font-bold text-muted-foreground mb-1 block">
-                <Upload className="w-3 h-3 inline mr-1" />ছবি আপলোড (ফাইল)
+                <Upload className="w-3 h-3 inline mr-1" />ছবি আপলোড (মাল্টিপল)
               </label>
               <input type="file" accept="image/*" multiple onChange={addImages}
                 className="w-full bg-muted border border-border rounded px-3 py-2 text-xs text-foreground file:mr-2 file:px-2 file:py-1 file:rounded file:border-0 file:bg-primary file:text-primary-foreground file:text-xs file:font-semibold" />
+              {images.length > 0 && (
+                <div className="grid grid-cols-4 gap-1.5 mt-2">
+                  {images.map((img, idx) => (
+                    <div key={idx} className="relative">
+                      <img src={img.preview} alt="" className="w-full aspect-square object-cover rounded-lg border border-border" />
+                      <button onClick={() => removeImage(idx)} className="absolute top-0.5 right-0.5 bg-destructive text-white rounded-full w-4 h-4 flex items-center justify-center">
+                        <X className="w-2.5 h-2.5" />
+                      </button>
+                      <input type="text" value={img.caption} onChange={e => updateCaption(idx, e.target.value)}
+                        placeholder="ক্যাপশন"
+                        className="w-full mt-0.5 bg-muted border border-border rounded px-1 py-0.5 text-[9px] text-foreground focus:outline-none" />
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
-
-            {/* Image from URL */}
-            <div>
-              <label className="text-xs font-bold text-muted-foreground mb-1 block">
-                <Link2 className="w-3 h-3 inline mr-1" />ছবি URL থেকে যুক্ত করুন
-              </label>
-              <div className="flex gap-2">
-                <input type="url" value={imageUrl} onChange={e => setImageUrl(e.target.value)}
-                  placeholder="https://example.com/photo.jpg"
-                  className="flex-1 bg-muted border border-border rounded px-3 py-1.5 text-xs text-foreground focus:outline-none focus:ring-1 focus:ring-primary" />
-                <Button onClick={addImageFromUrl} size="sm" variant="outline" disabled={!imageUrl.trim()}>
-                  <Plus className="w-3.5 h-3.5" />
-                </Button>
-              </div>
-            </div>
-
-            {/* Image previews */}
-            {images.length > 0 && (
-              <div className="grid grid-cols-4 gap-1.5">
-                {images.map((img, idx) => (
-                  <div key={idx} className="relative">
-                    <img src={img.preview} alt="" className="w-full aspect-square object-cover rounded-lg border border-border" />
-                    <button onClick={() => removeImage(idx)} className="absolute top-0.5 right-0.5 bg-destructive text-white rounded-full w-4 h-4 flex items-center justify-center">
-                      <X className="w-2.5 h-2.5" />
-                    </button>
-                    <input type="text" value={img.caption} onChange={e => updateCaption(idx, e.target.value)}
-                      placeholder="ক্যাপশন"
-                      className="w-full mt-0.5 bg-muted border border-border rounded px-1 py-0.5 text-[9px] text-foreground focus:outline-none" />
-                  </div>
-                ))}
-              </div>
-            )}
 
             {/* Background Template Upload */}
             <div>
@@ -425,9 +351,7 @@ export default function PhotoCardGenerator() {
 
           {/* Preview */}
           <div>
-            <p className="text-xs font-bold text-muted-foreground mb-2 flex items-center gap-1">
-              <Image className="w-3 h-3" /> প্রিভিউ
-            </p>
+            <p className="text-xs font-bold text-muted-foreground mb-2 flex items-center gap-1"><Eye className="w-3 h-3" /> প্রিভিউ</p>
             <CardPreview
               ref={canvasRef}
               template={activeTemplate}
