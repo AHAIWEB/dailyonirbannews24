@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
-import { Plus, Trash2, RefreshCw, Rss, Globe, ExternalLink, Eye, EyeOff, Star, Send, Edit3, Save, X, Sparkles, BookOpen, MapPin } from "lucide-react";
+import { Plus, Trash2, RefreshCw, Rss, Globe, ExternalLink, Eye, EyeOff, Star, Send, Edit3, Save, X, Sparkles, BookOpen, MapPin, Bookmark, Copy, CheckCircle2 } from "lucide-react";
 import { toast } from "sonner";
 import { getAllDivisions, getDistricts, getUpazilas } from "@/data/bangladeshLocations";
 
@@ -183,6 +183,31 @@ export default function RssFeedManager() {
   };
 
   const deleteArticle = async (id: string) => { await supabase.from("rss_articles").delete().eq("id", id); toast.success("আর্টিকেল মুছে ফেলা হয়েছে"); loadArticles(); };
+
+  const [copiedId, setCopiedId] = useState<string | null>(null);
+
+  const generateBloggerHtml = (article: RssArticle) => {
+    let html = "";
+    if (article.image_url) html += `<div style="text-align:center;margin-bottom:16px;"><img src="${article.image_url}" alt="${article.title}" style="max-width:100%;border-radius:8px;"/></div>`;
+    if (article.content) html += `<div style="line-height:1.8;font-size:15px;">${article.content}</div>`;
+    html += `<p style="margin-top:16px;font-size:12px;color:#888;">সূত্র: <a href="${article.source_url}" target="_blank" rel="noopener noreferrer">${article.source_name || article.source_url}</a></p>`;
+    return html;
+  };
+
+  const copyForBlogger = (article: RssArticle) => {
+    const html = generateBloggerHtml(article);
+    navigator.clipboard.writeText(html);
+    setCopiedId(article.id);
+    setTimeout(() => setCopiedId(null), 2000);
+    toast.success("ব্লগারের জন্য HTML কপি হয়েছে!");
+  };
+
+  const openInBlogger = (article: RssArticle) => {
+    const content = generateBloggerHtml(article);
+    const labels = article.category;
+    const url = `https://www.blogger.com/blog-this.g?n=${encodeURIComponent(article.title)}&t=${encodeURIComponent(content)}&u=${encodeURIComponent(article.source_url)}${labels ? `&l=${encodeURIComponent(labels)}` : ""}`;
+    window.open(url, "_blank");
+  };
 
   const filteredArticles = articles; // filtering is now done server-side
 
@@ -482,6 +507,19 @@ export default function RssFeedManager() {
                         {cat}
                       </button>
                     ))}
+                  </div>
+                  {/* Blogger post buttons */}
+                  <div className="flex flex-wrap gap-1 pt-1 border-t border-border/50">
+                    <span className="text-[9px] text-muted-foreground flex items-center gap-0.5 mr-1"><Bookmark className="w-2.5 h-2.5" /> ব্লগার:</span>
+                    <button onClick={() => openInBlogger(article)}
+                      className="text-[9px] px-1.5 py-0.5 rounded bg-[#FF6600] text-white hover:opacity-80 flex items-center gap-0.5">
+                      <Bookmark className="w-2.5 h-2.5" /> Blogger পোস্ট
+                    </button>
+                    <button onClick={() => copyForBlogger(article)}
+                      className="text-[9px] px-1.5 py-0.5 rounded bg-muted text-muted-foreground hover:bg-accent flex items-center gap-0.5">
+                      {copiedId === article.id ? <CheckCircle2 className="w-2.5 h-2.5 text-primary" /> : <Copy className="w-2.5 h-2.5" />}
+                      {copiedId === article.id ? "কপি হয়েছে!" : "HTML কপি"}
+                    </button>
                   </div>
                 </>
               )}

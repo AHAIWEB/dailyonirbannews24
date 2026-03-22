@@ -4,7 +4,7 @@ import Header from "@/components/news/Header";
 import Footer from "@/components/news/Footer";
 import CardPreview from "@/components/photocard/CardPreview";
 import { PRESET_TEMPLATES, type CardTemplate } from "@/components/photocard/CardTemplates";
-import { Download, Share2, Eye, Image, Type, Quote, QrCode, Upload, X, Plus, Palette, LayoutTemplate } from "lucide-react";
+import { Download, Share2, Eye, Image, Type, Quote, QrCode, Upload, X, Plus, Palette, LayoutTemplate, Move, ZoomIn } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -29,6 +29,13 @@ export default function PhotoCardGenerator() {
   const [saving, setSaving] = useState(false);
   const [customBgImage, setCustomBgImage] = useState<string>("");
   const [category, setCategory] = useState("বেলাভূমি কণ্ঠ");
+
+  // Text size & image position controls
+  const [titleSize, setTitleSize] = useState(16);
+  const [quoteSize, setQuoteSize] = useState(12);
+  const [imageOffsetX, setImageOffsetX] = useState(0);
+  const [imageOffsetY, setImageOffsetY] = useState(0);
+  const [imageScale, setImageScale] = useState(100);
 
   // Custom template overrides
   const [customLogoText, setCustomLogoText] = useState("");
@@ -116,7 +123,6 @@ export default function PhotoCardGenerator() {
     try {
       let imgUrl: string | null = null;
 
-      // Upload first image to storage
       if (images[0]) {
         const ext = images[0].file.name.split(".").pop() || "jpg";
         const path = `photocard/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
@@ -243,6 +249,40 @@ export default function PhotoCardGenerator() {
               )}
             </div>
 
+            {/* Text Size & Image Move Controls */}
+            <div className="p-3 bg-muted rounded-lg border border-border space-y-2">
+              <p className="text-xs font-bold text-foreground flex items-center gap-1"><ZoomIn className="w-3 h-3" /> টেক্সট সাইজ ও ছবি মুভ</p>
+              <div className="grid grid-cols-2 gap-2">
+                <div>
+                  <label className="text-[10px] text-muted-foreground">শিরোনাম সাইজ: {titleSize}px</label>
+                  <input type="range" min={10} max={28} value={titleSize} onChange={e => setTitleSize(Number(e.target.value))}
+                    className="w-full h-1.5 accent-primary" />
+                </div>
+                <div>
+                  <label className="text-[10px] text-muted-foreground">কোটেশন সাইজ: {quoteSize}px</label>
+                  <input type="range" min={8} max={20} value={quoteSize} onChange={e => setQuoteSize(Number(e.target.value))}
+                    className="w-full h-1.5 accent-primary" />
+                </div>
+              </div>
+              <div className="grid grid-cols-3 gap-2">
+                <div>
+                  <label className="text-[10px] text-muted-foreground flex items-center gap-0.5"><Move className="w-2.5 h-2.5" /> X: {imageOffsetX}</label>
+                  <input type="range" min={-50} max={50} value={imageOffsetX} onChange={e => setImageOffsetX(Number(e.target.value))}
+                    className="w-full h-1.5 accent-primary" />
+                </div>
+                <div>
+                  <label className="text-[10px] text-muted-foreground flex items-center gap-0.5"><Move className="w-2.5 h-2.5" /> Y: {imageOffsetY}</label>
+                  <input type="range" min={-50} max={50} value={imageOffsetY} onChange={e => setImageOffsetY(Number(e.target.value))}
+                    className="w-full h-1.5 accent-primary" />
+                </div>
+                <div>
+                  <label className="text-[10px] text-muted-foreground flex items-center gap-0.5"><ZoomIn className="w-2.5 h-2.5" /> স্কেল: {imageScale}%</label>
+                  <input type="range" min={50} max={150} value={imageScale} onChange={e => setImageScale(Number(e.target.value))}
+                    className="w-full h-1.5 accent-primary" />
+                </div>
+              </div>
+            </div>
+
             {/* Background Template Upload */}
             <div>
               <label className="text-xs font-bold text-muted-foreground mb-1 block">
@@ -333,7 +373,7 @@ export default function PhotoCardGenerator() {
               <label className="text-[10px] font-bold text-muted-foreground mb-1 block">পোস্ট ক্যাটাগরি</label>
               <select value={category} onChange={e => setCategory(e.target.value)}
                 className="w-full bg-muted border border-border rounded px-3 py-1.5 text-xs text-foreground">
-                {["বেলাভূমি কণ্ঠ", "জাতীয়", "আন্তর্জাতিক", "রাজনীতি", "খেলা", "বিনোদন", "প্রযুক্তি", "লাইফস্টাইল", "স্বাস্থ্যসেবা", "শিক্ষা", "অর্থনীতি"].map(c => (
+                {["বেলাভূমি কণ্ঠ", "জাতীয়", "আন্তর্জাতিক", "রাজনীতি", "খেলাধুলা", "বিনোদন", "প্রযুক্তি", "লাইফস্টাইল", "স্বাস্থ্যসেবা", "শিক্ষা", "অর্থনীতি"].map(c => (
                   <option key={c} value={c}>{c}</option>
                 ))}
               </select>
@@ -362,6 +402,11 @@ export default function PhotoCardGenerator() {
               showLogo={showLogo}
               qrUrl={qrUrl}
               bgImage={customBgImage}
+              titleSize={titleSize}
+              quoteSize={quoteSize}
+              imageOffsetX={imageOffsetX}
+              imageOffsetY={imageOffsetY}
+              imageScale={imageScale}
             />
           </div>
         </div>

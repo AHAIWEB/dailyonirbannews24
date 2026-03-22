@@ -24,6 +24,30 @@ interface SectionConfig {
   visible: boolean;
 }
 
+interface SidebarConfig {
+  leftTabs: { label: string; count: number }[];
+  rightTabs: { label: string; count: number }[];
+  rightPopular: { label: string; count: number }[];
+  leftWidget: string;
+  rightWidget: string;
+}
+
+const DEFAULT_SIDEBAR: SidebarConfig = {
+  leftTabs: [
+    { label: "পিপল", count: 7 },
+    { label: "একটু থামুন", count: 7 },
+  ],
+  rightTabs: [
+    { label: "আলোচিত", count: 7 },
+    { label: "স্পট লাইট", count: 7 },
+  ],
+  rightPopular: [
+    { label: "জনপ্রিয়", count: 7 },
+  ],
+  leftWidget: "ভাইরাল",
+  rightWidget: "জটিল",
+};
+
 const DEFAULT_SECTIONS: SectionConfig[] = [
   { label: "হাইলাইটস", count: 6, layout: "highlight", visible: true },
   { label: "জাতীয়", count: 8, layout: "grid", visible: true },
@@ -72,9 +96,9 @@ function renderSection(config: SectionConfig) {
 
 const Index = () => {
   const [sections, setSections] = useState<SectionConfig[]>(DEFAULT_SECTIONS);
+  const [sidebar, setSidebar] = useState<SidebarConfig>(DEFAULT_SIDEBAR);
 
   useEffect(() => {
-    // Load layout config from site_settings
     const loadConfig = async () => {
       try {
         const { data } = await supabase
@@ -89,9 +113,22 @@ const Index = () => {
             setSections(parsed);
           }
         }
-      } catch {
-        // Use defaults on error
-      }
+      } catch {}
+
+      // Load sidebar config
+      try {
+        const { data: sData } = await supabase
+          .from("site_settings")
+          .select("value")
+          .eq("key", "sidebar_config")
+          .maybeSingle();
+        if (sData?.value) {
+          const parsed = JSON.parse(sData.value);
+          if (parsed && typeof parsed === "object") {
+            setSidebar({ ...DEFAULT_SIDEBAR, ...parsed });
+          }
+        }
+      } catch {}
     };
     loadConfig();
   }, []);
@@ -106,12 +143,9 @@ const Index = () => {
           {/* Left Sidebar */}
           <aside className="lg:col-span-2 space-y-4 order-2 lg:order-1">
             <SidebarTabs
-              tabs={[
-                { label: "পিপল", postLabel: "পিপল", count: 7 },
-                { label: "একটু থামুন", postLabel: "একটু থামুন", count: 7 },
-              ]}
+              tabs={sidebar.leftTabs.map(t => ({ label: t.label, postLabel: t.label, count: t.count }))}
             />
-            <SidebarWidget label="ভাইরাল" title="ভাইরাল" />
+            <SidebarWidget label={sidebar.leftWidget} title={sidebar.leftWidget} />
             <RssNewsWidget />
           </aside>
 
@@ -127,18 +161,13 @@ const Index = () => {
           {/* Right Sidebar */}
           <aside className="lg:col-span-3 space-y-4 order-3">
             <SidebarTabs
-              tabs={[
-                { label: "আলোচিত", postLabel: "আলোচিত", count: 7 },
-                { label: "স্পট লাইট", postLabel: "স্পট লাইট", count: 7 },
-              ]}
+              tabs={sidebar.rightTabs.map(t => ({ label: t.label, postLabel: t.label, count: t.count }))}
             />
             <SidebarTabs
-              title="জনপ্রিয়"
-              tabs={[
-                { label: "জনপ্রিয়", postLabel: "জনপ্রিয়", count: 7 },
-              ]}
+              title={sidebar.rightPopular[0]?.label || "জনপ্রিয়"}
+              tabs={sidebar.rightPopular.map(t => ({ label: t.label, postLabel: t.label, count: t.count }))}
             />
-            <SidebarWidget label="জটিল" title="জটিল" />
+            <SidebarWidget label={sidebar.rightWidget} title={sidebar.rightWidget} />
             <div className="bg-muted rounded flex items-center justify-center h-[250px] text-xs text-muted-foreground">
               বিজ্ঞাপন — ৩০০×২৫০
             </div>
