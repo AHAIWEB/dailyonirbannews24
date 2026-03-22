@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
-import { Plus, Trash2, RefreshCw, Rss, Globe, ExternalLink, Eye, EyeOff, Star, Send, Edit3, Save, X, Sparkles, BookOpen, MapPin, FileText } from "lucide-react";
+import { Plus, Trash2, RefreshCw, Rss, Globe, ExternalLink, Eye, EyeOff, Star, Send, Edit3, Save, X, Sparkles, BookOpen, MapPin } from "lucide-react";
 import { toast } from "sonner";
 import { getAllDivisions, getDistricts, getUpazilas } from "@/data/bangladeshLocations";
 
@@ -183,17 +183,6 @@ export default function RssFeedManager() {
   };
 
   const deleteArticle = async (id: string) => { await supabase.from("rss_articles").delete().eq("id", id); toast.success("আর্টিকেল মুছে ফেলা হয়েছে"); loadArticles(); };
-
-  const postToBlogger = (article: RssArticle) => {
-    const body = `<div style="font-family:'Hind Siliguri',sans-serif">` +
-      (article.image_url ? `<div style="text-align:center;margin-bottom:16px"><img src="${article.image_url}" alt="${article.title}" style="max-width:100%;border-radius:8px"/></div>` : "") +
-      `<p>${(article.content || "").replace(/\n/g, "<br/>")}</p>` +
-      `<p style="margin-top:16px;font-size:13px;color:#666">সূত্র: <a href="${article.source_url}" target="_blank" rel="noopener">${article.source_name || "বেলাভূমি নিউজ"}</a></p>` +
-      `</div>`;
-    const bloggerUrl = `https://www.blogger.com/blog/post/edit/preview?content=${encodeURIComponent(body)}&title=${encodeURIComponent(article.title)}`;
-    window.open(bloggerUrl, "_blank");
-    toast.success("ব্লগার এডিটর ওপেন হয়েছে");
-  };
 
   const filteredArticles = articles; // filtering is now done server-side
 
@@ -480,7 +469,6 @@ export default function RssFeedManager() {
                         {article.is_published ? <Eye className="w-3.5 h-3.5" /> : <EyeOff className="w-3.5 h-3.5" />}
                       </button>
                       <button onClick={() => startEditArticle(article)} className="p-1 rounded text-muted-foreground hover:text-foreground"><Edit3 className="w-3.5 h-3.5" /></button>
-                      <button onClick={() => postToBlogger(article)} className="p-1 rounded text-muted-foreground hover:text-orange-500" title="ব্লগারে পোস্ট"><FileText className="w-3.5 h-3.5" /></button>
                       <a href={article.source_url} target="_blank" rel="noopener noreferrer" className="p-1 rounded text-muted-foreground hover:text-primary"><ExternalLink className="w-3.5 h-3.5" /></a>
                       <button onClick={() => deleteArticle(article.id)} className="p-1 rounded text-destructive hover:bg-destructive/10"><Trash2 className="w-3.5 h-3.5" /></button>
                     </div>

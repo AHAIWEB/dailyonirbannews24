@@ -24,14 +24,6 @@ interface SectionConfig {
   visible: boolean;
 }
 
-interface SidebarConfig {
-  leftTabs: { label: string; postLabel: string; count: number }[];
-  rightTabs: { label: string; postLabel: string; count: number }[];
-  leftWidgets: { label: string; title: string }[];
-  rightWidgets: { label: string; title: string }[];
-  rightExtraTabs: { label: string; postLabel: string; count: number }[];
-}
-
 const DEFAULT_SECTIONS: SectionConfig[] = [
   { label: "হাইলাইটস", count: 6, layout: "highlight", visible: true },
   { label: "জাতীয়", count: 8, layout: "grid", visible: true },
@@ -47,20 +39,7 @@ const DEFAULT_SECTIONS: SectionConfig[] = [
   { label: "ভিডিও", count: 4, layout: "grid", visible: true },
 ];
 
-const DEFAULT_SIDEBAR: SidebarConfig = {
-  leftTabs: [
-    { label: "পিপল", postLabel: "পিপল", count: 7 },
-    { label: "একটু থামুন", postLabel: "একটু থামুন", count: 7 },
-  ],
-  rightTabs: [
-    { label: "আলোচিত", postLabel: "আলোচিত", count: 7 },
-    { label: "স্পট লাইট", postLabel: "স্পট লাইট", count: 7 },
-  ],
-  leftWidgets: [{ label: "ভাইরাল", title: "ভাইরাল" }],
-  rightWidgets: [{ label: "জটিল", title: "জটিল" }],
-  rightExtraTabs: [{ label: "জনপ্রিয়", postLabel: "জনপ্রিয়", count: 7 }],
-};
-
+// Map of special component labels to their renderers
 const SPECIAL_SECTIONS: Record<string, (config: SectionConfig) => JSX.Element> = {
   "ওয়েব স্টোরি": () => <WebStorySection key="webstory" />,
   "বেলাভূমি কণ্ঠ": () => <FotoCardSection key="fotocard" />,
@@ -73,8 +52,14 @@ const SPECIAL_SECTIONS: Record<string, (config: SectionConfig) => JSX.Element> =
 
 function renderSection(config: SectionConfig) {
   if (!config.visible) return null;
+
+  // Check if it's a special component
   const specialRenderer = SPECIAL_SECTIONS[config.label];
-  if (specialRenderer) return specialRenderer(config);
+  if (specialRenderer) {
+    return specialRenderer(config);
+  }
+
+  // Default: render as LabelPostSection with the configured layout/count
   return (
     <LabelPostSection
       key={config.label}
@@ -87,29 +72,26 @@ function renderSection(config: SectionConfig) {
 
 const Index = () => {
   const [sections, setSections] = useState<SectionConfig[]>(DEFAULT_SECTIONS);
-  const [sidebar, setSidebar] = useState<SidebarConfig>(DEFAULT_SIDEBAR);
 
   useEffect(() => {
+    // Load layout config from site_settings
     const loadConfig = async () => {
       try {
         const { data } = await supabase
           .from("site_settings")
-          .select("value, key")
-          .in("key", ["layout_config", "sidebar_config"]);
+          .select("value")
+          .eq("key", "layout_config")
+          .maybeSingle();
 
-        if (data) {
-          const layoutRow = data.find(d => d.key === "layout_config");
-          if (layoutRow?.value) {
-            const parsed = JSON.parse(layoutRow.value);
-            if (Array.isArray(parsed) && parsed.length > 0) setSections(parsed);
-          }
-          const sidebarRow = data.find(d => d.key === "sidebar_config");
-          if (sidebarRow?.value) {
-            const parsed = JSON.parse(sidebarRow.value);
-            if (parsed && typeof parsed === "object") setSidebar({ ...DEFAULT_SIDEBAR, ...parsed });
+        if (data?.value) {
+          const parsed = JSON.parse(data.value);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            setSections(parsed);
           }
         }
-      } catch {}
+      } catch {
+        // Use defaults on error
+      }
     };
     loadConfig();
   }, []);
@@ -123,16 +105,17 @@ const Index = () => {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
           {/* Left Sidebar */}
           <aside className="lg:col-span-2 space-y-4 order-2 lg:order-1">
-            {sidebar.leftTabs.length > 0 && (
-              <SidebarTabs tabs={sidebar.leftTabs} />
-            )}
-            {sidebar.leftWidgets.map(w => (
-              <SidebarWidget key={w.label} label={w.label} title={w.title} />
-            ))}
+            <SidebarTabs
+              tabs={[
+                { label: "পিপল", postLabel: "পিপল", count: 7 },
+                { label: "একটু থামুন", postLabel: "একটু থামুন", count: 7 },
+              ]}
+            />
+            <SidebarWidget label="ভাইরাল" title="ভাইরাল" />
             <RssNewsWidget />
           </aside>
 
-          {/* Main Content */}
+          {/* Main Content — Dynamic Sections */}
           <main className="lg:col-span-7 space-y-6 order-1 lg:order-2">
             <TopNews />
             <NewsCarousel />
@@ -143,15 +126,19 @@ const Index = () => {
 
           {/* Right Sidebar */}
           <aside className="lg:col-span-3 space-y-4 order-3">
-            {sidebar.rightTabs.length > 0 && (
-              <SidebarTabs tabs={sidebar.rightTabs} />
-            )}
-            {sidebar.rightExtraTabs.map((tabGroup, i) => (
-              <SidebarTabs key={`extra-${i}`} title={tabGroup.label} tabs={[tabGroup]} />
-            ))}
-            {sidebar.rightWidgets.map(w => (
-              <SidebarWidget key={w.label} label={w.label} title={w.title} />
-            ))}
+            <SidebarTabs
+              tabs={[
+                { label: "আলোচিত", postLabel: "আলোচিত", count: 7 },
+                { label: "স্পট লাইট", postLabel: "স্পট লাইট", count: 7 },
+              ]}
+            />
+            <SidebarTabs
+              title="জনপ্রিয়"
+              tabs={[
+                { label: "জনপ্রিয়", postLabel: "জনপ্রিয়", count: 7 },
+              ]}
+            />
+            <SidebarWidget label="জটিল" title="জটিল" />
             <div className="bg-muted rounded flex items-center justify-center h-[250px] text-xs text-muted-foreground">
               বিজ্ঞাপন — ৩০০×২৫০
             </div>

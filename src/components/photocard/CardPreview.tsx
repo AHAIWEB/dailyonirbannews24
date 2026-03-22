@@ -17,29 +17,25 @@ interface CardPreviewProps {
   showLogo: boolean;
   qrUrl: string;
   bgImage?: string;
-  titleSize?: number;
-  quoteSize?: number;
-  imageX?: number;
-  imageY?: number;
-  imageScale?: number;
 }
 
 const CardPreview = forwardRef<HTMLDivElement, CardPreviewProps>(
-  ({ template, title, quote, images, showQr, showLogo, qrUrl, bgImage, titleSize = 16, quoteSize = 12, imageX = 0, imageY = 0, imageScale = 100 }, ref) => {
+  ({ template, title, quote, images, showQr, showLogo, qrUrl, bgImage }, ref) => {
     const { bgColor, textColor, accentColor, borderStyle, fontStyle, logoText, subtitleText, footerLabel, footerUrl } = template;
     const today = new Date().toLocaleDateString("bn-BD", { day: "numeric", month: "long", year: "numeric" });
+
+    const fontClass = fontStyle === "serif" ? "font-serif" : fontStyle === "decorative" ? "font-serif" : "";
 
     return (
       <div
         ref={ref}
-        className="rounded-2xl overflow-hidden shadow-2xl max-w-[400px] mx-auto relative"
+        className={`rounded-2xl overflow-hidden shadow-2xl max-w-[400px] mx-auto relative ${fontClass}`}
         style={{
           backgroundColor: bgColor,
           border: borderStyle || "none",
           backgroundImage: bgImage ? `url(${bgImage})` : undefined,
           backgroundSize: "cover",
           backgroundPosition: "center",
-          fontFamily: fontStyle === "decorative" ? "'Hind Siliguri', sans-serif" : fontStyle === "serif" ? "serif" : "inherit",
         }}
       >
         {bgImage && <div className="absolute inset-0 bg-black/40 rounded-2xl" />}
@@ -61,20 +57,11 @@ const CardPreview = forwardRef<HTMLDivElement, CardPreviewProps>(
             <span className="text-[8px] opacity-50" style={{ color: textColor }}>{today}</span>
           </div>
 
-          {/* Main Image with transform controls */}
+          {/* Main Image */}
           {images[0] && (
             <div className="px-3">
               <div className="rounded-xl overflow-hidden aspect-[4/3]">
-                <img
-                  src={images[0].preview}
-                  alt=""
-                  className="w-full h-full object-cover"
-                  crossOrigin="anonymous"
-                  style={{
-                    transform: `translate(${imageX}px, ${imageY}px) scale(${imageScale / 100})`,
-                    transformOrigin: "center center",
-                  }}
-                />
+                <img src={images[0].preview} alt="" className="w-full h-full object-cover" crossOrigin="anonymous" />
               </div>
               {images[0].caption && (
                 <p className="text-[9px] mt-1 opacity-60 text-center" style={{ color: textColor }}>{images[0].caption}</p>
@@ -85,7 +72,7 @@ const CardPreview = forwardRef<HTMLDivElement, CardPreviewProps>(
           {/* Title */}
           {title && (
             <div className="px-4 pt-3">
-              <h3 className="font-black leading-relaxed" style={{ color: textColor, fontSize: `${titleSize}px` }}>{title}</h3>
+              <h3 className="text-base font-black leading-relaxed" style={{ color: textColor }}>{title}</h3>
             </div>
           )}
 
@@ -93,7 +80,7 @@ const CardPreview = forwardRef<HTMLDivElement, CardPreviewProps>(
           {quote && (
             <div className="px-4 pt-2">
               <div className="border-r-2 pr-3" style={{ borderColor: `${accentColor}80` }}>
-                <p className="italic leading-relaxed opacity-80" style={{ color: textColor, fontSize: `${quoteSize}px` }}>❝ {quote} ❞</p>
+                <p className="text-xs italic leading-relaxed opacity-80" style={{ color: textColor }}>❝ {quote} ❞</p>
               </div>
             </div>
           )}
