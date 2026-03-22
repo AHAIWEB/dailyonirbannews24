@@ -131,7 +131,13 @@ export default function SiteCustomizer() {
         value: JSON.stringify(sections),
         updated_at: new Date().toISOString(),
       } as any, { onConflict: "key" });
-      toast.success("লেআউট কনফিগ সেভ হয়েছে!");
+      // Save sidebar config too
+      await supabase.from("site_settings").upsert({
+        key: "sidebar_config",
+        value: JSON.stringify(sidebar),
+        updated_at: new Date().toISOString(),
+      } as any, { onConflict: "key" });
+      toast.success("লেআউট ও সাইডবার কনফিগ সেভ হয়েছে!");
     } catch {
       toast.success("লোকালি সেভ হয়েছে");
     }
