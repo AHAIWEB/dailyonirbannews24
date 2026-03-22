@@ -741,10 +741,11 @@ h1,h2,h3,h4,h5,h6 { font-family: 'Noto Sans Bengali', sans-serif; }
     <a href='/search/label/খেলাধুলা'>খেলাধুলা ›</a>
     <a href='/search/label/প্রযুক্তি'>প্রযুক্তি ›</a>
     <a href='/search/label/শিক্ষা'>শিক্ষা ›</a>
-    <a href='/search/label/স্বাস্থ্য'>স্বাস্থ্য ›</a>
+    <a href='/search/label/স্বাস্থ্যসেবা'>স্বাস্থ্যসেবা ›</a>
     <a href='/search/label/লাইফস্টাইল'>লাইফস্টাইল ›</a>
-    <a href='/search/label/মত-দ্বিমত'>মত-দ্বিমত ›</a>
+    <a href='/search/label/মতামত'>মতামত ›</a>
     <a href='/search/label/ভিডিও'>ভিডিও ›</a>
+    <a href='https://belabhuminews.lovable.app/photo-card' rel='noopener noreferrer' target='_blank'>ফটো কার্ড ↗</a>
   </nav>
 </div>
 
@@ -818,10 +819,11 @@ h1,h2,h3,h4,h5,h6 { font-family: 'Noto Sans Bengali', sans-serif; }
             <a href='/search/label/খেলাধুলা'>খেলাধুলা</a>
             <a href='/search/label/প্রযুক্তি'>প্রযুক্তি</a>
             <a href='/search/label/শিক্ষা'>শিক্ষা</a>
-            <a href='/search/label/স্বাস্থ্য'>স্বাস্থ্য</a>
+            <a href='/search/label/স্বাস্থ্যসেবা'>স্বাস্থ্যসেবা</a>
             <a href='/search/label/লাইফস্টাইল'>লাইফস্টাইল</a>
-            <a href='/search/label/মত-দ্বিমত'>মত-দ্বিমত</a>
+            <a href='/search/label/মতামত'>মতামত</a>
             <a href='/search/label/ভিডিও'>ভিডিও</a>
+            <a href='https://belabhuminews.lovable.app/photo-card' rel='noopener noreferrer' target='_blank'>ফটো কার্ড</a>
           </div>
         </div>
       </header>
