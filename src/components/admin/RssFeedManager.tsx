@@ -184,6 +184,31 @@ export default function RssFeedManager() {
 
   const deleteArticle = async (id: string) => { await supabase.from("rss_articles").delete().eq("id", id); toast.success("আর্টিকেল মুছে ফেলা হয়েছে"); loadArticles(); };
 
+  const [copiedId, setCopiedId] = useState<string | null>(null);
+
+  const generateBloggerHtml = (article: RssArticle) => {
+    let html = "";
+    if (article.image_url) html += `<div style="text-align:center;margin-bottom:16px;"><img src="${article.image_url}" alt="${article.title}" style="max-width:100%;border-radius:8px;"/></div>`;
+    if (article.content) html += `<div style="line-height:1.8;font-size:15px;">${article.content}</div>`;
+    html += `<p style="margin-top:16px;font-size:12px;color:#888;">সূত্র: <a href="${article.source_url}" target="_blank" rel="noopener noreferrer">${article.source_name || article.source_url}</a></p>`;
+    return html;
+  };
+
+  const copyForBlogger = (article: RssArticle) => {
+    const html = generateBloggerHtml(article);
+    navigator.clipboard.writeText(html);
+    setCopiedId(article.id);
+    setTimeout(() => setCopiedId(null), 2000);
+    toast.success("ব্লগারের জন্য HTML কপি হয়েছে!");
+  };
+
+  const openInBlogger = (article: RssArticle) => {
+    const content = generateBloggerHtml(article);
+    const labels = article.category;
+    const url = `https://www.blogger.com/blog-this.g?n=${encodeURIComponent(article.title)}&t=${encodeURIComponent(content)}&u=${encodeURIComponent(article.source_url)}${labels ? `&l=${encodeURIComponent(labels)}` : ""}`;
+    window.open(url, "_blank");
+  };
+
   const filteredArticles = articles; // filtering is now done server-side
 
   // Location helpers
