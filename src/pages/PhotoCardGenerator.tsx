@@ -600,6 +600,11 @@ export default function PhotoCardGenerator() {
               imageTransform={imageTransform}
               titleTransform={titleTransform}
               quoteTransform={quoteTransform}
+              imageOnTop={imageOnTop}
+              clipShape={clipShape}
+              onImageTransformChange={setImageTransform}
+              onTitleTransformChange={setTitleTransform}
+              onQuoteTransformChange={setQuoteTransform}
             />
           </div>
         </div>
