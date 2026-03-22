@@ -366,6 +366,101 @@ export default function SiteCustomizer() {
           </div>
         </CardContent>
       </Card>
+
+      {/* Sidebar Config */}
+      <Card>
+        <CardHeader className="pb-3">
+          <button onClick={() => setShowSidebar(!showSidebar)} className="flex items-center justify-between w-full">
+            <CardTitle className="text-base flex items-center gap-2">
+              <Columns className="w-4 h-4 text-primary" />
+              সাইডবার কাস্টমাইজার
+            </CardTitle>
+            <ChevronDown className={`w-4 h-4 transition-transform ${showSidebar ? "rotate-180" : ""}`} />
+          </button>
+        </CardHeader>
+        {showSidebar && (
+          <CardContent className="space-y-4">
+            {/* Left sidebar tabs */}
+            <div className="space-y-2">
+              <p className="text-xs font-bold text-muted-foreground">বাম সাইডবার ট্যাব</p>
+              {sidebar.leftTabs.map((t, i) => (
+                <div key={i} className="flex items-center gap-2">
+                  <input type="text" value={t.label} onChange={e => {
+                    const tabs = [...sidebar.leftTabs];
+                    tabs[i] = { ...tabs[i], label: e.target.value };
+                    setSidebar({ ...sidebar, leftTabs: tabs });
+                  }} className="flex-1 bg-muted border border-border rounded px-2 py-1 text-xs" />
+                  <input type="number" value={t.count} min={1} max={15} onChange={e => {
+                    const tabs = [...sidebar.leftTabs];
+                    tabs[i] = { ...tabs[i], count: Number(e.target.value) };
+                    setSidebar({ ...sidebar, leftTabs: tabs });
+                  }} className="w-14 bg-muted border border-border rounded px-2 py-1 text-xs" />
+                  <button onClick={() => setSidebar({ ...sidebar, leftTabs: sidebar.leftTabs.filter((_, j) => j !== i) })}
+                    className="text-destructive/60 hover:text-destructive p-1"><Trash2 className="w-3 h-3" /></button>
+                </div>
+              ))}
+              <button onClick={() => setSidebar({ ...sidebar, leftTabs: [...sidebar.leftTabs, { label: "নতুন", count: 7 }] })}
+                className="text-[10px] text-primary hover:underline flex items-center gap-0.5"><Plus className="w-3 h-3" /> ট্যাব যোগ</button>
+            </div>
+
+            {/* Left widget */}
+            <div>
+              <p className="text-xs font-bold text-muted-foreground mb-1">বাম উইজেট</p>
+              <input type="text" value={sidebar.leftWidget} onChange={e => setSidebar({ ...sidebar, leftWidget: e.target.value })}
+                className="w-full bg-muted border border-border rounded px-2 py-1 text-xs" />
+            </div>
+
+            {/* Right sidebar tabs */}
+            <div className="space-y-2">
+              <p className="text-xs font-bold text-muted-foreground">ডান সাইডবার ট্যাব</p>
+              {sidebar.rightTabs.map((t, i) => (
+                <div key={i} className="flex items-center gap-2">
+                  <input type="text" value={t.label} onChange={e => {
+                    const tabs = [...sidebar.rightTabs];
+                    tabs[i] = { ...tabs[i], label: e.target.value };
+                    setSidebar({ ...sidebar, rightTabs: tabs });
+                  }} className="flex-1 bg-muted border border-border rounded px-2 py-1 text-xs" />
+                  <input type="number" value={t.count} min={1} max={15} onChange={e => {
+                    const tabs = [...sidebar.rightTabs];
+                    tabs[i] = { ...tabs[i], count: Number(e.target.value) };
+                    setSidebar({ ...sidebar, rightTabs: tabs });
+                  }} className="w-14 bg-muted border border-border rounded px-2 py-1 text-xs" />
+                  <button onClick={() => setSidebar({ ...sidebar, rightTabs: sidebar.rightTabs.filter((_, j) => j !== i) })}
+                    className="text-destructive/60 hover:text-destructive p-1"><Trash2 className="w-3 h-3" /></button>
+                </div>
+              ))}
+              <button onClick={() => setSidebar({ ...sidebar, rightTabs: [...sidebar.rightTabs, { label: "নতুন", count: 7 }] })}
+                className="text-[10px] text-primary hover:underline flex items-center gap-0.5"><Plus className="w-3 h-3" /> ট্যাব যোগ</button>
+            </div>
+
+            {/* Right popular */}
+            <div className="space-y-2">
+              <p className="text-xs font-bold text-muted-foreground">ডান জনপ্রিয় ট্যাব</p>
+              {sidebar.rightPopular.map((t, i) => (
+                <div key={i} className="flex items-center gap-2">
+                  <input type="text" value={t.label} onChange={e => {
+                    const tabs = [...sidebar.rightPopular];
+                    tabs[i] = { ...tabs[i], label: e.target.value };
+                    setSidebar({ ...sidebar, rightPopular: tabs });
+                  }} className="flex-1 bg-muted border border-border rounded px-2 py-1 text-xs" />
+                  <input type="number" value={t.count} min={1} max={15} onChange={e => {
+                    const tabs = [...sidebar.rightPopular];
+                    tabs[i] = { ...tabs[i], count: Number(e.target.value) };
+                    setSidebar({ ...sidebar, rightPopular: tabs });
+                  }} className="w-14 bg-muted border border-border rounded px-2 py-1 text-xs" />
+                </div>
+              ))}
+            </div>
+
+            {/* Right widget */}
+            <div>
+              <p className="text-xs font-bold text-muted-foreground mb-1">ডান উইজেট</p>
+              <input type="text" value={sidebar.rightWidget} onChange={e => setSidebar({ ...sidebar, rightWidget: e.target.value })}
+                className="w-full bg-muted border border-border rounded px-2 py-1 text-xs" />
+            </div>
+          </CardContent>
+        )}
+      </Card>
     </div>
   );
 }
