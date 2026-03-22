@@ -143,12 +143,9 @@ const Index = () => {
           {/* Left Sidebar */}
           <aside className="lg:col-span-2 space-y-4 order-2 lg:order-1">
             <SidebarTabs
-              tabs={[
-                { label: "পিপল", postLabel: "পিপল", count: 7 },
-                { label: "একটু থামুন", postLabel: "একটু থামুন", count: 7 },
-              ]}
+              tabs={sidebar.leftTabs.map(t => ({ label: t.label, postLabel: t.label, count: t.count }))}
             />
-            <SidebarWidget label="ভাইরাল" title="ভাইরাল" />
+            <SidebarWidget label={sidebar.leftWidget} title={sidebar.leftWidget} />
             <RssNewsWidget />
           </aside>
 
@@ -164,18 +161,13 @@ const Index = () => {
           {/* Right Sidebar */}
           <aside className="lg:col-span-3 space-y-4 order-3">
             <SidebarTabs
-              tabs={[
-                { label: "আলোচিত", postLabel: "আলোচিত", count: 7 },
-                { label: "স্পট লাইট", postLabel: "স্পট লাইট", count: 7 },
-              ]}
+              tabs={sidebar.rightTabs.map(t => ({ label: t.label, postLabel: t.label, count: t.count }))}
             />
             <SidebarTabs
-              title="জনপ্রিয়"
-              tabs={[
-                { label: "জনপ্রিয়", postLabel: "জনপ্রিয়", count: 7 },
-              ]}
+              title={sidebar.rightPopular[0]?.label || "জনপ্রিয়"}
+              tabs={sidebar.rightPopular.map(t => ({ label: t.label, postLabel: t.label, count: t.count }))}
             />
-            <SidebarWidget label="জটিল" title="জটিল" />
+            <SidebarWidget label={sidebar.rightWidget} title={sidebar.rightWidget} />
             <div className="bg-muted rounded flex items-center justify-center h-[250px] text-xs text-muted-foreground">
               বিজ্ঞাপন — ৩০০×২৫০
             </div>
