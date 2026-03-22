@@ -508,6 +508,19 @@ export default function RssFeedManager() {
                       </button>
                     ))}
                   </div>
+                  {/* Blogger post buttons */}
+                  <div className="flex flex-wrap gap-1 pt-1 border-t border-border/50">
+                    <span className="text-[9px] text-muted-foreground flex items-center gap-0.5 mr-1"><Bookmark className="w-2.5 h-2.5" /> ব্লগার:</span>
+                    <button onClick={() => openInBlogger(article)}
+                      className="text-[9px] px-1.5 py-0.5 rounded bg-[#FF6600] text-white hover:opacity-80 flex items-center gap-0.5">
+                      <Bookmark className="w-2.5 h-2.5" /> Blogger পোস্ট
+                    </button>
+                    <button onClick={() => copyForBlogger(article)}
+                      className="text-[9px] px-1.5 py-0.5 rounded bg-muted text-muted-foreground hover:bg-accent flex items-center gap-0.5">
+                      {copiedId === article.id ? <CheckCircle2 className="w-2.5 h-2.5 text-primary" /> : <Copy className="w-2.5 h-2.5" />}
+                      {copiedId === article.id ? "কপি হয়েছে!" : "HTML কপি"}
+                    </button>
+                  </div>
                 </>
               )}
             </div>
