@@ -69,10 +69,14 @@ export default function FotoCardSection() {
         <div ref={scrollRef} className="grid grid-cols-3 gap-2 md:flex md:gap-4 md:overflow-x-auto md:scrollbar-hide pb-2 md:snap-x md:snap-mandatory">
           {items.map((item) => {
             const card = (
-              <div className="bg-sky-50 dark:bg-sky-950/30 rounded-xl md:rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-all border border-sky-100 dark:border-sky-900/50">
+              <div className="bg-sky-50 dark:bg-sky-950/30 rounded-xl md:rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-all border border-sky-100 dark:border-sky-900/50" style={{ fontFamily: "'Hind Siliguri', sans-serif" }}>
                 {item.image && (
-                  <div className="aspect-[4/3] overflow-hidden">
-                    <img src={item.image} alt={item.title} className="w-full h-full object-cover" />
+                  <div className="w-full overflow-hidden bg-sky-100 dark:bg-sky-900/30 flex items-center justify-center">
+                    <img
+                      src={item.image}
+                      alt={item.title}
+                      className="w-full h-auto max-h-[400px] object-contain"
+                    />
                   </div>
                 )}
                 <div className="px-2 pt-2 pb-1 md:px-4 md:pt-4 md:pb-2 flex items-start justify-between">
