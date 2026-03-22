@@ -18,16 +18,53 @@ function extractMeta(html: string, property: string): string | null {
 function extractTitle(html: string): string {
   const ogTitle = extractMeta(html, 'og:title');
   if (ogTitle) return ogTitle;
+  const h1Match = html.match(/<h1[^>]*>([\s\S]*?)<\/h1>/i);
+  if (h1Match) {
+    return h1Match[1].replace(/<[^>]+>/g, '').trim();
+  }
   const titleMatch = html.match(/<title[^>]*>([^<]+)<\/title>/i);
   return titleMatch ? titleMatch[1].trim() : '';
 }
 
 function extractDescription(html: string): string {
-  return extractMeta(html, 'og:description') || extractMeta(html, 'description') || '';
+  const metaDescription = extractMeta(html, 'og:description') || extractMeta(html, 'description');
+  if (metaDescription) return metaDescription;
+
+  const firstParagraph = html.match(/<p[^>]*>([\s\S]*?)<\/p>/i);
+  return firstParagraph
+    ? firstParagraph[1].replace(/<[^>]+>/g, '').replace(/\s+/g, ' ').trim().slice(0, 280)
+    : '';
 }
 
-function extractImage(html: string): string {
-  return extractMeta(html, 'og:image') || extractMeta(html, 'twitter:image') || '';
+function resolveUrl(rawUrl: string, baseUrl: string): string {
+  if (!rawUrl) return '';
+  if (rawUrl.startsWith('http')) return rawUrl;
+  if (rawUrl.startsWith('//')) return `https:${rawUrl}`;
+
+  try {
+    return new URL(rawUrl, baseUrl).toString();
+  } catch {
+    return rawUrl;
+  }
+}
+
+function extractImage(html: string, baseUrl: string): string {
+  const metaImage = extractMeta(html, 'og:image') || extractMeta(html, 'twitter:image');
+  if (metaImage) return resolveUrl(metaImage, baseUrl);
+
+  const imagePatterns = [
+    /<article[^>]*>[\s\S]*?<img[^>]+(?:data-src|src)=["']([^"']+)["']/i,
+    /<main[^>]*>[\s\S]*?<img[^>]+(?:data-src|src)=["']([^"']+)["']/i,
+    /<img[^>]+(?:data-src|src)=["']([^"']+)["'][^>]*(?:class|alt)=["'][^"']*(?:featured|thumbnail|article|story|news)[^"']*["']/i,
+    /<img[^>]+(?:data-src|src)=["']([^"']+)["']/i,
+  ];
+
+  for (const pattern of imagePatterns) {
+    const match = html.match(pattern);
+    if (match?.[1]) return resolveUrl(match[1], baseUrl);
+  }
+
+  return '';
 }
 
 function extractFavicon(html: string, baseUrl: string): string {
@@ -421,28 +458,24 @@ Deno.serve(async (req) => {
     const metadata: Record<string, string> = {
       title: extractTitle(html),
       description: extractDescription(html),
-      image: extractImage(html),
+      image: extractImage(html, formattedUrl),
       favicon: extractFavicon(html, formattedUrl),
       siteName: extractSiteName(html, formattedUrl),
       url: formattedUrl,
     };
 
-    if (metadata.image && !metadata.image.startsWith('http')) {
-      if (metadata.image.startsWith('//')) {
-        metadata.image = `https:${metadata.image}`;
-      } else {
-        const base = new URL(formattedUrl);
-        metadata.image = `${base.origin}${metadata.image.startsWith('/') ? '' : '/'}${metadata.image}`;
-      }
+    const extractedBody = extractContent ? extractArticleBody(html) : '';
+    if (!metadata.description && extractedBody) {
+      metadata.description = extractedBody.replace(/\s+/g, ' ').trim().slice(0, 280);
     }
 
     if (extractContent) {
-      metadata.content = extractArticleBody(html);
+      metadata.content = extractedBody;
       console.log(`Content extracted: ${metadata.content.length} chars, ${metadata.content.split('\n\n').length} paragraphs`);
     }
 
     return new Response(
-      JSON.stringify({ success: true, data: metadata }),
+      JSON.stringify({ success: true, ...metadata, data: metadata }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   } catch (error) {
