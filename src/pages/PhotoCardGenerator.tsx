@@ -354,7 +354,7 @@ export default function PhotoCardGenerator() {
             {/* Image Transform Controls */}
             {images.length > 0 && (
               <div className="p-3 bg-muted rounded-lg border border-border space-y-2">
-                <p className="text-xs font-bold text-foreground flex items-center gap-1"><Move className="w-3 h-3" /> ছবি পজিশন ও এঙ্গেল</p>
+                <p className="text-xs font-bold text-foreground flex items-center gap-1"><Move className="w-3 h-3" /> ছবি পজিশন ও এঙ্গেল (ড্র্যাগ করেও সরানো যায়)</p>
                 <div className="grid grid-cols-2 gap-2">
                   <div>
                     <label className="text-[10px] text-muted-foreground">X পজিশন ({imageTransform.x}px)</label>
@@ -381,6 +381,50 @@ export default function PhotoCardGenerator() {
                       className="w-full h-1.5 accent-primary" />
                   </div>
                 </div>
+
+                {/* Layer toggle */}
+                {customBgImage && (
+                  <div className="flex items-center gap-3 pt-1">
+                    <label className="flex items-center gap-1.5 text-[10px] cursor-pointer">
+                      <Layers className="w-3 h-3 text-primary" />
+                      <input type="checkbox" checked={imageOnTop} onChange={e => setImageOnTop(e.target.checked)} className="rounded" />
+                      ছবি উপরে (পজিশন সেটআপ)
+                    </label>
+                    <span className="text-[9px] text-muted-foreground">
+                      {imageOnTop ? "📌 ছবি ফ্রেমের উপরে — সাইজ/পজিশন ঠিক করুন" : "✅ ছবি ফ্রেমের পেছনে"}
+                    </span>
+                  </div>
+                )}
+
+                {/* Clip shape */}
+                <div className="pt-1">
+                  <label className="text-[10px] text-muted-foreground flex items-center gap-1 mb-1">
+                    <Crop className="w-3 h-3" /> ছবি ক্রপ / ফ্রেম সেপ
+                  </label>
+                  <div className="flex gap-1.5 flex-wrap">
+                    {([
+                      { value: "none", label: "কোনোটা না" },
+                      { value: "circle", label: "⬤ বৃত্ত" },
+                      { value: "rounded", label: "▢ গোল কোণা" },
+                      { value: "hexagon", label: "⬡ হেক্সাগন" },
+                      { value: "diamond", label: "◆ ডায়মন্ড" },
+                      { value: "oval", label: "⬮ ওভাল" },
+                    ] as { value: ClipShape; label: string }[]).map(s => (
+                      <button
+                        key={s.value}
+                        onClick={() => setClipShape(s.value)}
+                        className={`px-2 py-0.5 rounded text-[10px] border transition-all ${
+                          clipShape === s.value
+                            ? "border-primary bg-primary/10 text-primary font-bold"
+                            : "border-border text-muted-foreground hover:border-primary/50"
+                        }`}
+                      >
+                        {s.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
                 <button onClick={resetAllTransforms}
                   className="text-[10px] text-primary underline">রিসেট</button>
               </div>
