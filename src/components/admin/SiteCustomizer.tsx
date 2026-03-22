@@ -13,14 +13,6 @@ interface SectionConfig {
   subcategories?: string[];
 }
 
-interface SidebarConfig {
-  leftTabs: { label: string; count: number }[];
-  rightTabs: { label: string; count: number }[];
-  rightPopular: { label: string; count: number }[];
-  leftWidget: string;
-  rightWidget: string;
-}
-
 const LAYOUT_OPTIONS = [
   { value: "list", label: "লিস্ট", icon: List },
   { value: "grid", label: "গ্রিড", icon: LayoutGrid },
@@ -57,33 +49,15 @@ const DEFAULT_SECTIONS: SectionConfig[] = [
 
 const STORAGE_KEY = "site-layout-config";
 
-const DEFAULT_SIDEBAR: SidebarConfig = {
-  leftTabs: [
-    { label: "পিপল", count: 7 },
-    { label: "একটু থামুন", count: 7 },
-  ],
-  rightTabs: [
-    { label: "আলোচিত", count: 7 },
-    { label: "স্পট লাইট", count: 7 },
-  ],
-  rightPopular: [
-    { label: "জনপ্রিয়", count: 7 },
-  ],
-  leftWidget: "ভাইরাল",
-  rightWidget: "জটিল",
-};
-
 export default function SiteCustomizer() {
   const [sections, setSections] = useState<SectionConfig[]>(DEFAULT_SECTIONS);
-  const [sidebar, setSidebar] = useState<SidebarConfig>(DEFAULT_SIDEBAR);
   const [newLabel, setNewLabel] = useState("");
   const [newSubcat, setNewSubcat] = useState("");
   const [saving, setSaving] = useState(false);
   const [loading, setLoading] = useState(true);
   const [expandedIdx, setExpandedIdx] = useState<number | null>(null);
-  const [showSidebar, setShowSidebar] = useState(false);
 
-  // Load config
+  // Load config — only from saved config or defaults, NO RSS auto-merge
   useEffect(() => {
     const load = async () => {
       setLoading(true);
@@ -98,25 +72,27 @@ export default function SiteCustomizer() {
           const parsed = JSON.parse(data.value);
           if (Array.isArray(parsed) && parsed.length > 0) {
             setSections(parsed);
+            setLoading(false);
+            return;
           }
         }
       } catch {}
 
-      // Load sidebar config
+      // Try localStorage fallback
       try {
-        const { data: sData } = await supabase
-          .from("site_settings")
-          .select("value")
-          .eq("key", "sidebar_config")
-          .maybeSingle();
-        if (sData?.value) {
-          const parsed = JSON.parse(sData.value);
-          if (parsed && typeof parsed === "object") {
-            setSidebar({ ...DEFAULT_SIDEBAR, ...parsed });
+        const saved = localStorage.getItem(STORAGE_KEY);
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            setSections(parsed);
+            setLoading(false);
+            return;
           }
         }
       } catch {}
 
+      // Use defaults only
+      setSections([...DEFAULT_SECTIONS]);
       setLoading(false);
     };
     load();
@@ -131,13 +107,7 @@ export default function SiteCustomizer() {
         value: JSON.stringify(sections),
         updated_at: new Date().toISOString(),
       } as any, { onConflict: "key" });
-      // Save sidebar config too
-      await supabase.from("site_settings").upsert({
-        key: "sidebar_config",
-        value: JSON.stringify(sidebar),
-        updated_at: new Date().toISOString(),
-      } as any, { onConflict: "key" });
-      toast.success("লেআউট ও সাইডবার কনফিগ সেভ হয়েছে!");
+      toast.success("লেআউট কনফিগ সেভ হয়েছে!");
     } catch {
       toast.success("লোকালি সেভ হয়েছে");
     }
@@ -365,101 +335,6 @@ export default function SiteCustomizer() {
             </Button>
           </div>
         </CardContent>
-      </Card>
-
-      {/* Sidebar Config */}
-      <Card>
-        <CardHeader className="pb-3">
-          <button onClick={() => setShowSidebar(!showSidebar)} className="flex items-center justify-between w-full">
-            <CardTitle className="text-base flex items-center gap-2">
-              <Columns className="w-4 h-4 text-primary" />
-              সাইডবার কাস্টমাইজার
-            </CardTitle>
-            <ChevronDown className={`w-4 h-4 transition-transform ${showSidebar ? "rotate-180" : ""}`} />
-          </button>
-        </CardHeader>
-        {showSidebar && (
-          <CardContent className="space-y-4">
-            {/* Left sidebar tabs */}
-            <div className="space-y-2">
-              <p className="text-xs font-bold text-muted-foreground">বাম সাইডবার ট্যাব</p>
-              {sidebar.leftTabs.map((t, i) => (
-                <div key={i} className="flex items-center gap-2">
-                  <input type="text" value={t.label} onChange={e => {
-                    const tabs = [...sidebar.leftTabs];
-                    tabs[i] = { ...tabs[i], label: e.target.value };
-                    setSidebar({ ...sidebar, leftTabs: tabs });
-                  }} className="flex-1 bg-muted border border-border rounded px-2 py-1 text-xs" />
-                  <input type="number" value={t.count} min={1} max={15} onChange={e => {
-                    const tabs = [...sidebar.leftTabs];
-                    tabs[i] = { ...tabs[i], count: Number(e.target.value) };
-                    setSidebar({ ...sidebar, leftTabs: tabs });
-                  }} className="w-14 bg-muted border border-border rounded px-2 py-1 text-xs" />
-                  <button onClick={() => setSidebar({ ...sidebar, leftTabs: sidebar.leftTabs.filter((_, j) => j !== i) })}
-                    className="text-destructive/60 hover:text-destructive p-1"><Trash2 className="w-3 h-3" /></button>
-                </div>
-              ))}
-              <button onClick={() => setSidebar({ ...sidebar, leftTabs: [...sidebar.leftTabs, { label: "নতুন", count: 7 }] })}
-                className="text-[10px] text-primary hover:underline flex items-center gap-0.5"><Plus className="w-3 h-3" /> ট্যাব যোগ</button>
-            </div>
-
-            {/* Left widget */}
-            <div>
-              <p className="text-xs font-bold text-muted-foreground mb-1">বাম উইজেট</p>
-              <input type="text" value={sidebar.leftWidget} onChange={e => setSidebar({ ...sidebar, leftWidget: e.target.value })}
-                className="w-full bg-muted border border-border rounded px-2 py-1 text-xs" />
-            </div>
-
-            {/* Right sidebar tabs */}
-            <div className="space-y-2">
-              <p className="text-xs font-bold text-muted-foreground">ডান সাইডবার ট্যাব</p>
-              {sidebar.rightTabs.map((t, i) => (
-                <div key={i} className="flex items-center gap-2">
-                  <input type="text" value={t.label} onChange={e => {
-                    const tabs = [...sidebar.rightTabs];
-                    tabs[i] = { ...tabs[i], label: e.target.value };
-                    setSidebar({ ...sidebar, rightTabs: tabs });
-                  }} className="flex-1 bg-muted border border-border rounded px-2 py-1 text-xs" />
-                  <input type="number" value={t.count} min={1} max={15} onChange={e => {
-                    const tabs = [...sidebar.rightTabs];
-                    tabs[i] = { ...tabs[i], count: Number(e.target.value) };
-                    setSidebar({ ...sidebar, rightTabs: tabs });
-                  }} className="w-14 bg-muted border border-border rounded px-2 py-1 text-xs" />
-                  <button onClick={() => setSidebar({ ...sidebar, rightTabs: sidebar.rightTabs.filter((_, j) => j !== i) })}
-                    className="text-destructive/60 hover:text-destructive p-1"><Trash2 className="w-3 h-3" /></button>
-                </div>
-              ))}
-              <button onClick={() => setSidebar({ ...sidebar, rightTabs: [...sidebar.rightTabs, { label: "নতুন", count: 7 }] })}
-                className="text-[10px] text-primary hover:underline flex items-center gap-0.5"><Plus className="w-3 h-3" /> ট্যাব যোগ</button>
-            </div>
-
-            {/* Right popular */}
-            <div className="space-y-2">
-              <p className="text-xs font-bold text-muted-foreground">ডান জনপ্রিয় ট্যাব</p>
-              {sidebar.rightPopular.map((t, i) => (
-                <div key={i} className="flex items-center gap-2">
-                  <input type="text" value={t.label} onChange={e => {
-                    const tabs = [...sidebar.rightPopular];
-                    tabs[i] = { ...tabs[i], label: e.target.value };
-                    setSidebar({ ...sidebar, rightPopular: tabs });
-                  }} className="flex-1 bg-muted border border-border rounded px-2 py-1 text-xs" />
-                  <input type="number" value={t.count} min={1} max={15} onChange={e => {
-                    const tabs = [...sidebar.rightPopular];
-                    tabs[i] = { ...tabs[i], count: Number(e.target.value) };
-                    setSidebar({ ...sidebar, rightPopular: tabs });
-                  }} className="w-14 bg-muted border border-border rounded px-2 py-1 text-xs" />
-                </div>
-              ))}
-            </div>
-
-            {/* Right widget */}
-            <div>
-              <p className="text-xs font-bold text-muted-foreground mb-1">ডান উইজেট</p>
-              <input type="text" value={sidebar.rightWidget} onChange={e => setSidebar({ ...sidebar, rightWidget: e.target.value })}
-                className="w-full bg-muted border border-border rounded px-2 py-1 text-xs" />
-            </div>
-          </CardContent>
-        )}
       </Card>
     </div>
   );

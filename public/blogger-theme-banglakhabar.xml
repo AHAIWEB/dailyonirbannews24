@@ -8,7 +8,7 @@
 <title><data:blog.pageTitle/></title>
 
 <!-- Fonts -->
-<link href='https://fonts.googleapis.com/css2?family=Noto+Sans+Bengali:wght@300;400;500;600;700;800;900&amp;family=Tiro+Bangla:ital@0;1&amp;family=Hind+Siliguri:wght@300;400;500;600;700&amp;display=swap' rel='stylesheet'/>
+<link href='https://fonts.googleapis.com/css2?family=Noto+Sans+Bengali:wght@300;400;500;600;700;800;900&amp;family=Tiro+Bangla:ital@0;1&amp;display=swap' rel='stylesheet'/>
 
 <b:skin><![CDATA[
 /* ===== VARIABLES ===== */
@@ -1089,7 +1089,7 @@ h1,h2,h3,h4,h5,h6 { font-family: 'Noto Sans Bengali', sans-serif; }
             //<![CDATA[
             (function(){
               var s=document.createElement('script');
-              s.src='/feeds/posts/default/-/শীর্ষ সংবাদ?alt=json-in-script&amp;max-results=6&amp;callback=_bkTopNews';
+              s.src='/feeds/posts/default?alt=json-in-script&amp;max-results=6&amp;callback=_bkTopNews';
               document.body.appendChild(s);
             })();
             function _bkTopNews(d){
@@ -1284,7 +1284,7 @@ h1,h2,h3,h4,h5,h6 { font-family: 'Noto Sans Bengali', sans-serif; }
             //<![CDATA[
             (function(){
               var s=document.createElement('script');
-              s.src='/feeds/posts/default/-/বেলাভূমি কণ্ঠ?alt=json-in-script&amp;max-results=6&amp;callback=_bkFotoCard';
+              s.src='/feeds/posts/default/-/মত-দ্বিমত?alt=json-in-script&max-results=6&callback=_bkFotoCard';
               document.body.appendChild(s);
             })();
             function _bkFotoCard(d){if(typeof _renderFotoCard==='function'){_renderFotoCard('fotoCardSection',d);}else{var _t=setInterval(function(){if(typeof _renderFotoCard==='function'){clearInterval(_t);_renderFotoCard('fotoCardSection',d);}},100);}}

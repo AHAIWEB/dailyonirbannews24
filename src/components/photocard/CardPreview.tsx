@@ -17,15 +17,10 @@ interface CardPreviewProps {
   showLogo: boolean;
   qrUrl: string;
   bgImage?: string;
-  titleSize?: number;
-  quoteSize?: number;
-  imageOffsetX?: number;
-  imageOffsetY?: number;
-  imageScale?: number;
 }
 
 const CardPreview = forwardRef<HTMLDivElement, CardPreviewProps>(
-  ({ template, title, quote, images, showQr, showLogo, qrUrl, bgImage, titleSize = 16, quoteSize = 12, imageOffsetX = 0, imageOffsetY = 0, imageScale = 100 }, ref) => {
+  ({ template, title, quote, images, showQr, showLogo, qrUrl, bgImage }, ref) => {
     const { bgColor, textColor, accentColor, borderStyle, fontStyle, logoText, subtitleText, footerLabel, footerUrl } = template;
     const today = new Date().toLocaleDateString("bn-BD", { day: "numeric", month: "long", year: "numeric" });
 
@@ -41,7 +36,6 @@ const CardPreview = forwardRef<HTMLDivElement, CardPreviewProps>(
           backgroundImage: bgImage ? `url(${bgImage})` : undefined,
           backgroundSize: "cover",
           backgroundPosition: "center",
-          fontFamily: "'Hind Siliguri', sans-serif",
         }}
       >
         {bgImage && <div className="absolute inset-0 bg-black/40 rounded-2xl" />}
@@ -63,20 +57,11 @@ const CardPreview = forwardRef<HTMLDivElement, CardPreviewProps>(
             <span className="text-[8px] opacity-50" style={{ color: textColor }}>{today}</span>
           </div>
 
-          {/* Main Image — auto resize with move/scale */}
+          {/* Main Image */}
           {images[0] && (
             <div className="px-3">
-              <div className="rounded-xl overflow-hidden bg-black/10 flex items-center justify-center">
-                <img
-                  src={images[0].preview}
-                  alt=""
-                  className="w-full h-auto max-h-[400px] object-contain"
-                  crossOrigin="anonymous"
-                  style={{
-                    transform: `translate(${imageOffsetX}px, ${imageOffsetY}px) scale(${imageScale / 100})`,
-                    transition: "transform 0.2s",
-                  }}
-                />
+              <div className="rounded-xl overflow-hidden aspect-[4/3]">
+                <img src={images[0].preview} alt="" className="w-full h-full object-cover" crossOrigin="anonymous" />
               </div>
               {images[0].caption && (
                 <p className="text-[9px] mt-1 opacity-60 text-center" style={{ color: textColor }}>{images[0].caption}</p>
@@ -87,7 +72,7 @@ const CardPreview = forwardRef<HTMLDivElement, CardPreviewProps>(
           {/* Title */}
           {title && (
             <div className="px-4 pt-3">
-              <h3 className="font-black leading-relaxed" style={{ color: textColor, fontSize: `${titleSize}px` }}>{title}</h3>
+              <h3 className="text-base font-black leading-relaxed" style={{ color: textColor }}>{title}</h3>
             </div>
           )}
 
@@ -95,7 +80,7 @@ const CardPreview = forwardRef<HTMLDivElement, CardPreviewProps>(
           {quote && (
             <div className="px-4 pt-2">
               <div className="border-r-2 pr-3" style={{ borderColor: `${accentColor}80` }}>
-                <p className="italic leading-relaxed opacity-80" style={{ color: textColor, fontSize: `${quoteSize}px` }}>❝ {quote} ❞</p>
+                <p className="text-xs italic leading-relaxed opacity-80" style={{ color: textColor }}>❝ {quote} ❞</p>
               </div>
             </div>
           )}
