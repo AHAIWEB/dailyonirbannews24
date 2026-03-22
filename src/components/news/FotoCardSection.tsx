@@ -1,13 +1,11 @@
 import { useState, useEffect, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { generatePosts } from "@/data/mockData";
 import SectionLabel from "./SectionLabel";
 import { Link } from "react-router-dom";
 import { ChevronLeft, ChevronRight, Quote } from "lucide-react";
 
 export default function FotoCardSection() {
   const [articles, setArticles] = useState<any[]>([]);
-  const mockPosts = generatePosts("মতামত", 6);
   const scrollRef = useRef<HTMLDivElement>(null);
   const today = new Date().toLocaleDateString("bn-BD", { day: "numeric", month: "long", year: "numeric" });
 
@@ -18,34 +16,14 @@ export default function FotoCardSection() {
         .select("*")
         .eq("is_published", true)
         .eq("category", "বেলাভূমি কণ্ঠ")
-        .order("published_at", { ascending: false })
-        .limit(6);
+        .order("created_at", { ascending: false })
+        .limit(10);
       setArticles(data || []);
     };
     load();
   }, []);
 
-  const hasRss = articles.length > 0;
-
-  const items = hasRss
-    ? articles.map(a => ({
-        id: a.id,
-        title: a.title,
-        excerpt: a.content || "",
-        image: a.image_url || "",
-        url: a.source_url,
-        source: a.source_name || "",
-        isExternal: true,
-      }))
-    : mockPosts.map(p => ({
-        id: String(p.id),
-        title: p.title,
-        excerpt: p.excerpt,
-        image: p.authorImage,
-        url: `/post/${p.id}`,
-        source: p.author,
-        isExternal: false,
-      }));
+  if (articles.length === 0) return null;
 
   const scroll = (dir: "left" | "right") => {
     if (scrollRef.current) {
@@ -67,12 +45,15 @@ export default function FotoCardSection() {
         </button>
 
         <div ref={scrollRef} className="grid grid-cols-3 gap-2 md:flex md:gap-4 md:overflow-x-auto md:scrollbar-hide pb-2 md:snap-x md:snap-mandatory">
-          {items.map((item) => {
+          {articles.map((item) => {
+            const isInternal = item.source_url?.includes(window.location.origin) || item.source_url?.startsWith("/");
+            const postUrl = isInternal ? `/post/${item.id}` : item.source_url;
+
             const card = (
               <div className="bg-sky-50 dark:bg-sky-950/30 rounded-xl md:rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-all border border-sky-100 dark:border-sky-900/50">
-                {item.image && (
+                {item.image_url && (
                   <div className="aspect-[4/3] overflow-hidden">
-                    <img src={item.image} alt={item.title} className="w-full h-full object-cover" />
+                    <img src={item.image_url} alt={item.title} className="w-full h-full object-cover" />
                   </div>
                 )}
                 <div className="px-2 pt-2 pb-1 md:px-4 md:pt-4 md:pb-2 flex items-start justify-between">
@@ -83,6 +64,9 @@ export default function FotoCardSection() {
                   <p className="text-[10px] md:text-sm font-bold text-foreground leading-[1.6] md:leading-[1.8] line-clamp-3 md:line-clamp-5 group-hover:text-primary transition-colors">
                     {item.title}
                   </p>
+                  {item.content && (
+                    <p className="text-[8px] md:text-xs text-muted-foreground mt-1 line-clamp-2">{item.content}</p>
+                  )}
                 </div>
                 <div className="bg-sky-600 dark:bg-sky-800 px-2 py-1 md:px-4 md:py-1.5 flex items-center justify-between">
                   <span className="text-[8px] md:text-[10px] font-bold text-white tracking-wider">বেলাভূমি কণ্ঠ</span>
@@ -91,16 +75,16 @@ export default function FotoCardSection() {
               </div>
             );
 
-            return item.isExternal ? (
-              <a key={item.id} href={item.url} target="_blank" rel="noopener noreferrer"
-                className="md:flex-shrink-0 md:w-[280px] lg:w-[300px] md:snap-start block group">
-                {card}
-              </a>
-            ) : (
-              <Link key={item.id} to={item.url}
+            return isInternal ? (
+              <Link key={item.id} to={postUrl}
                 className="md:flex-shrink-0 md:w-[280px] lg:w-[300px] md:snap-start block group">
                 {card}
               </Link>
+            ) : (
+              <a key={item.id} href={postUrl} target="_blank" rel="noopener noreferrer"
+                className="md:flex-shrink-0 md:w-[280px] lg:w-[300px] md:snap-start block group">
+                {card}
+              </a>
             );
           })}
         </div>
