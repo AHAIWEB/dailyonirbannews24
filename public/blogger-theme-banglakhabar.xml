@@ -1089,7 +1089,7 @@ h1,h2,h3,h4,h5,h6 { font-family: 'Noto Sans Bengali', sans-serif; }
             //<![CDATA[
             (function(){
               var s=document.createElement('script');
-              s.src='/feeds/posts/default?alt=json-in-script&amp;max-results=6&amp;callback=_bkTopNews';
+              s.src='/feeds/posts/default/-/শীর্ষ সংবাদ?alt=json-in-script&amp;max-results=6&amp;callback=_bkTopNews';
               document.body.appendChild(s);
             })();
             function _bkTopNews(d){
