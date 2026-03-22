@@ -57,13 +57,31 @@ const DEFAULT_SECTIONS: SectionConfig[] = [
 
 const STORAGE_KEY = "site-layout-config";
 
+const DEFAULT_SIDEBAR: SidebarConfig = {
+  leftTabs: [
+    { label: "পিপল", count: 7 },
+    { label: "একটু থামুন", count: 7 },
+  ],
+  rightTabs: [
+    { label: "আলোচিত", count: 7 },
+    { label: "স্পট লাইট", count: 7 },
+  ],
+  rightPopular: [
+    { label: "জনপ্রিয়", count: 7 },
+  ],
+  leftWidget: "ভাইরাল",
+  rightWidget: "জটিল",
+};
+
 export default function SiteCustomizer() {
   const [sections, setSections] = useState<SectionConfig[]>(DEFAULT_SECTIONS);
+  const [sidebar, setSidebar] = useState<SidebarConfig>(DEFAULT_SIDEBAR);
   const [newLabel, setNewLabel] = useState("");
   const [newSubcat, setNewSubcat] = useState("");
   const [saving, setSaving] = useState(false);
   const [loading, setLoading] = useState(true);
   const [expandedIdx, setExpandedIdx] = useState<number | null>(null);
+  const [showSidebar, setShowSidebar] = useState(false);
 
   // Load config — only from saved config or defaults, NO RSS auto-merge
   useEffect(() => {
