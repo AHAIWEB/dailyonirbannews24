@@ -3,8 +3,8 @@ import { useAuth } from "@/hooks/useAuth";
 import Header from "@/components/news/Header";
 import Footer from "@/components/news/Footer";
 import CardPreview from "@/components/photocard/CardPreview";
-import { PRESET_TEMPLATES, DEFAULT_CONTROLS, type CardTemplate, type CardControls } from "@/components/photocard/CardTemplates";
-import { Download, Share2, Image, Type, Quote, QrCode, Upload, X, Plus, Palette, LayoutTemplate, Move, ZoomIn } from "lucide-react";
+import { PRESET_TEMPLATES, type CardTemplate } from "@/components/photocard/CardTemplates";
+import { Download, Share2, Eye, Image, Type, Quote, QrCode, Upload, X, Plus, Palette, LayoutTemplate } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -29,7 +29,6 @@ export default function PhotoCardGenerator() {
   const [saving, setSaving] = useState(false);
   const [customBgImage, setCustomBgImage] = useState<string>("");
   const [category, setCategory] = useState("বেলাভূমি কণ্ঠ");
-  const [controls, setControls] = useState<CardControls>({ ...DEFAULT_CONTROLS });
 
   // Custom template overrides
   const [customLogoText, setCustomLogoText] = useState("");
@@ -116,6 +115,8 @@ export default function PhotoCardGenerator() {
     setSaving(true);
     try {
       let imgUrl: string | null = null;
+
+      // Upload first image to storage
       if (images[0]) {
         const ext = images[0].file.name.split(".").pop() || "jpg";
         const path = `photocard/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
@@ -126,7 +127,9 @@ export default function PhotoCardGenerator() {
         const { data: urlData } = supabase.storage.from("post-images").getPublicUrl(path);
         imgUrl = urlData.publicUrl;
       }
+
       const sourceUrl = `${window.location.origin}/post/fotocard-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+
       const { error } = await supabase.from("rss_articles").insert({
         title: title.trim(),
         content: quote || null,
@@ -143,10 +146,6 @@ export default function PhotoCardGenerator() {
     } finally {
       setSaving(false);
     }
-  };
-
-  const updateControl = (key: keyof CardControls, value: number) => {
-    setControls(prev => ({ ...prev, [key]: value }));
   };
 
   if (!user || !isAdmin) {
@@ -190,7 +189,10 @@ export default function PhotoCardGenerator() {
                     ? "border-primary ring-2 ring-primary/30 scale-105"
                     : "border-border hover:border-primary/50"
                 }`}
-                style={{ backgroundColor: t.bgColor, color: t.textColor }}
+                style={{
+                  backgroundColor: t.bgColor,
+                  color: t.textColor,
+                }}
               >
                 {t.name}
               </button>
@@ -239,53 +241,6 @@ export default function PhotoCardGenerator() {
                   ))}
                 </div>
               )}
-            </div>
-
-            {/* Font & Size Controls */}
-            <div className="p-3 bg-muted rounded-lg border border-border space-y-2">
-              <p className="text-xs font-bold text-foreground flex items-center gap-1"><ZoomIn className="w-3 h-3" /> ফন্ট ও সাইজ কন্ট্রোল</p>
-              <div className="grid grid-cols-2 gap-2">
-                <div>
-                  <label className="text-[10px] text-muted-foreground">শিরোনাম সাইজ: {controls.titleSize}px</label>
-                  <input type="range" min={10} max={32} value={controls.titleSize} onChange={e => updateControl("titleSize", +e.target.value)}
-                    className="w-full h-1.5 accent-primary" />
-                </div>
-                <div>
-                  <label className="text-[10px] text-muted-foreground">কোটেশন সাইজ: {controls.quoteSize}px</label>
-                  <input type="range" min={8} max={24} value={controls.quoteSize} onChange={e => updateControl("quoteSize", +e.target.value)}
-                    className="w-full h-1.5 accent-primary" />
-                </div>
-              </div>
-
-              <p className="text-[10px] font-bold text-foreground flex items-center gap-1 pt-1"><Move className="w-3 h-3" /> পজিশন মুভ</p>
-              <div className="grid grid-cols-2 gap-2">
-                <div>
-                  <label className="text-[10px] text-muted-foreground">শিরোনাম X: {controls.titleX}</label>
-                  <input type="range" min={-50} max={50} value={controls.titleX} onChange={e => updateControl("titleX", +e.target.value)}
-                    className="w-full h-1.5 accent-primary" />
-                </div>
-                <div>
-                  <label className="text-[10px] text-muted-foreground">শিরোনাম Y: {controls.titleY}</label>
-                  <input type="range" min={-50} max={50} value={controls.titleY} onChange={e => updateControl("titleY", +e.target.value)}
-                    className="w-full h-1.5 accent-primary" />
-                </div>
-                <div>
-                  <label className="text-[10px] text-muted-foreground">ছবি X: {controls.imageX}</label>
-                  <input type="range" min={-50} max={50} value={controls.imageX} onChange={e => updateControl("imageX", +e.target.value)}
-                    className="w-full h-1.5 accent-primary" />
-                </div>
-                <div>
-                  <label className="text-[10px] text-muted-foreground">ছবি Y: {controls.imageY}</label>
-                  <input type="range" min={-50} max={50} value={controls.imageY} onChange={e => updateControl("imageY", +e.target.value)}
-                    className="w-full h-1.5 accent-primary" />
-                </div>
-              </div>
-              <div>
-                <label className="text-[10px] text-muted-foreground">ছবি স্কেল: {controls.imageScale}%</label>
-                <input type="range" min={50} max={150} value={controls.imageScale} onChange={e => updateControl("imageScale", +e.target.value)}
-                  className="w-full h-1.5 accent-primary" />
-              </div>
-              <button onClick={() => setControls({ ...DEFAULT_CONTROLS })} className="text-[10px] text-destructive hover:underline">রিসেট</button>
             </div>
 
             {/* Background Template Upload */}
@@ -396,7 +351,7 @@ export default function PhotoCardGenerator() {
 
           {/* Preview */}
           <div>
-            <p className="text-xs font-bold text-muted-foreground mb-2 flex items-center gap-1"><Image className="w-3 h-3" /> প্রিভিউ</p>
+            <p className="text-xs font-bold text-muted-foreground mb-2 flex items-center gap-1"><Eye className="w-3 h-3" /> প্রিভিউ</p>
             <CardPreview
               ref={canvasRef}
               template={activeTemplate}
@@ -407,7 +362,6 @@ export default function PhotoCardGenerator() {
               showLogo={showLogo}
               qrUrl={qrUrl}
               bgImage={customBgImage}
-              controls={controls}
             />
           </div>
         </div>

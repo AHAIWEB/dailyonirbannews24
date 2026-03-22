@@ -1,6 +1,6 @@
 import { forwardRef } from "react";
 import { QRCodeSVG } from "qrcode.react";
-import type { CardTemplate, CardControls } from "./CardTemplates";
+import type { CardTemplate } from "./CardTemplates";
 
 interface CardImage {
   file: File;
@@ -17,27 +17,25 @@ interface CardPreviewProps {
   showLogo: boolean;
   qrUrl: string;
   bgImage?: string;
-  controls: CardControls;
 }
 
 const CardPreview = forwardRef<HTMLDivElement, CardPreviewProps>(
-  ({ template, title, quote, images, showQr, showLogo, qrUrl, bgImage, controls }, ref) => {
+  ({ template, title, quote, images, showQr, showLogo, qrUrl, bgImage }, ref) => {
     const { bgColor, textColor, accentColor, borderStyle, fontStyle, logoText, subtitleText, footerLabel, footerUrl } = template;
     const today = new Date().toLocaleDateString("bn-BD", { day: "numeric", month: "long", year: "numeric" });
 
-    const fontFamily = fontStyle === "decorative" ? "'Hind Siliguri', sans-serif" : fontStyle === "serif" ? "serif" : "inherit";
+    const fontClass = fontStyle === "serif" ? "font-serif" : fontStyle === "decorative" ? "font-serif" : "";
 
     return (
       <div
         ref={ref}
-        className="rounded-2xl overflow-hidden shadow-2xl max-w-[400px] mx-auto relative"
+        className={`rounded-2xl overflow-hidden shadow-2xl max-w-[400px] mx-auto relative ${fontClass}`}
         style={{
           backgroundColor: bgColor,
           border: borderStyle || "none",
           backgroundImage: bgImage ? `url(${bgImage})` : undefined,
           backgroundSize: "cover",
           backgroundPosition: "center",
-          fontFamily,
         }}
       >
         {bgImage && <div className="absolute inset-0 bg-black/40 rounded-2xl" />}
@@ -62,14 +60,8 @@ const CardPreview = forwardRef<HTMLDivElement, CardPreviewProps>(
           {/* Main Image */}
           {images[0] && (
             <div className="px-3">
-              <div
-                className="rounded-xl overflow-hidden"
-                style={{
-                  transform: `translate(${controls.imageX}px, ${controls.imageY}px) scale(${controls.imageScale / 100})`,
-                  transformOrigin: "center center",
-                }}
-              >
-                <img src={images[0].preview} alt="" className="w-full h-auto object-contain" crossOrigin="anonymous" />
+              <div className="rounded-xl overflow-hidden aspect-[4/3]">
+                <img src={images[0].preview} alt="" className="w-full h-full object-cover" crossOrigin="anonymous" />
               </div>
               {images[0].caption && (
                 <p className="text-[9px] mt-1 opacity-60 text-center" style={{ color: textColor }}>{images[0].caption}</p>
@@ -79,8 +71,8 @@ const CardPreview = forwardRef<HTMLDivElement, CardPreviewProps>(
 
           {/* Title */}
           {title && (
-            <div className="px-4 pt-3" style={{ transform: `translate(${controls.titleX}px, ${controls.titleY}px)` }}>
-              <h3 className="font-black leading-relaxed" style={{ color: textColor, fontSize: `${controls.titleSize}px` }}>{title}</h3>
+            <div className="px-4 pt-3">
+              <h3 className="text-base font-black leading-relaxed" style={{ color: textColor }}>{title}</h3>
             </div>
           )}
 
@@ -88,7 +80,7 @@ const CardPreview = forwardRef<HTMLDivElement, CardPreviewProps>(
           {quote && (
             <div className="px-4 pt-2">
               <div className="border-r-2 pr-3" style={{ borderColor: `${accentColor}80` }}>
-                <p className="italic leading-relaxed opacity-80" style={{ color: textColor, fontSize: `${controls.quoteSize}px` }}>❝ {quote} ❞</p>
+                <p className="text-xs italic leading-relaxed opacity-80" style={{ color: textColor }}>❝ {quote} ❞</p>
               </div>
             </div>
           )}

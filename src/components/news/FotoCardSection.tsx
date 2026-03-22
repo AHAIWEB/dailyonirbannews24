@@ -71,13 +71,8 @@ export default function FotoCardSection() {
             const card = (
               <div className="bg-sky-50 dark:bg-sky-950/30 rounded-xl md:rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-all border border-sky-100 dark:border-sky-900/50">
                 {item.image && (
-                  <div className="w-full overflow-hidden">
-                    <img
-                      src={item.image}
-                      alt={item.title}
-                      className="w-full h-auto object-contain"
-                      style={{ maxHeight: "400px" }}
-                    />
+                  <div className="aspect-[4/3] overflow-hidden">
+                    <img src={item.image} alt={item.title} className="w-full h-full object-cover" />
                   </div>
                 )}
                 <div className="px-2 pt-2 pb-1 md:px-4 md:pt-4 md:pb-2 flex items-start justify-between">
