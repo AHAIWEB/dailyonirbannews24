@@ -24,6 +24,30 @@ interface SectionConfig {
   visible: boolean;
 }
 
+interface SidebarConfig {
+  leftTabs: { label: string; count: number }[];
+  rightTabs: { label: string; count: number }[];
+  rightPopular: { label: string; count: number }[];
+  leftWidget: string;
+  rightWidget: string;
+}
+
+const DEFAULT_SIDEBAR: SidebarConfig = {
+  leftTabs: [
+    { label: "পিপল", count: 7 },
+    { label: "একটু থামুন", count: 7 },
+  ],
+  rightTabs: [
+    { label: "আলোচিত", count: 7 },
+    { label: "স্পট লাইট", count: 7 },
+  ],
+  rightPopular: [
+    { label: "জনপ্রিয়", count: 7 },
+  ],
+  leftWidget: "ভাইরাল",
+  rightWidget: "জটিল",
+};
+
 const DEFAULT_SECTIONS: SectionConfig[] = [
   { label: "হাইলাইটস", count: 6, layout: "highlight", visible: true },
   { label: "জাতীয়", count: 8, layout: "grid", visible: true },
