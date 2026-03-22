@@ -13,6 +13,14 @@ interface SectionConfig {
   subcategories?: string[];
 }
 
+interface SidebarConfig {
+  leftTabs: { label: string; count: number }[];
+  rightTabs: { label: string; count: number }[];
+  rightPopular: { label: string; count: number }[];
+  leftWidget: string;
+  rightWidget: string;
+}
+
 const LAYOUT_OPTIONS = [
   { value: "list", label: "লিস্ট", icon: List },
   { value: "grid", label: "গ্রিড", icon: LayoutGrid },
