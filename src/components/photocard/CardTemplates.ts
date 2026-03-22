@@ -4,7 +4,7 @@ export interface CardTemplate {
   bgColor: string;
   textColor: string;
   accentColor: string;
-  bgImage?: string; // custom uploaded bg
+  bgImage?: string;
   borderStyle?: string;
   fontStyle?: "normal" | "serif" | "decorative";
   logoText: string;
@@ -12,6 +12,26 @@ export interface CardTemplate {
   footerLabel: string;
   footerUrl: string;
 }
+
+export interface CardControls {
+  titleSize: number;
+  quoteSize: number;
+  titleX: number;
+  titleY: number;
+  imageX: number;
+  imageY: number;
+  imageScale: number;
+}
+
+export const DEFAULT_CONTROLS: CardControls = {
+  titleSize: 16,
+  quoteSize: 12,
+  titleX: 0,
+  titleY: 0,
+  imageX: 0,
+  imageY: 0,
+  imageScale: 100,
+};
 
 export const PRESET_TEMPLATES: CardTemplate[] = [
   {

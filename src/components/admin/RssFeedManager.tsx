@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
-import { Plus, Trash2, RefreshCw, Rss, Globe, ExternalLink, Eye, EyeOff, Star, Send, Edit3, Save, X, Sparkles, BookOpen, MapPin } from "lucide-react";
+import { Plus, Trash2, RefreshCw, Rss, Globe, ExternalLink, Eye, EyeOff, Star, Send, Edit3, Save, X, Sparkles, BookOpen, MapPin, Copy } from "lucide-react";
 import { toast } from "sonner";
 import { getAllDivisions, getDistricts, getUpazilas } from "@/data/bangladeshLocations";
 
@@ -469,6 +469,11 @@ export default function RssFeedManager() {
                         {article.is_published ? <Eye className="w-3.5 h-3.5" /> : <EyeOff className="w-3.5 h-3.5" />}
                       </button>
                       <button onClick={() => startEditArticle(article)} className="p-1 rounded text-muted-foreground hover:text-foreground"><Edit3 className="w-3.5 h-3.5" /></button>
+                      <button onClick={() => {
+                        const html = `<h2>${article.title}</h2>\n${article.image_url ? `<div class="separator" style="clear:both;text-align:center"><img border="0" src="${article.image_url}" style="max-width:100%" /></div>` : ""}\n<p>${article.content || ""}</p>\n<p><small>সূত্র: <a href="${article.source_url}" target="_blank">${article.source_name || "বেলাভূমি নিউজ"}</a></small></p>`;
+                        navigator.clipboard.writeText(html);
+                        toast.success("ব্লগার HTML কপি হয়েছে!");
+                      }} className="p-1 rounded text-muted-foreground hover:text-orange-500" title="ব্লগারে পোস্ট কপি"><Copy className="w-3.5 h-3.5" /></button>
                       <a href={article.source_url} target="_blank" rel="noopener noreferrer" className="p-1 rounded text-muted-foreground hover:text-primary"><ExternalLink className="w-3.5 h-3.5" /></a>
                       <button onClick={() => deleteArticle(article.id)} className="p-1 rounded text-destructive hover:bg-destructive/10"><Trash2 className="w-3.5 h-3.5" /></button>
                     </div>
