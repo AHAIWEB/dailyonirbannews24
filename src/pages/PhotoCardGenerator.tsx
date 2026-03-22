@@ -4,7 +4,7 @@ import Header from "@/components/news/Header";
 import Footer from "@/components/news/Footer";
 import CardPreview from "@/components/photocard/CardPreview";
 import { PRESET_TEMPLATES, type CardTemplate } from "@/components/photocard/CardTemplates";
-import { Download, Share2, Eye, Image, Type, Quote, QrCode, Upload, X, Plus, Palette, LayoutTemplate } from "lucide-react";
+import { Download, Share2, Eye, Image, Type, Quote, QrCode, Upload, X, Plus, Palette, LayoutTemplate, Link2, Move, ZoomIn } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -38,6 +38,17 @@ export default function PhotoCardGenerator() {
   const [customBgColor, setCustomBgColor] = useState("#0ea5e9");
   const [customTextColor, setCustomTextColor] = useState("#ffffff");
 
+  // Text size & image transform
+  const [titleSize, setTitleSize] = useState(16);
+  const [quoteSize, setQuoteSize] = useState(12);
+  const [imageX, setImageX] = useState(0);
+  const [imageY, setImageY] = useState(0);
+  const [imageScale, setImageScale] = useState(100);
+
+  // URL fetch
+  const [urlInput, setUrlInput] = useState("");
+  const [fetchingUrl, setFetchingUrl] = useState(false);
+
   const isCustom = selectedTemplate.id === "custom";
 
   const activeTemplate: CardTemplate = isCustom
@@ -51,6 +62,34 @@ export default function PhotoCardGenerator() {
         footerUrl: customFooterUrl,
       }
     : selectedTemplate;
+
+  const fetchUrlMetadata = async () => {
+    if (!urlInput.trim()) return;
+    setFetchingUrl(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("fetch-url-metadata", {
+        body: { url: urlInput.trim() },
+      });
+      if (error) throw error;
+      if (data?.title) setTitle(data.title);
+      if (data?.description) setQuote(data.description.slice(0, 200));
+      if (data?.image) {
+        // Fetch remote image as blob for preview
+        try {
+          const resp = await fetch(data.image);
+          const blob = await resp.blob();
+          const file = new File([blob], "url-image.jpg", { type: blob.type });
+          setImages(prev => [{ file, preview: URL.createObjectURL(blob), caption: "" }, ...prev]);
+        } catch {
+          // Image fetch failed, skip
+        }
+      }
+      toast.success("URL থেকে ডেটা আনা হয়েছে");
+    } catch (err: any) {
+      toast.error("URL ফেচ ব্যর্থ: " + err.message);
+    }
+    setFetchingUrl(false);
+  };
 
   const addImages = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
@@ -116,7 +155,6 @@ export default function PhotoCardGenerator() {
     try {
       let imgUrl: string | null = null;
 
-      // Upload first image to storage
       if (images[0]) {
         const ext = images[0].file.name.split(".").pop() || "jpg";
         const path = `photocard/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
@@ -189,10 +227,7 @@ export default function PhotoCardGenerator() {
                     ? "border-primary ring-2 ring-primary/30 scale-105"
                     : "border-border hover:border-primary/50"
                 }`}
-                style={{
-                  backgroundColor: t.bgColor,
-                  color: t.textColor,
-                }}
+                style={{ backgroundColor: t.bgColor, color: t.textColor }}
               >
                 {t.name}
               </button>
@@ -203,6 +238,20 @@ export default function PhotoCardGenerator() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Editor */}
           <div className="space-y-3">
+            {/* URL Fetch */}
+            <div>
+              <label className="text-xs font-bold text-muted-foreground mb-1 block">
+                <Link2 className="w-3 h-3 inline mr-1" />URL থেকে আনুন
+              </label>
+              <div className="flex gap-2">
+                <input type="url" value={urlInput} onChange={e => setUrlInput(e.target.value)} placeholder="https://example.com/news-article"
+                  className="flex-1 bg-muted border border-border rounded px-3 py-2 text-sm text-foreground focus:ring-1 focus:ring-primary focus:outline-none" />
+                <Button onClick={fetchUrlMetadata} size="sm" variant="outline" disabled={fetchingUrl}>
+                  {fetchingUrl ? "আনছে..." : "ফেচ"}
+                </Button>
+              </div>
+            </div>
+
             <div>
               <label className="text-xs font-bold text-muted-foreground mb-1 block">
                 <Type className="w-3 h-3 inline mr-1" />শিরোনাম
@@ -241,6 +290,40 @@ export default function PhotoCardGenerator() {
                   ))}
                 </div>
               )}
+            </div>
+
+            {/* Text Size & Image Transform */}
+            <div className="space-y-2 p-3 bg-muted/50 rounded-lg border border-border">
+              <p className="text-xs font-bold text-foreground flex items-center gap-1"><Type className="w-3 h-3" /> টেক্সট ও ছবি কন্ট্রোল</p>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="text-[10px] text-muted-foreground">শিরোনাম সাইজ: {titleSize}px</label>
+                  <input type="range" min={10} max={32} value={titleSize} onChange={e => setTitleSize(Number(e.target.value))}
+                    className="w-full h-1.5 accent-primary" />
+                </div>
+                <div>
+                  <label className="text-[10px] text-muted-foreground">কোটেশন সাইজ: {quoteSize}px</label>
+                  <input type="range" min={8} max={24} value={quoteSize} onChange={e => setQuoteSize(Number(e.target.value))}
+                    className="w-full h-1.5 accent-primary" />
+                </div>
+              </div>
+              <div className="grid grid-cols-3 gap-2">
+                <div>
+                  <label className="text-[10px] text-muted-foreground flex items-center gap-1"><Move className="w-2.5 h-2.5" /> X: {imageX}</label>
+                  <input type="range" min={-100} max={100} value={imageX} onChange={e => setImageX(Number(e.target.value))}
+                    className="w-full h-1.5 accent-primary" />
+                </div>
+                <div>
+                  <label className="text-[10px] text-muted-foreground flex items-center gap-1"><Move className="w-2.5 h-2.5" /> Y: {imageY}</label>
+                  <input type="range" min={-100} max={100} value={imageY} onChange={e => setImageY(Number(e.target.value))}
+                    className="w-full h-1.5 accent-primary" />
+                </div>
+                <div>
+                  <label className="text-[10px] text-muted-foreground flex items-center gap-1"><ZoomIn className="w-2.5 h-2.5" /> স্কেল: {imageScale}%</label>
+                  <input type="range" min={50} max={200} value={imageScale} onChange={e => setImageScale(Number(e.target.value))}
+                    className="w-full h-1.5 accent-primary" />
+                </div>
+              </div>
             </div>
 
             {/* Background Template Upload */}
@@ -362,6 +445,11 @@ export default function PhotoCardGenerator() {
               showLogo={showLogo}
               qrUrl={qrUrl}
               bgImage={customBgImage}
+              titleSize={titleSize}
+              quoteSize={quoteSize}
+              imageX={imageX}
+              imageY={imageY}
+              imageScale={imageScale}
             />
           </div>
         </div>
