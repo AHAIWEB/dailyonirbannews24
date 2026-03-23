@@ -20,7 +20,7 @@ function stripHtml(html: string): string {
   return html.replace(/<[^>]*>/g, '').replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&#39;/g, "'").trim();
 }
 
-function truncateContent(text: string, percent: number = 50): string {
+function truncateContent(text: string, percent: number = 90): string {
   const clean = stripHtml(text);
   const words = clean.split(/\s+/);
   const cutoff = Math.ceil(words.length * (percent / 100));

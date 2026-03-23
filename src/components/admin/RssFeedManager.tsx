@@ -470,6 +470,16 @@ export default function RssFeedManager() {
                       </button>
                       <button onClick={() => startEditArticle(article)} className="p-1 rounded text-muted-foreground hover:text-foreground"><Edit3 className="w-3.5 h-3.5" /></button>
                       <a href={article.source_url} target="_blank" rel="noopener noreferrer" className="p-1 rounded text-muted-foreground hover:text-primary"><ExternalLink className="w-3.5 h-3.5" /></a>
+                      <button onClick={() => {
+                        const blogTitle = encodeURIComponent(article.title);
+                        const blogBody = encodeURIComponent(
+                          `<div>${article.image_url ? `<img src="${article.image_url}" style="max-width:100%;height:auto;margin-bottom:12px;" />` : ''}<p>${(article.content || '').substring(0, 500)}...</p><p><strong>সূত্র:</strong> <a href="${article.source_url}" target="_blank">${article.source_name || 'মূল সংবাদ পড়ুন'}</a></p></div>`
+                        );
+                        window.open(`https://www.blogger.com/blog/post/edit/preview?content=${blogBody}&title=${blogTitle}`, '_blank');
+                        toast.success("Blogger-এ শেয়ার করা হচ্ছে");
+                      }} className="p-1 rounded text-muted-foreground hover:text-orange-500" title="Blogger-এ শেয়ার">
+                        <Send className="w-3.5 h-3.5" />
+                      </button>
                       <button onClick={() => deleteArticle(article.id)} className="p-1 rounded text-destructive hover:bg-destructive/10"><Trash2 className="w-3.5 h-3.5" /></button>
                     </div>
                   </div>

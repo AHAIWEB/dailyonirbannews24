@@ -165,13 +165,18 @@ export default function PostPage() {
                 />
               )}
 
-              {/* Source link */}
+              {/* বিস্তারিত পড়ুন Button */}
               {isExternal && (
-                <div className="mt-6 p-4 bg-muted rounded-lg border border-border">
+                <div className="mt-6 p-5 bg-gradient-to-r from-primary/10 to-primary/5 rounded-xl border border-primary/20 text-center space-y-2">
+                  <p className="text-sm text-muted-foreground">সম্পূর্ণ সংবাদটি পড়তে মূল সূত্রে যান</p>
                   <a href={article.source_url} target="_blank" rel="noopener noreferrer"
-                    className="text-sm font-bold text-primary hover:underline">
-                    📰 সম্পূর্ণ আর্টিকেল পড়ুন এখানে »
+                    className="inline-flex items-center gap-2 bg-primary text-primary-foreground px-6 py-2.5 rounded-lg text-sm font-bold hover:opacity-90 transition-opacity shadow-md">
+                    📰 বিস্তারিত পড়ুন
+                    <ChevronRight className="w-4 h-4" />
                   </a>
+                  {article.source_name && (
+                    <p className="text-[10px] text-muted-foreground">সূত্র: {article.source_name}</p>
+                  )}
                 </div>
               )}
             </div>
