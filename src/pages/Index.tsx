@@ -24,6 +24,13 @@ interface SectionConfig {
   visible: boolean;
 }
 
+interface SidebarConfig {
+  left: { label: string; postLabel: string; count: number }[];
+  right: { label: string; postLabel: string; count: number }[];
+  rightExtra: { label: string; postLabel: string; count: number }[];
+  widgets: { label: string; title: string; position: "left" | "right" }[];
+}
+
 const DEFAULT_SECTIONS: SectionConfig[] = [
   { label: "হাইলাইটস", count: 6, layout: "highlight", visible: true },
   { label: "জাতীয়", count: 8, layout: "grid", visible: true },
@@ -38,6 +45,24 @@ const DEFAULT_SECTIONS: SectionConfig[] = [
   { label: "মতামত", count: 4, layout: "grid", visible: true },
   { label: "ভিডিও", count: 4, layout: "grid", visible: true },
 ];
+
+const DEFAULT_SIDEBAR: SidebarConfig = {
+  left: [
+    { label: "পিপল", postLabel: "পিপল", count: 7 },
+    { label: "একটু থামুন", postLabel: "একটু থামুন", count: 7 },
+  ],
+  right: [
+    { label: "আলোচিত", postLabel: "আলোচিত", count: 7 },
+    { label: "স্পট লাইট", postLabel: "স্পট লাইট", count: 7 },
+  ],
+  rightExtra: [
+    { label: "জনপ্রিয়", postLabel: "জনপ্রিয়", count: 7 },
+  ],
+  widgets: [
+    { label: "ভাইরাল", title: "ভাইরাল", position: "left" },
+    { label: "জটিল", title: "জটিল", position: "right" },
+  ],
+};
 
 // Map of special component labels to their renderers
 const SPECIAL_SECTIONS: Record<string, (config: SectionConfig) => JSX.Element> = {
@@ -72,9 +97,9 @@ function renderSection(config: SectionConfig) {
 
 const Index = () => {
   const [sections, setSections] = useState<SectionConfig[]>(DEFAULT_SECTIONS);
+  const [sidebar, setSidebar] = useState<SidebarConfig>(DEFAULT_SIDEBAR);
 
   useEffect(() => {
-    // Load layout config from site_settings
     const loadConfig = async () => {
       try {
         const { data } = await supabase
@@ -89,12 +114,27 @@ const Index = () => {
             setSections(parsed);
           }
         }
-      } catch {
-        // Use defaults on error
-      }
+      } catch {}
+
+      try {
+        const { data } = await supabase
+          .from("site_settings")
+          .select("value")
+          .eq("key", "sidebar_config")
+          .maybeSingle();
+        if (data?.value) {
+          const parsed = JSON.parse(data.value);
+          if (parsed && typeof parsed === "object") {
+            setSidebar({ ...DEFAULT_SIDEBAR, ...parsed });
+          }
+        }
+      } catch {}
     };
     loadConfig();
   }, []);
+
+  const leftWidgets = sidebar.widgets.filter(w => w.position === "left");
+  const rightWidgets = sidebar.widgets.filter(w => w.position === "right");
 
   return (
     <div className="min-h-screen bg-background font-bangla">
@@ -105,13 +145,12 @@ const Index = () => {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
           {/* Left Sidebar */}
           <aside className="lg:col-span-2 space-y-4 order-2 lg:order-1">
-            <SidebarTabs
-              tabs={[
-                { label: "পিপল", postLabel: "পিপল", count: 7 },
-                { label: "একটু থামুন", postLabel: "একটু থামুন", count: 7 },
-              ]}
-            />
-            <SidebarWidget label="ভাইরাল" title="ভাইরাল" />
+            {sidebar.left.length > 0 && (
+              <SidebarTabs tabs={sidebar.left} />
+            )}
+            {leftWidgets.map(w => (
+              <SidebarWidget key={w.label} label={w.label} title={w.title} />
+            ))}
             <RssNewsWidget />
           </aside>
 
@@ -126,19 +165,15 @@ const Index = () => {
 
           {/* Right Sidebar */}
           <aside className="lg:col-span-3 space-y-4 order-3">
-            <SidebarTabs
-              tabs={[
-                { label: "আলোচিত", postLabel: "আলোচিত", count: 7 },
-                { label: "স্পট লাইট", postLabel: "স্পট লাইট", count: 7 },
-              ]}
-            />
-            <SidebarTabs
-              title="জনপ্রিয়"
-              tabs={[
-                { label: "জনপ্রিয়", postLabel: "জনপ্রিয়", count: 7 },
-              ]}
-            />
-            <SidebarWidget label="জটিল" title="জটিল" />
+            {sidebar.right.length > 0 && (
+              <SidebarTabs tabs={sidebar.right} />
+            )}
+            {sidebar.rightExtra.length > 0 && (
+              <SidebarTabs title={sidebar.rightExtra[0]?.label} tabs={sidebar.rightExtra} />
+            )}
+            {rightWidgets.map(w => (
+              <SidebarWidget key={w.label} label={w.label} title={w.title} />
+            ))}
             <div className="bg-muted rounded flex items-center justify-center h-[250px] text-xs text-muted-foreground">
               বিজ্ঞাপন — ৩০০×২৫০
             </div>

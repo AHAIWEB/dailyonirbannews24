@@ -13,6 +13,13 @@ interface SectionConfig {
   subcategories?: string[];
 }
 
+interface SidebarConfig {
+  left: { label: string; postLabel: string; count: number }[];
+  right: { label: string; postLabel: string; count: number }[];
+  rightExtra: { label: string; postLabel: string; count: number }[];
+  widgets: { label: string; title: string; position: "left" | "right" }[];
+}
+
 const LAYOUT_OPTIONS = [
   { value: "list", label: "লিস্ট", icon: List },
   { value: "grid", label: "গ্রিড", icon: LayoutGrid },
@@ -49,15 +56,37 @@ const DEFAULT_SECTIONS: SectionConfig[] = [
 
 const STORAGE_KEY = "site-layout-config";
 
+const DEFAULT_SIDEBAR: SidebarConfig = {
+  left: [
+    { label: "পিপল", postLabel: "পিপল", count: 7 },
+    { label: "একটু থামুন", postLabel: "একটু থামুন", count: 7 },
+  ],
+  right: [
+    { label: "আলোচিত", postLabel: "আলোচিত", count: 7 },
+    { label: "স্পট লাইট", postLabel: "স্পট লাইট", count: 7 },
+  ],
+  rightExtra: [
+    { label: "জনপ্রিয়", postLabel: "জনপ্রিয়", count: 7 },
+  ],
+  widgets: [
+    { label: "ভাইরাল", title: "ভাইরাল", position: "left" },
+    { label: "জটিল", title: "জটিল", position: "right" },
+  ],
+};
+
 export default function SiteCustomizer() {
   const [sections, setSections] = useState<SectionConfig[]>(DEFAULT_SECTIONS);
+  const [sidebar, setSidebar] = useState<SidebarConfig>(DEFAULT_SIDEBAR);
   const [newLabel, setNewLabel] = useState("");
   const [newSubcat, setNewSubcat] = useState("");
+  const [newSidebarTab, setNewSidebarTab] = useState("");
+  const [sidebarPosition, setSidebarPosition] = useState<"left" | "right" | "rightExtra" | "widget-left" | "widget-right">("left");
   const [saving, setSaving] = useState(false);
   const [loading, setLoading] = useState(true);
   const [expandedIdx, setExpandedIdx] = useState<number | null>(null);
+  const [showSidebarConfig, setShowSidebarConfig] = useState(false);
 
-  // Load config — only from saved config or defaults, NO RSS auto-merge
+  // Load config
   useEffect(() => {
     const load = async () => {
       setLoading(true);
@@ -72,8 +101,21 @@ export default function SiteCustomizer() {
           const parsed = JSON.parse(data.value);
           if (Array.isArray(parsed) && parsed.length > 0) {
             setSections(parsed);
-            setLoading(false);
-            return;
+          }
+        }
+      } catch {}
+
+      // Load sidebar config
+      try {
+        const { data } = await supabase
+          .from("site_settings")
+          .select("value")
+          .eq("key", "sidebar_config")
+          .maybeSingle();
+        if (data?.value) {
+          const parsed = JSON.parse(data.value);
+          if (parsed && typeof parsed === "object") {
+            setSidebar({ ...DEFAULT_SIDEBAR, ...parsed });
           }
         }
       } catch {}
@@ -85,14 +127,10 @@ export default function SiteCustomizer() {
           const parsed = JSON.parse(saved);
           if (Array.isArray(parsed) && parsed.length > 0) {
             setSections(parsed);
-            setLoading(false);
-            return;
           }
         }
       } catch {}
 
-      // Use defaults only
-      setSections([...DEFAULT_SECTIONS]);
       setLoading(false);
     };
     load();
@@ -107,7 +145,12 @@ export default function SiteCustomizer() {
         value: JSON.stringify(sections),
         updated_at: new Date().toISOString(),
       } as any, { onConflict: "key" });
-      toast.success("লেআউট কনফিগ সেভ হয়েছে!");
+      await supabase.from("site_settings").upsert({
+        key: "sidebar_config",
+        value: JSON.stringify(sidebar),
+        updated_at: new Date().toISOString(),
+      } as any, { onConflict: "key" });
+      toast.success("লেআউট ও সাইডবার কনফিগ সেভ হয়েছে!");
     } catch {
       toast.success("লোকালি সেভ হয়েছে");
     }
@@ -335,6 +378,124 @@ export default function SiteCustomizer() {
             </Button>
           </div>
         </CardContent>
+      </Card>
+
+      {/* Sidebar Customizer */}
+      <Card>
+        <CardHeader className="pb-3">
+          <div className="flex items-center justify-between">
+            <CardTitle className="text-base flex items-center gap-2">
+              <Columns className="w-4 h-4 text-primary" />
+              সাইডবার কাস্টমাইজার
+            </CardTitle>
+            <Button size="sm" variant="outline" onClick={() => setShowSidebarConfig(!showSidebarConfig)} className="text-xs">
+              {showSidebarConfig ? <ChevronDown className="w-3 h-3 mr-1" /> : <ChevronRight className="w-3 h-3 mr-1" />}
+              {showSidebarConfig ? "বন্ধ" : "খুলুন"}
+            </Button>
+          </div>
+        </CardHeader>
+        {showSidebarConfig && (
+          <CardContent className="space-y-4">
+            {/* Left Sidebar Tabs */}
+            <div className="space-y-2">
+              <p className="text-xs font-bold text-foreground">বাম সাইডবার ট্যাব</p>
+              {sidebar.left.map((tab, i) => (
+                <div key={i} className="flex items-center gap-2 bg-muted/50 rounded p-2">
+                  <input value={tab.label} onChange={e => {
+                    const arr = [...sidebar.left]; arr[i] = { ...arr[i], label: e.target.value, postLabel: e.target.value }; setSidebar({ ...sidebar, left: arr });
+                  }} className="flex-1 bg-card border border-border rounded px-2 py-1 text-xs" />
+                  <input type="number" value={tab.count} onChange={e => {
+                    const arr = [...sidebar.left]; arr[i] = { ...arr[i], count: Number(e.target.value) }; setSidebar({ ...sidebar, left: arr });
+                  }} className="w-14 bg-card border border-border rounded px-2 py-1 text-xs" min={1} max={20} />
+                  <button onClick={() => setSidebar({ ...sidebar, left: sidebar.left.filter((_, j) => j !== i) })} className="text-destructive p-1"><Trash2 className="w-3 h-3" /></button>
+                </div>
+              ))}
+            </div>
+
+            {/* Right Sidebar Tabs */}
+            <div className="space-y-2">
+              <p className="text-xs font-bold text-foreground">ডান সাইডবার ট্যাব</p>
+              {sidebar.right.map((tab, i) => (
+                <div key={i} className="flex items-center gap-2 bg-muted/50 rounded p-2">
+                  <input value={tab.label} onChange={e => {
+                    const arr = [...sidebar.right]; arr[i] = { ...arr[i], label: e.target.value, postLabel: e.target.value }; setSidebar({ ...sidebar, right: arr });
+                  }} className="flex-1 bg-card border border-border rounded px-2 py-1 text-xs" />
+                  <input type="number" value={tab.count} onChange={e => {
+                    const arr = [...sidebar.right]; arr[i] = { ...arr[i], count: Number(e.target.value) }; setSidebar({ ...sidebar, right: arr });
+                  }} className="w-14 bg-card border border-border rounded px-2 py-1 text-xs" min={1} max={20} />
+                  <button onClick={() => setSidebar({ ...sidebar, right: sidebar.right.filter((_, j) => j !== i) })} className="text-destructive p-1"><Trash2 className="w-3 h-3" /></button>
+                </div>
+              ))}
+            </div>
+
+            {/* Right Extra Tabs */}
+            <div className="space-y-2">
+              <p className="text-xs font-bold text-foreground">ডান সাইডবার অতিরিক্ত</p>
+              {sidebar.rightExtra.map((tab, i) => (
+                <div key={i} className="flex items-center gap-2 bg-muted/50 rounded p-2">
+                  <input value={tab.label} onChange={e => {
+                    const arr = [...sidebar.rightExtra]; arr[i] = { ...arr[i], label: e.target.value, postLabel: e.target.value }; setSidebar({ ...sidebar, rightExtra: arr });
+                  }} className="flex-1 bg-card border border-border rounded px-2 py-1 text-xs" />
+                  <input type="number" value={tab.count} onChange={e => {
+                    const arr = [...sidebar.rightExtra]; arr[i] = { ...arr[i], count: Number(e.target.value) }; setSidebar({ ...sidebar, rightExtra: arr });
+                  }} className="w-14 bg-card border border-border rounded px-2 py-1 text-xs" min={1} max={20} />
+                  <button onClick={() => setSidebar({ ...sidebar, rightExtra: sidebar.rightExtra.filter((_, j) => j !== i) })} className="text-destructive p-1"><Trash2 className="w-3 h-3" /></button>
+                </div>
+              ))}
+            </div>
+
+            {/* Widgets */}
+            <div className="space-y-2">
+              <p className="text-xs font-bold text-foreground">উইজেট</p>
+              {sidebar.widgets.map((w, i) => (
+                <div key={i} className="flex items-center gap-2 bg-muted/50 rounded p-2">
+                  <input value={w.label} onChange={e => {
+                    const arr = [...sidebar.widgets]; arr[i] = { ...arr[i], label: e.target.value, title: e.target.value }; setSidebar({ ...sidebar, widgets: arr });
+                  }} className="flex-1 bg-card border border-border rounded px-2 py-1 text-xs" />
+                  <select value={w.position} onChange={e => {
+                    const arr = [...sidebar.widgets]; arr[i] = { ...arr[i], position: e.target.value as "left" | "right" }; setSidebar({ ...sidebar, widgets: arr });
+                  }} className="bg-card border border-border rounded px-2 py-1 text-xs">
+                    <option value="left">বাম</option>
+                    <option value="right">ডান</option>
+                  </select>
+                  <button onClick={() => setSidebar({ ...sidebar, widgets: sidebar.widgets.filter((_, j) => j !== i) })} className="text-destructive p-1"><Trash2 className="w-3 h-3" /></button>
+                </div>
+              ))}
+            </div>
+
+            {/* Add new sidebar item */}
+            <div className="flex gap-2 pt-2 border-t border-border">
+              <input value={newSidebarTab} onChange={e => setNewSidebarTab(e.target.value)}
+                placeholder="নতুন ট্যাব/উইজেট নাম..."
+                className="flex-1 bg-muted border border-border rounded px-2 py-1.5 text-xs" />
+              <select value={sidebarPosition} onChange={e => setSidebarPosition(e.target.value as any)}
+                className="bg-muted border border-border rounded px-2 py-1.5 text-xs">
+                <option value="left">বাম ট্যাব</option>
+                <option value="right">ডান ট্যাব</option>
+                <option value="rightExtra">ডান অতিরিক্ত</option>
+                <option value="widget-left">উইজেট (বাম)</option>
+                <option value="widget-right">উইজেট (ডান)</option>
+              </select>
+              <Button size="sm" variant="outline" onClick={() => {
+                if (!newSidebarTab.trim()) return;
+                const name = newSidebarTab.trim();
+                if (sidebarPosition === "left") {
+                  setSidebar({ ...sidebar, left: [...sidebar.left, { label: name, postLabel: name, count: 7 }] });
+                } else if (sidebarPosition === "right") {
+                  setSidebar({ ...sidebar, right: [...sidebar.right, { label: name, postLabel: name, count: 7 }] });
+                } else if (sidebarPosition === "rightExtra") {
+                  setSidebar({ ...sidebar, rightExtra: [...sidebar.rightExtra, { label: name, postLabel: name, count: 7 }] });
+                } else if (sidebarPosition.startsWith("widget")) {
+                  const pos = sidebarPosition === "widget-left" ? "left" : "right";
+                  setSidebar({ ...sidebar, widgets: [...sidebar.widgets, { label: name, title: name, position: pos }] });
+                }
+                setNewSidebarTab("");
+              }} className="text-xs">
+                <Plus className="w-3 h-3 mr-1" /> যোগ
+              </Button>
+            </div>
+          </CardContent>
+        )}
       </Card>
     </div>
   );
