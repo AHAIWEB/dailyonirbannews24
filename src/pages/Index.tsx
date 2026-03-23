@@ -152,24 +152,6 @@ const Index = () => {
               <SidebarWidget key={w.label} label={w.label} title={w.title} />
             ))}
             <RssNewsWidget />
-
-  return (
-    <div className="min-h-screen bg-background font-bangla">
-      <Header />
-      <BreakingNews />
-
-      <div className="container mx-auto mt-4">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
-          {/* Left Sidebar */}
-          <aside className="lg:col-span-2 space-y-4 order-2 lg:order-1">
-            <SidebarTabs
-              tabs={[
-                { label: "পিপল", postLabel: "পিপল", count: 7 },
-                { label: "একটু থামুন", postLabel: "একটু থামুন", count: 7 },
-              ]}
-            />
-            <SidebarWidget label="ভাইরাল" title="ভাইরাল" />
-            <RssNewsWidget />
           </aside>
 
           {/* Main Content — Dynamic Sections */}
@@ -183,19 +165,15 @@ const Index = () => {
 
           {/* Right Sidebar */}
           <aside className="lg:col-span-3 space-y-4 order-3">
-            <SidebarTabs
-              tabs={[
-                { label: "আলোচিত", postLabel: "আলোচিত", count: 7 },
-                { label: "স্পট লাইট", postLabel: "স্পট লাইট", count: 7 },
-              ]}
-            />
-            <SidebarTabs
-              title="জনপ্রিয়"
-              tabs={[
-                { label: "জনপ্রিয়", postLabel: "জনপ্রিয়", count: 7 },
-              ]}
-            />
-            <SidebarWidget label="জটিল" title="জটিল" />
+            {sidebar.right.length > 0 && (
+              <SidebarTabs tabs={sidebar.right} />
+            )}
+            {sidebar.rightExtra.length > 0 && (
+              <SidebarTabs title={sidebar.rightExtra[0]?.label} tabs={sidebar.rightExtra} />
+            )}
+            {rightWidgets.map(w => (
+              <SidebarWidget key={w.label} label={w.label} title={w.title} />
+            ))}
             <div className="bg-muted rounded flex items-center justify-center h-[250px] text-xs text-muted-foreground">
               বিজ্ঞাপন — ৩০০×২৫০
             </div>
