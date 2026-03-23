@@ -24,6 +24,13 @@ interface SectionConfig {
   visible: boolean;
 }
 
+interface SidebarConfig {
+  left: { label: string; postLabel: string; count: number }[];
+  right: { label: string; postLabel: string; count: number }[];
+  rightExtra: { label: string; postLabel: string; count: number }[];
+  widgets: { label: string; title: string; position: "left" | "right" }[];
+}
+
 const DEFAULT_SECTIONS: SectionConfig[] = [
   { label: "হাইলাইটস", count: 6, layout: "highlight", visible: true },
   { label: "জাতীয়", count: 8, layout: "grid", visible: true },
@@ -38,6 +45,24 @@ const DEFAULT_SECTIONS: SectionConfig[] = [
   { label: "মতামত", count: 4, layout: "grid", visible: true },
   { label: "ভিডিও", count: 4, layout: "grid", visible: true },
 ];
+
+const DEFAULT_SIDEBAR: SidebarConfig = {
+  left: [
+    { label: "পিপল", postLabel: "পিপল", count: 7 },
+    { label: "একটু থামুন", postLabel: "একটু থামুন", count: 7 },
+  ],
+  right: [
+    { label: "আলোচিত", postLabel: "আলোচিত", count: 7 },
+    { label: "স্পট লাইট", postLabel: "স্পট লাইট", count: 7 },
+  ],
+  rightExtra: [
+    { label: "জনপ্রিয়", postLabel: "জনপ্রিয়", count: 7 },
+  ],
+  widgets: [
+    { label: "ভাইরাল", title: "ভাইরাল", position: "left" },
+    { label: "জটিল", title: "জটিল", position: "right" },
+  ],
+};
 
 // Map of special component labels to their renderers
 const SPECIAL_SECTIONS: Record<string, (config: SectionConfig) => JSX.Element> = {
