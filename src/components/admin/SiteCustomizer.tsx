@@ -86,7 +86,7 @@ export default function SiteCustomizer() {
   const [expandedIdx, setExpandedIdx] = useState<number | null>(null);
   const [showSidebarConfig, setShowSidebarConfig] = useState(false);
 
-  // Load config — only from saved config or defaults, NO RSS auto-merge
+  // Load config
   useEffect(() => {
     const load = async () => {
       setLoading(true);
@@ -101,8 +101,21 @@ export default function SiteCustomizer() {
           const parsed = JSON.parse(data.value);
           if (Array.isArray(parsed) && parsed.length > 0) {
             setSections(parsed);
-            setLoading(false);
-            return;
+          }
+        }
+      } catch {}
+
+      // Load sidebar config
+      try {
+        const { data } = await supabase
+          .from("site_settings")
+          .select("value")
+          .eq("key", "sidebar_config")
+          .maybeSingle();
+        if (data?.value) {
+          const parsed = JSON.parse(data.value);
+          if (parsed && typeof parsed === "object") {
+            setSidebar({ ...DEFAULT_SIDEBAR, ...parsed });
           }
         }
       } catch {}
@@ -114,14 +127,10 @@ export default function SiteCustomizer() {
           const parsed = JSON.parse(saved);
           if (Array.isArray(parsed) && parsed.length > 0) {
             setSections(parsed);
-            setLoading(false);
-            return;
           }
         }
       } catch {}
 
-      // Use defaults only
-      setSections([...DEFAULT_SECTIONS]);
       setLoading(false);
     };
     load();
