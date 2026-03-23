@@ -97,9 +97,9 @@ function renderSection(config: SectionConfig) {
 
 const Index = () => {
   const [sections, setSections] = useState<SectionConfig[]>(DEFAULT_SECTIONS);
+  const [sidebar, setSidebar] = useState<SidebarConfig>(DEFAULT_SIDEBAR);
 
   useEffect(() => {
-    // Load layout config from site_settings
     const loadConfig = async () => {
       try {
         const { data } = await supabase
@@ -114,12 +114,44 @@ const Index = () => {
             setSections(parsed);
           }
         }
-      } catch {
-        // Use defaults on error
-      }
+      } catch {}
+
+      try {
+        const { data } = await supabase
+          .from("site_settings")
+          .select("value")
+          .eq("key", "sidebar_config")
+          .maybeSingle();
+        if (data?.value) {
+          const parsed = JSON.parse(data.value);
+          if (parsed && typeof parsed === "object") {
+            setSidebar({ ...DEFAULT_SIDEBAR, ...parsed });
+          }
+        }
+      } catch {}
     };
     loadConfig();
   }, []);
+
+  const leftWidgets = sidebar.widgets.filter(w => w.position === "left");
+  const rightWidgets = sidebar.widgets.filter(w => w.position === "right");
+
+  return (
+    <div className="min-h-screen bg-background font-bangla">
+      <Header />
+      <BreakingNews />
+
+      <div className="container mx-auto mt-4">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
+          {/* Left Sidebar */}
+          <aside className="lg:col-span-2 space-y-4 order-2 lg:order-1">
+            {sidebar.left.length > 0 && (
+              <SidebarTabs tabs={sidebar.left} />
+            )}
+            {leftWidgets.map(w => (
+              <SidebarWidget key={w.label} label={w.label} title={w.title} />
+            ))}
+            <RssNewsWidget />
 
   return (
     <div className="min-h-screen bg-background font-bangla">
