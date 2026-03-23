@@ -56,13 +56,35 @@ const DEFAULT_SECTIONS: SectionConfig[] = [
 
 const STORAGE_KEY = "site-layout-config";
 
+const DEFAULT_SIDEBAR: SidebarConfig = {
+  left: [
+    { label: "পিপল", postLabel: "পিপল", count: 7 },
+    { label: "একটু থামুন", postLabel: "একটু থামুন", count: 7 },
+  ],
+  right: [
+    { label: "আলোচিত", postLabel: "আলোচিত", count: 7 },
+    { label: "স্পট লাইট", postLabel: "স্পট লাইট", count: 7 },
+  ],
+  rightExtra: [
+    { label: "জনপ্রিয়", postLabel: "জনপ্রিয়", count: 7 },
+  ],
+  widgets: [
+    { label: "ভাইরাল", title: "ভাইরাল", position: "left" },
+    { label: "জটিল", title: "জটিল", position: "right" },
+  ],
+};
+
 export default function SiteCustomizer() {
   const [sections, setSections] = useState<SectionConfig[]>(DEFAULT_SECTIONS);
+  const [sidebar, setSidebar] = useState<SidebarConfig>(DEFAULT_SIDEBAR);
   const [newLabel, setNewLabel] = useState("");
   const [newSubcat, setNewSubcat] = useState("");
+  const [newSidebarTab, setNewSidebarTab] = useState("");
+  const [sidebarPosition, setSidebarPosition] = useState<"left" | "right" | "rightExtra" | "widget-left" | "widget-right">("left");
   const [saving, setSaving] = useState(false);
   const [loading, setLoading] = useState(true);
   const [expandedIdx, setExpandedIdx] = useState<number | null>(null);
+  const [showSidebarConfig, setShowSidebarConfig] = useState(false);
 
   // Load config — only from saved config or defaults, NO RSS auto-merge
   useEffect(() => {
