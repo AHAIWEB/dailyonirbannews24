@@ -123,10 +123,23 @@ export default function RssFeedManager() {
   const deleteFeed = async (id: string) => { await supabase.from("rss_feeds").delete().eq("id", id); toast.success("ফিড মুছে ফেলা হয়েছে"); loadFeeds(); };
   const toggleFeed = async (id: string, isActive: boolean) => { await supabase.from("rss_feeds").update({ is_active: !isActive } as any).eq("id", id); loadFeeds(); };
 
-  const startEditFeed = (feed: RssFeed) => { setEditingFeed(feed.id); setEditFeedData({ name: feed.name, url: feed.url, category: feed.category }); };
+  const startEditFeed = (feed: RssFeed) => { setEditingFeed(feed.id); setEditFeedData({ name: feed.name, url: feed.url, category: feed.category, feed_type: (feed as any).feed_type || "rss" }); };
   const saveEditFeed = async (id: string) => {
-    await supabase.from("rss_feeds").update({ name: editFeedData.name, url: editFeedData.url, category: editFeedData.category } as any).eq("id", id);
+    await supabase.from("rss_feeds").update({ name: editFeedData.name, url: editFeedData.url, category: editFeedData.category, feed_type: editFeedData.feed_type } as any).eq("id", id);
     toast.success("ফিড আপডেট হয়েছে"); setEditingFeed(null); loadFeeds();
+  };
+
+  const handleScrapeAll = async () => {
+    setScrapeFetching(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("scrape-website");
+      if (error) throw error;
+      toast.success(`${data?.totalInserted || 0} টি নতুন আর্টিকেল স্ক্র্যাপ হয়েছে`);
+      loadArticles();
+    } catch (err: any) {
+      toast.error("স্ক্র্যাপ করতে সমস্যা: " + err.message);
+    }
+    setScrapeFetching(false);
   };
 
   const handleFetchAll = async () => {
