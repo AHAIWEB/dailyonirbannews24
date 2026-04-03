@@ -11,17 +11,13 @@ function stripHtml(html: string): string {
 }
 
 function extractImage(html: string): string | null {
-  // og:image
   const ogMatch = html.match(/<meta[^>]+property=["']og:image["'][^>]+content=["']([^"']+)["']/i)
     || html.match(/<meta[^>]+content=["']([^"']+)["'][^>]+property=["']og:image["']/i);
   if (ogMatch) return ogMatch[1];
-  // twitter:image
   const twMatch = html.match(/<meta[^>]+name=["']twitter:image["'][^>]+content=["']([^"']+)["']/i);
   if (twMatch) return twMatch[1];
-  // First large img
   const imgMatch = html.match(/<img[^>]+src=["']([^"']+(?:\.jpg|\.jpeg|\.png|\.webp)[^"']*)["']/i);
   if (imgMatch) return imgMatch[1];
-  // data-src
   const dataSrc = html.match(/<img[^>]+data-src=["']([^"']+)["']/i);
   if (dataSrc) return dataSrc[1];
   return null;
@@ -32,7 +28,6 @@ function extractArticleLinks(html: string, baseUrl: string): string[] {
   const seen = new Set<string>();
   const base = new URL(baseUrl);
   
-  // Match all <a> tags with href
   const linkRegex = /<a[^>]+href=["']([^"'#]+)["'][^>]*>/gi;
   let match;
   while ((match = linkRegex.exec(html)) !== null) {
@@ -41,9 +36,7 @@ function extractArticleLinks(html: string, baseUrl: string): string[] {
     
     try {
       const url = new URL(href, baseUrl);
-      // Only same domain
       if (url.hostname !== base.hostname) continue;
-      // Filter out non-article pages
       const path = url.pathname;
       if (path === '/' || path.length < 5) continue;
       if (/\.(css|js|png|jpg|gif|svg|ico|pdf|xml|json|rss|atom)$/i.test(path)) continue;
@@ -57,7 +50,7 @@ function extractArticleLinks(html: string, baseUrl: string): string[] {
     } catch {}
   }
   
-  return links.slice(0, 30); // Limit to 30 articles per page
+  return links.slice(0, 30);
 }
 
 async function fetchPage(url: string): Promise<string | null> {
@@ -95,11 +88,9 @@ function extractTitle(html: string): string {
 }
 
 function extractContent(html: string): string {
-  // Try article body
   const articleMatch = html.match(/<article[^>]*>([\s\S]*?)<\/article>/i);
   const bodyHtml = articleMatch?.[1] || html;
   
-  // Extract paragraphs
   const paragraphs: string[] = [];
   const pRegex = /<p[^>]*>([\s\S]*?)<\/p>/gi;
   let m;
@@ -109,7 +100,6 @@ function extractContent(html: string): string {
   }
   
   const fullText = paragraphs.join('\n\n');
-  // Return 50% of content
   const words = fullText.split(/\s+/);
   const cutoff = Math.ceil(words.length * 0.5);
   return words.slice(0, cutoff).join(' ') + (cutoff < words.length ? '\n\n[বিস্তারিত পড়তে মূল সূত্রে যান]' : '');
@@ -142,7 +132,6 @@ serve(async (req) => {
     if (scraper_url) {
       scrapers = [{ id: scraper_id || 'manual', url: scraper_url, category: scraperCategory || 'জাতীয়', name: 'Manual' }];
     } else {
-      // Fetch all active scrapers
       const { data, error } = await supabase
         .from('rss_feeds')
         .select('*')
@@ -172,7 +161,6 @@ serve(async (req) => {
 
         for (const link of articleLinks) {
           try {
-            // Check if already exists
             const { data: existing } = await supabase
               .from('rss_articles')
               .select('id')
@@ -202,7 +190,7 @@ serve(async (req) => {
                 source_name: sourceName,
                 category: scraper.category,
                 is_published: true,
-                is_featured: inserted === 0, // First article from each source becomes featured
+                is_featured: false,
                 published_at: new Date().toISOString(),
                 fetched_at: new Date().toISOString(),
               }, {
@@ -219,7 +207,6 @@ serve(async (req) => {
           }
         }
 
-        // Update last_fetched_at
         if (scraper.id !== 'manual') {
           await supabase
             .from('rss_feeds')

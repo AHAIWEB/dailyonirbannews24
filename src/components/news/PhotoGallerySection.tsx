@@ -1,15 +1,15 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import SectionLabel from "./SectionLabel";
-import { Camera, X } from "lucide-react";
+import { Camera, X, ChevronLeft, ChevronRight } from "lucide-react";
 
 export default function PhotoGallerySection() {
   const [articles, setArticles] = useState<any[]>([]);
-  const [lightbox, setLightbox] = useState<string | null>(null);
+  const [lightboxIdx, setLightboxIdx] = useState<number | null>(null);
 
   useEffect(() => {
     const load = async () => {
-      // Try gallery category first
+      // Try gallery category
       let { data } = await supabase
         .from("rss_articles")
         .select("*")
@@ -18,9 +18,9 @@ export default function PhotoGallerySection() {
         .not("image_url", "is", null)
         .order("published_at", { ascending: false })
         .limit(12);
-      
+
       // Fallback: any posts with images
-      if (!data || data.length === 0) {
+      if (!data || data.length < 4) {
         const { data: fallback } = await supabase
           .from("rss_articles")
           .select("*")
@@ -35,7 +35,24 @@ export default function PhotoGallerySection() {
     load();
   }, []);
 
-  if (articles.length === 0) return null;
+  // Always show section even with fallback images
+  if (articles.length === 0) {
+    return (
+      <section>
+        <SectionLabel label="ফটো গ্যালারি" />
+        <div className="text-center py-8 text-muted-foreground text-sm">
+          <Camera className="w-8 h-8 mx-auto mb-2 opacity-40" />
+          ফটো গ্যালারি লোড হচ্ছে...
+        </div>
+      </section>
+    );
+  }
+
+  const navigateLightbox = (dir: number) => {
+    if (lightboxIdx === null) return;
+    const next = lightboxIdx + dir;
+    if (next >= 0 && next < articles.length) setLightboxIdx(next);
+  };
 
   return (
     <section>
@@ -47,7 +64,7 @@ export default function PhotoGallerySection() {
             className={`relative overflow-hidden rounded-lg cursor-pointer group ${
               i === 0 ? "col-span-2 row-span-2" : ""
             }`}
-            onClick={() => setLightbox(a.image_url || null)}
+            onClick={() => setLightboxIdx(i)}
           >
             <div className={`${i === 0 ? "aspect-square" : "aspect-[4/3]"} overflow-hidden`}>
               <img
@@ -70,23 +87,35 @@ export default function PhotoGallerySection() {
       </div>
 
       {/* Lightbox */}
-      {lightbox && (
+      {lightboxIdx !== null && articles[lightboxIdx] && (
         <div
           className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-4"
-          onClick={() => setLightbox(null)}
+          onClick={() => setLightboxIdx(null)}
         >
-          <button
-            onClick={() => setLightbox(null)}
-            className="absolute top-4 right-4 text-white bg-white/20 rounded-full p-2 hover:bg-white/30"
-          >
+          <button onClick={() => setLightboxIdx(null)}
+            className="absolute top-4 right-4 text-white bg-white/20 rounded-full p-2 hover:bg-white/30 z-10">
             <X className="w-6 h-6" />
           </button>
-          <img
-            src={lightbox}
-            alt=""
-            className="max-w-full max-h-[90vh] object-contain rounded-lg"
-            onClick={(e) => e.stopPropagation()}
-          />
+          {lightboxIdx > 0 && (
+            <button onClick={(e) => { e.stopPropagation(); navigateLightbox(-1); }}
+              className="absolute left-4 text-white bg-white/20 rounded-full p-2 hover:bg-white/30 z-10">
+              <ChevronLeft className="w-6 h-6" />
+            </button>
+          )}
+          {lightboxIdx < articles.length - 1 && (
+            <button onClick={(e) => { e.stopPropagation(); navigateLightbox(1); }}
+              className="absolute right-4 text-white bg-white/20 rounded-full p-2 hover:bg-white/30 z-10">
+              <ChevronRight className="w-6 h-6" />
+            </button>
+          )}
+          <div className="text-center" onClick={(e) => e.stopPropagation()}>
+            <img
+              src={articles[lightboxIdx].image_url}
+              alt={articles[lightboxIdx].title}
+              className="max-w-full max-h-[80vh] object-contain rounded-lg"
+            />
+            <p className="text-white text-sm mt-3 max-w-lg mx-auto">{articles[lightboxIdx].title}</p>
+          </div>
         </div>
       )}
     </section>

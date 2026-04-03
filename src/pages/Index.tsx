@@ -16,6 +16,8 @@ import RssNewsWidget from "@/components/news/RssNewsWidget";
 import WebStorySection from "@/components/news/WebStorySection";
 import FotoCardSection from "@/components/news/FotoCardSection";
 import PhotoGallerySection from "@/components/news/PhotoGallerySection";
+import TravelGuideSection from "@/components/news/TravelGuideSection";
+import JobSection from "@/components/news/JobSection";
 import Footer from "@/components/news/Footer";
 
 interface SectionConfig {
@@ -77,6 +79,8 @@ const SPECIAL_SECTIONS: Record<string, (config: SectionConfig) => JSX.Element> =
   "গ্যালারি": () => <PhotoGallerySection key="gallery" />,
   "দেশ বাংলা": () => <DeshBangla key="deshbangla" />,
   "লাইফস্টাইল": () => <LifestyleSection key="lifestyle" />,
+  "ভ্রমণ": () => <TravelGuideSection key="travel" />,
+  "চাকরি": () => <JobSection key="jobs" />,
   "মতামত": () => <OpinionSection key="opinion" />,
   "ভিডিও": () => <VideoSlider key="video" />,
 };
