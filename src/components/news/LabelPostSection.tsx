@@ -305,7 +305,7 @@ export default function LabelPostSection({ label, count, layout = "list" }: Prop
                   {rssArticles[0]?.title}
                 </h3>
               </div>
-            </a>
+            </Link>
             <div className="space-y-3">
               {rssArticles.slice(1).map((article) => (
                 <a key={article.id} href={article.source_url} target="_blank" rel="noopener noreferrer"
