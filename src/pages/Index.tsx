@@ -74,6 +74,7 @@ const SPECIAL_SECTIONS: Record<string, (config: SectionConfig) => JSX.Element> =
   "ওয়েব স্টোরি": () => <WebStorySection key="webstory" />,
   "বেলাভূমি কণ্ঠ": () => <FotoCardSection key="fotocard" />,
   "বিনোদন": () => <EntertainmentGrid key="entertainment" />,
+  "গ্যালারি": () => <PhotoGallerySection key="gallery" />,
   "দেশ বাংলা": () => <DeshBangla key="deshbangla" />,
   "লাইফস্টাইল": () => <LifestyleSection key="lifestyle" />,
   "মতামত": () => <OpinionSection key="opinion" />,
