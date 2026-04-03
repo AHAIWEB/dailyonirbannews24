@@ -112,10 +112,10 @@ export default function RssFeedManager() {
 
   const addFeed = async () => {
     if (!newFeed.name || !newFeed.url) { toast.error("নাম ও URL দিন"); return; }
-    const { error } = await supabase.from("rss_feeds").insert({ name: newFeed.name, url: newFeed.url, category: newFeed.category, created_by: user?.id } as any);
-    if (error) { toast.error("ফিড যোগ করতে সমস্যা হয়েছে"); return; }
-    toast.success("RSS ফিড যোগ হয়েছে");
-    setNewFeed({ name: "", url: "", category: "জাতীয়" });
+    const { error } = await supabase.from("rss_feeds").insert({ name: newFeed.name, url: newFeed.url, category: newFeed.category, feed_type: newFeed.feed_type, created_by: user?.id } as any);
+    if (error) { toast.error("ফিড যোগ করতে সমস্যা হয়েছে: " + error.message); return; }
+    toast.success(newFeed.feed_type === "scraper" ? "স্ক্র্যাপার যোগ হয়েছে" : "RSS ফিড যোগ হয়েছে");
+    setNewFeed({ name: "", url: "", category: "জাতীয়", feed_type: "rss" });
     setShowAddForm(false);
     loadFeeds();
   };
