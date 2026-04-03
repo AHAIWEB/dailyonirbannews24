@@ -9,10 +9,19 @@ const corsHeaders = {
 function extractImageFromContent(content: string): string | null {
   const imgMatch = content.match(/<img[^>]+src=["']([^"']+)["']/i);
   if (imgMatch) return imgMatch[1];
+  // data-src (lazy load)
+  const dataSrcMatch = content.match(/<img[^>]+data-src=["']([^"']+)["']/i);
+  if (dataSrcMatch) return dataSrcMatch[1];
+  // data-original
+  const dataOrigMatch = content.match(/<img[^>]+data-original=["']([^"']+)["']/i);
+  if (dataOrigMatch) return dataOrigMatch[1];
   const mediaMatch = content.match(/<media:content[^>]+url=["']([^"']+)["']/i);
   if (mediaMatch) return mediaMatch[1];
   const enclosureMatch = content.match(/<enclosure[^>]+url=["']([^"']+)["']/i);
   if (enclosureMatch) return enclosureMatch[1];
+  // og:image in RSS content
+  const ogMatch = content.match(/<meta[^>]+property=["']og:image["'][^>]+content=["']([^"']+)["']/i);
+  if (ogMatch) return ogMatch[1];
   return null;
 }
 
