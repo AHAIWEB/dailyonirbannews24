@@ -15,6 +15,7 @@ import SidebarWidget from "@/components/news/SidebarWidget";
 import RssNewsWidget from "@/components/news/RssNewsWidget";
 import WebStorySection from "@/components/news/WebStorySection";
 import FotoCardSection from "@/components/news/FotoCardSection";
+import PhotoGallerySection from "@/components/news/PhotoGallerySection";
 import Footer from "@/components/news/Footer";
 
 interface SectionConfig {
