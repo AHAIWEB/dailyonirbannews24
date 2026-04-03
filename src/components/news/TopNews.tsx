@@ -23,7 +23,7 @@ export default function TopNews() {
 
   useEffect(() => {
     const load = async () => {
-      // First try featured articles
+      // Only featured articles for top news
       const { data: featured } = await supabase
         .from("rss_articles")
         .select("*")
@@ -37,7 +37,7 @@ export default function TopNews() {
         return;
       }
 
-      // Fallback: latest published
+      // Fallback: latest published (but NOT all — just the most recent few)
       const { data: latest } = await supabase
         .from("rss_articles")
         .select("*")
@@ -61,7 +61,6 @@ export default function TopNews() {
         date: new Date(a.published_at).toLocaleDateString("bn-BD"),
         source: a.source_name,
         excerpt: a.content || "",
-        isExternal: false,
         category: a.category,
       }))
     : mockPosts.map(p => ({
@@ -72,14 +71,8 @@ export default function TopNews() {
         date: p.date,
         source: "",
         excerpt: p.excerpt,
-        isExternal: false,
         category: "শীর্ষ সংবাদ",
       }));
-
-  const ItemLink = ({ item, children, className }: { item: typeof items[0]; children: React.ReactNode; className?: string }) =>
-    item.isExternal
-      ? <a href={item.url} target="_blank" rel="noopener noreferrer" className={className}>{children}</a>
-      : <Link to={item.url} className={className}>{children}</Link>;
 
   const hero = items[0];
   const sideItems = items.slice(1, 3);
@@ -89,9 +82,8 @@ export default function TopNews() {
     <section>
       <SectionLabel label="শীর্ষ সংবাদ" />
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        {/* Main post */}
         {hero && (
-          <ItemLink item={hero} className="md:col-span-2 post-card bg-card rounded overflow-hidden shadow-sm block relative group">
+          <Link to={hero.url} className="md:col-span-2 post-card bg-card rounded overflow-hidden shadow-sm block relative group">
             <div className="overflow-hidden aspect-video">
               <img src={hero.image} alt={hero.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
             </div>
@@ -110,13 +102,12 @@ export default function TopNews() {
                 {hero.source && <><span>•</span><span>{hero.source}</span></>}
               </div>
             </div>
-          </ItemLink>
+          </Link>
         )}
 
-        {/* Side posts */}
         <div className="flex flex-col gap-4">
           {sideItems.map((item) => (
-            <ItemLink item={item} key={item.id} className="post-card bg-card rounded overflow-hidden shadow-sm block relative group">
+            <Link to={item.url} key={item.id} className="post-card bg-card rounded overflow-hidden shadow-sm block relative group">
               <div className="overflow-hidden aspect-video">
                 <img src={item.image} alt={item.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
               </div>
@@ -129,16 +120,15 @@ export default function TopNews() {
                   <Clock className="w-2.5 h-2.5" /> {item.date}
                 </span>
               </div>
-            </ItemLink>
+            </Link>
           ))}
         </div>
       </div>
 
-      {/* Bottom row */}
       {bottomItems.length > 0 && (
         <div className="grid grid-cols-3 gap-3 mt-3">
           {bottomItems.map(item => (
-            <ItemLink key={item.id} item={item} className="block rounded overflow-hidden group relative">
+            <Link key={item.id} to={item.url} className="block rounded overflow-hidden group relative">
               <div className="aspect-video bg-muted">
                 <img src={item.image} alt={item.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
               </div>
@@ -148,7 +138,7 @@ export default function TopNews() {
                   {item.title}
                 </h4>
               </div>
-            </ItemLink>
+            </Link>
           ))}
         </div>
       )}
