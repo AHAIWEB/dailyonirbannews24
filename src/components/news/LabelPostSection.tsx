@@ -163,7 +163,7 @@ export default function LabelPostSection({ label, count, layout = "list" }: Prop
             )}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               {rssArticles.slice(1).map((article) => (
-                <a key={article.id} href={article.source_url} target="_blank" rel="noopener noreferrer"
+                <Link key={article.id} to={`/post/${article.id}`}
                   className="flex gap-3 bg-card rounded-lg p-3 group border-l-4 border-red-600 hover:shadow-lg transition-all">
                   {article.image_url && (
                     <div className="w-24 h-20 rounded overflow-hidden shrink-0">
