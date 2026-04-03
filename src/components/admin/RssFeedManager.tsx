@@ -216,41 +216,51 @@ export default function RssFeedManager() {
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div className="flex items-center gap-2">
           <Rss className="w-5 h-5 text-primary" />
-          <h2 className="text-lg font-bold text-foreground">RSS ফিড ম্যানেজার</h2>
+          <h2 className="text-lg font-bold text-foreground">RSS ফিড ও স্ক্র্যাপার</h2>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-wrap">
           <button onClick={handleFetchAll} disabled={fetching}
             className="flex items-center gap-1.5 bg-primary text-primary-foreground px-3 py-1.5 rounded text-xs font-semibold disabled:opacity-50">
             <RefreshCw className={`w-3.5 h-3.5 ${fetching ? "animate-spin" : ""}`} />
-            {fetching ? "ফেচিং..." : "সব ফেচ করুন"}
+            {fetching ? "ফেচিং..." : "RSS ফেচ"}
+          </button>
+          <button onClick={handleScrapeAll} disabled={scrapeFetching}
+            className="flex items-center gap-1.5 bg-accent text-accent-foreground px-3 py-1.5 rounded text-xs font-semibold disabled:opacity-50">
+            <Search className={`w-3.5 h-3.5 ${scrapeFetching ? "animate-spin" : ""}`} />
+            {scrapeFetching ? "স্ক্র্যাপিং..." : "স্ক্র্যাপ চালান"}
           </button>
           <button onClick={() => setShowAddForm(!showAddForm)}
             className="flex items-center gap-1.5 bg-secondary text-secondary-foreground px-3 py-1.5 rounded text-xs font-semibold">
-            <Plus className="w-3.5 h-3.5" /> ফিড যোগ করুন
+            <Plus className="w-3.5 h-3.5" /> যোগ করুন
           </button>
         </div>
       </div>
 
       <div className="flex items-center gap-2 text-[10px] text-muted-foreground bg-muted px-3 py-1.5 rounded">
-        <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
-        অটো রিফ্রেশ চালু — প্রতি ১ মিনিটে আপডেট হচ্ছে
+        <Timer className="w-3 h-3" />
+        অটো ফেচ চালু — প্রতি ১ মিনিটে RSS + স্ক্র্যাপার আপডেট হচ্ছে
       </div>
 
-      {/* Add Feed Form */}
+      {/* Add Feed/Scraper Form */}
       {showAddForm && (
         <div className="bg-card border border-border rounded-lg p-4 space-y-3">
-          <h3 className="text-sm font-bold text-foreground">নতুন RSS ফিড যোগ করুন</h3>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-            <input type="text" placeholder="ফিডের নাম" value={newFeed.name}
+          <h3 className="text-sm font-bold text-foreground">নতুন ফিড / স্ক্র্যাপার যোগ করুন</h3>
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
+            <input type="text" placeholder="নাম" value={newFeed.name}
               onChange={(e) => setNewFeed({ ...newFeed, name: e.target.value })}
               className="bg-muted border border-border rounded px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:ring-1 focus:ring-primary focus:outline-none" />
-            <input type="url" placeholder="RSS URL (https://...)" value={newFeed.url}
+            <input type="url" placeholder="URL (https://...)" value={newFeed.url}
               onChange={(e) => setNewFeed({ ...newFeed, url: e.target.value })}
               className="bg-muted border border-border rounded px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:ring-1 focus:ring-primary focus:outline-none" />
             <select value={newFeed.category} onChange={(e) => setNewFeed({ ...newFeed, category: e.target.value })}
               className="bg-muted border border-border rounded px-3 py-2 text-sm text-foreground focus:ring-1 focus:ring-primary focus:outline-none">
-              <option value="" disabled>সংবাদ সূত্র নির্বাচন</option>
+              <option value="" disabled>ক্যাটাগরি নির্বাচন</option>
               {categories.map(c => <option key={c} value={c}>{c}</option>)}
+            </select>
+            <select value={newFeed.feed_type} onChange={(e) => setNewFeed({ ...newFeed, feed_type: e.target.value as "rss" | "scraper" })}
+              className="bg-muted border border-border rounded px-3 py-2 text-sm text-foreground focus:ring-1 focus:ring-primary focus:outline-none">
+              <option value="rss">📡 RSS ফিড</option>
+              <option value="scraper">🔍 স্ক্র্যাপার</option>
             </select>
           </div>
           <div className="flex gap-2">
@@ -264,7 +274,11 @@ export default function RssFeedManager() {
       <div className="flex border-b border-border">
         <button onClick={() => setActiveTab("feeds")}
           className={`px-4 py-2 text-sm font-semibold border-b-2 transition-colors ${activeTab === "feeds" ? "border-primary text-primary" : "border-transparent text-muted-foreground hover:text-foreground"}`}>
-          ফিড তালিকা ({feeds.length})
+          📡 RSS ({feeds.filter((f: any) => (f as any).feed_type !== "scraper").length})
+        </button>
+        <button onClick={() => setActiveTab("scrapers")}
+          className={`px-4 py-2 text-sm font-semibold border-b-2 transition-colors ${activeTab === "scrapers" ? "border-primary text-primary" : "border-transparent text-muted-foreground hover:text-foreground"}`}>
+          🔍 স্ক্র্যাপার ({feeds.filter((f: any) => (f as any).feed_type === "scraper").length})
         </button>
         <button onClick={() => setActiveTab("articles")}
           className={`px-4 py-2 text-sm font-semibold border-b-2 transition-colors ${activeTab === "articles" ? "border-primary text-primary" : "border-transparent text-muted-foreground hover:text-foreground"}`}>
