@@ -44,9 +44,9 @@ export default function RssFeedManager() {
   const [subcatMap, setSubcatMap] = useState<Record<string, string[]>>({});
   const [loading, setLoading] = useState(true);
   const [fetching, setFetching] = useState(false);
-  const [newFeed, setNewFeed] = useState({ name: "", url: "", category: "জাতীয়" });
+  const [newFeed, setNewFeed] = useState({ name: "", url: "", category: "জাতীয়", feed_type: "rss" as "rss" | "scraper" });
   const [showAddForm, setShowAddForm] = useState(false);
-  const [activeTab, setActiveTab] = useState<"feeds" | "articles">("feeds");
+  const [activeTab, setActiveTab] = useState<"feeds" | "scrapers" | "articles">("feeds");
   const [articleFilter, setArticleFilter] = useState("all");
   const [dateFrom, setDateFrom] = useState("");
   const [dateTo, setDateTo] = useState("");
