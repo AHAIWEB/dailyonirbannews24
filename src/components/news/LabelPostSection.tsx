@@ -182,7 +182,7 @@ export default function LabelPostSection({ label, count, layout = "list" }: Prop
                       </span>
                     </div>
                   </div>
-                </a>
+                </Link>
               ))}
             </div>
           </div>
