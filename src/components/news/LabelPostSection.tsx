@@ -373,7 +373,7 @@ export default function LabelPostSection({ label, count, layout = "list" }: Prop
         {hasRss ? (
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
             {rssArticles.map((article) => (
-              <a key={article.id} href={article.source_url} target="_blank" rel="noopener noreferrer"
+              <Link key={article.id} to={`/post/${article.id}`}
                 className="post-card bg-card rounded-lg overflow-hidden shadow-sm block group border border-border/50 hover:border-primary/30 hover:shadow-md transition-all">
                 <div className="overflow-hidden aspect-[4/3] relative">
                   {article.image_url && <img src={article.image_url} alt={article.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />}
