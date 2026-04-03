@@ -66,7 +66,7 @@ export default function RssFeedManager() {
   useEffect(() => { loadFeeds(); loadCategories(); }, []);
   useEffect(() => { loadArticles(); }, [articleFilter, dateFrom, dateTo, articlePage]);
   useEffect(() => {
-    const interval = setInterval(() => { handleFetchAll(); }, 60000);
+    const interval = setInterval(() => { handleFetchAll(); handleScrapeAll(); }, 60000);
     return () => clearInterval(interval);
   }, []);
 
