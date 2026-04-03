@@ -46,7 +46,7 @@ export default function LabelPostSection({ label, count, layout = "list" }: Prop
   // ===== জাতীয় (National) — Screenshot-matched layout =====
   if (label === "জাতীয়") {
     const items = hasRss
-      ? rssArticles.map(a => ({ id: a.id, title: a.title, image: a.image_url || "", url: a.source_url, date: new Date(a.published_at).toLocaleDateString("bn-BD"), source: a.source_name, excerpt: a.content || "", isExternal: true }))
+      ? rssArticles.map(a => ({ id: a.id, title: a.title, image: a.image_url || "", url: `/post/${a.id}`, date: new Date(a.published_at).toLocaleDateString("bn-BD"), source: a.source_name, excerpt: a.content || "", isExternal: false }))
       : mockPosts.map(p => ({ id: String(p.id), title: p.title, image: p.image, url: `/post/${p.id}`, date: p.date, source: "", excerpt: p.excerpt, isExternal: false }));
 
     const hero = items[0];
