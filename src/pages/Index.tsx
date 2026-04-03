@@ -15,6 +15,7 @@ import SidebarWidget from "@/components/news/SidebarWidget";
 import RssNewsWidget from "@/components/news/RssNewsWidget";
 import WebStorySection from "@/components/news/WebStorySection";
 import FotoCardSection from "@/components/news/FotoCardSection";
+import PhotoGallerySection from "@/components/news/PhotoGallerySection";
 import Footer from "@/components/news/Footer";
 
 interface SectionConfig {
@@ -38,10 +39,14 @@ const DEFAULT_SECTIONS: SectionConfig[] = [
   { label: "রাজনীতি", count: 4, layout: "list", visible: true },
   { label: "আন্তর্জাতিক", count: 5, layout: "highlight", visible: true },
   { label: "বেলাভূমি কণ্ঠ", count: 6, layout: "fotocard", visible: true },
-  { label: "বিনোদন", count: 6, layout: "grid", visible: true },
+  { label: "বিনোদন", count: 8, layout: "grid", visible: true },
+  { label: "গ্যালারি", count: 12, layout: "gallery", visible: true },
   { label: "দেশ বাংলা", count: 8, layout: "deshbangla", visible: true },
   { label: "লাইফস্টাইল", count: 6, layout: "highlight", visible: true },
+  { label: "ভ্রমণ", count: 6, layout: "grid", visible: true },
   { label: "স্বাস্থ্যসেবা", count: 5, layout: "list", visible: true },
+  { label: "চাকরি", count: 5, layout: "list", visible: true },
+  { label: "টপটেন", count: 10, layout: "list", visible: true },
   { label: "মতামত", count: 4, layout: "grid", visible: true },
   { label: "ভিডিও", count: 4, layout: "grid", visible: true },
 ];
@@ -69,6 +74,7 @@ const SPECIAL_SECTIONS: Record<string, (config: SectionConfig) => JSX.Element> =
   "ওয়েব স্টোরি": () => <WebStorySection key="webstory" />,
   "বেলাভূমি কণ্ঠ": () => <FotoCardSection key="fotocard" />,
   "বিনোদন": () => <EntertainmentGrid key="entertainment" />,
+  "গ্যালারি": () => <PhotoGallerySection key="gallery" />,
   "দেশ বাংলা": () => <DeshBangla key="deshbangla" />,
   "লাইফস্টাইল": () => <LifestyleSection key="lifestyle" />,
   "মতামত": () => <OpinionSection key="opinion" />,

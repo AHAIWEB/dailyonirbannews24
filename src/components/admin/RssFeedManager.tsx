@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
-import { Plus, Trash2, RefreshCw, Rss, Globe, ExternalLink, Eye, EyeOff, Star, Send, Edit3, Save, X, Sparkles, BookOpen, MapPin } from "lucide-react";
+import { Plus, Trash2, RefreshCw, Rss, Globe, ExternalLink, Eye, EyeOff, Star, Send, Edit3, Save, X, Sparkles, BookOpen, MapPin, Search, Timer } from "lucide-react";
 import { toast } from "sonner";
 import { getAllDivisions, getDistricts, getUpazilas } from "@/data/bangladeshLocations";
 
@@ -34,7 +34,7 @@ interface RssArticle {
   location_upazila?: string;
 }
 
-const DEFAULT_CATEGORIES = ["জাতীয়", "রাজনীতি", "আন্তর্জাতিক", "অর্থনীতি", "বিনোদন", "খেলাধুলা", "প্রযুক্তি", "শিক্ষা", "স্বাস্থ্যসেবা", "লাইফস্টাইল", "মতামত", "দেশ বাংলা", "ভিডিও", "এডিটর পিক", "ওয়েব স্টোরি", "বেলাভূমি কণ্ঠ", "পিপল", "একটু থামুন", "আলোচিত", "স্পট লাইট", "জনপ্রিয়", "ভাইরাল", "জটিল"];
+const DEFAULT_CATEGORIES = ["জাতীয়", "রাজনীতি", "আন্তর্জাতিক", "অর্থনীতি", "বিনোদন", "খেলাধুলা", "প্রযুক্তি", "শিক্ষা", "স্বাস্থ্যসেবা", "লাইফস্টাইল", "মতামত", "দেশ বাংলা", "ভিডিও", "এডিটর পিক", "ওয়েব স্টোরি", "বেলাভূমি কণ্ঠ", "পিপল", "একটু থামুন", "আলোচিত", "স্পট লাইট", "জনপ্রিয়", "ভাইরাল", "জটিল", "গ্যালারি", "ভ্রমণ", "চাকরি", "টপটেন"];
 
 export default function RssFeedManager() {
   const { user } = useAuth();
@@ -44,9 +44,9 @@ export default function RssFeedManager() {
   const [subcatMap, setSubcatMap] = useState<Record<string, string[]>>({});
   const [loading, setLoading] = useState(true);
   const [fetching, setFetching] = useState(false);
-  const [newFeed, setNewFeed] = useState({ name: "", url: "", category: "জাতীয়" });
+  const [newFeed, setNewFeed] = useState({ name: "", url: "", category: "জাতীয়", feed_type: "rss" as "rss" | "scraper" });
   const [showAddForm, setShowAddForm] = useState(false);
-  const [activeTab, setActiveTab] = useState<"feeds" | "articles">("feeds");
+  const [activeTab, setActiveTab] = useState<"feeds" | "scrapers" | "articles">("feeds");
   const [articleFilter, setArticleFilter] = useState("all");
   const [dateFrom, setDateFrom] = useState("");
   const [dateTo, setDateTo] = useState("");
@@ -60,12 +60,13 @@ export default function RssFeedManager() {
     location_division: string; location_district: string; location_upazila: string;
   }>({ title: "", content: "", category: "", sub_category: "", is_editor_pick: false, is_web_story: false, location_division: "", location_district: "", location_upazila: "" });
   const [editingFeed, setEditingFeed] = useState<string | null>(null);
-  const [editFeedData, setEditFeedData] = useState<{ name: string; url: string; category: string }>({ name: "", url: "", category: "" });
+  const [editFeedData, setEditFeedData] = useState<{ name: string; url: string; category: string; feed_type: string }>({ name: "", url: "", category: "", feed_type: "rss" });
+  const [scrapeFetching, setScrapeFetching] = useState(false);
 
   useEffect(() => { loadFeeds(); loadCategories(); }, []);
   useEffect(() => { loadArticles(); }, [articleFilter, dateFrom, dateTo, articlePage]);
   useEffect(() => {
-    const interval = setInterval(() => { handleFetchAll(); }, 60000);
+    const interval = setInterval(() => { handleFetchAll(); handleScrapeAll(); }, 60000);
     return () => clearInterval(interval);
   }, []);
 
@@ -111,10 +112,10 @@ export default function RssFeedManager() {
 
   const addFeed = async () => {
     if (!newFeed.name || !newFeed.url) { toast.error("নাম ও URL দিন"); return; }
-    const { error } = await supabase.from("rss_feeds").insert({ name: newFeed.name, url: newFeed.url, category: newFeed.category, created_by: user?.id } as any);
-    if (error) { toast.error("ফিড যোগ করতে সমস্যা হয়েছে"); return; }
-    toast.success("RSS ফিড যোগ হয়েছে");
-    setNewFeed({ name: "", url: "", category: "জাতীয়" });
+    const { error } = await supabase.from("rss_feeds").insert({ name: newFeed.name, url: newFeed.url, category: newFeed.category, feed_type: newFeed.feed_type, created_by: user?.id } as any);
+    if (error) { toast.error("ফিড যোগ করতে সমস্যা হয়েছে: " + error.message); return; }
+    toast.success(newFeed.feed_type === "scraper" ? "স্ক্র্যাপার যোগ হয়েছে" : "RSS ফিড যোগ হয়েছে");
+    setNewFeed({ name: "", url: "", category: "জাতীয়", feed_type: "rss" });
     setShowAddForm(false);
     loadFeeds();
   };
@@ -122,10 +123,23 @@ export default function RssFeedManager() {
   const deleteFeed = async (id: string) => { await supabase.from("rss_feeds").delete().eq("id", id); toast.success("ফিড মুছে ফেলা হয়েছে"); loadFeeds(); };
   const toggleFeed = async (id: string, isActive: boolean) => { await supabase.from("rss_feeds").update({ is_active: !isActive } as any).eq("id", id); loadFeeds(); };
 
-  const startEditFeed = (feed: RssFeed) => { setEditingFeed(feed.id); setEditFeedData({ name: feed.name, url: feed.url, category: feed.category }); };
+  const startEditFeed = (feed: RssFeed) => { setEditingFeed(feed.id); setEditFeedData({ name: feed.name, url: feed.url, category: feed.category, feed_type: (feed as any).feed_type || "rss" }); };
   const saveEditFeed = async (id: string) => {
-    await supabase.from("rss_feeds").update({ name: editFeedData.name, url: editFeedData.url, category: editFeedData.category } as any).eq("id", id);
+    await supabase.from("rss_feeds").update({ name: editFeedData.name, url: editFeedData.url, category: editFeedData.category, feed_type: editFeedData.feed_type } as any).eq("id", id);
     toast.success("ফিড আপডেট হয়েছে"); setEditingFeed(null); loadFeeds();
+  };
+
+  const handleScrapeAll = async () => {
+    setScrapeFetching(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("scrape-website");
+      if (error) throw error;
+      toast.success(`${data?.totalInserted || 0} টি নতুন আর্টিকেল স্ক্র্যাপ হয়েছে`);
+      loadArticles();
+    } catch (err: any) {
+      toast.error("স্ক্র্যাপ করতে সমস্যা: " + err.message);
+    }
+    setScrapeFetching(false);
   };
 
   const handleFetchAll = async () => {
@@ -202,41 +216,51 @@ export default function RssFeedManager() {
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div className="flex items-center gap-2">
           <Rss className="w-5 h-5 text-primary" />
-          <h2 className="text-lg font-bold text-foreground">RSS ফিড ম্যানেজার</h2>
+          <h2 className="text-lg font-bold text-foreground">RSS ফিড ও স্ক্র্যাপার</h2>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-wrap">
           <button onClick={handleFetchAll} disabled={fetching}
             className="flex items-center gap-1.5 bg-primary text-primary-foreground px-3 py-1.5 rounded text-xs font-semibold disabled:opacity-50">
             <RefreshCw className={`w-3.5 h-3.5 ${fetching ? "animate-spin" : ""}`} />
-            {fetching ? "ফেচিং..." : "সব ফেচ করুন"}
+            {fetching ? "ফেচিং..." : "RSS ফেচ"}
+          </button>
+          <button onClick={handleScrapeAll} disabled={scrapeFetching}
+            className="flex items-center gap-1.5 bg-accent text-accent-foreground px-3 py-1.5 rounded text-xs font-semibold disabled:opacity-50">
+            <Search className={`w-3.5 h-3.5 ${scrapeFetching ? "animate-spin" : ""}`} />
+            {scrapeFetching ? "স্ক্র্যাপিং..." : "স্ক্র্যাপ চালান"}
           </button>
           <button onClick={() => setShowAddForm(!showAddForm)}
             className="flex items-center gap-1.5 bg-secondary text-secondary-foreground px-3 py-1.5 rounded text-xs font-semibold">
-            <Plus className="w-3.5 h-3.5" /> ফিড যোগ করুন
+            <Plus className="w-3.5 h-3.5" /> যোগ করুন
           </button>
         </div>
       </div>
 
       <div className="flex items-center gap-2 text-[10px] text-muted-foreground bg-muted px-3 py-1.5 rounded">
-        <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
-        অটো রিফ্রেশ চালু — প্রতি ১ মিনিটে আপডেট হচ্ছে
+        <Timer className="w-3 h-3" />
+        অটো ফেচ চালু — প্রতি ১ মিনিটে RSS + স্ক্র্যাপার আপডেট হচ্ছে
       </div>
 
-      {/* Add Feed Form */}
+      {/* Add Feed/Scraper Form */}
       {showAddForm && (
         <div className="bg-card border border-border rounded-lg p-4 space-y-3">
-          <h3 className="text-sm font-bold text-foreground">নতুন RSS ফিড যোগ করুন</h3>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-            <input type="text" placeholder="ফিডের নাম" value={newFeed.name}
+          <h3 className="text-sm font-bold text-foreground">নতুন ফিড / স্ক্র্যাপার যোগ করুন</h3>
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
+            <input type="text" placeholder="নাম" value={newFeed.name}
               onChange={(e) => setNewFeed({ ...newFeed, name: e.target.value })}
               className="bg-muted border border-border rounded px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:ring-1 focus:ring-primary focus:outline-none" />
-            <input type="url" placeholder="RSS URL (https://...)" value={newFeed.url}
+            <input type="url" placeholder="URL (https://...)" value={newFeed.url}
               onChange={(e) => setNewFeed({ ...newFeed, url: e.target.value })}
               className="bg-muted border border-border rounded px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:ring-1 focus:ring-primary focus:outline-none" />
             <select value={newFeed.category} onChange={(e) => setNewFeed({ ...newFeed, category: e.target.value })}
               className="bg-muted border border-border rounded px-3 py-2 text-sm text-foreground focus:ring-1 focus:ring-primary focus:outline-none">
-              <option value="" disabled>সংবাদ সূত্র নির্বাচন</option>
+              <option value="" disabled>ক্যাটাগরি নির্বাচন</option>
               {categories.map(c => <option key={c} value={c}>{c}</option>)}
+            </select>
+            <select value={newFeed.feed_type} onChange={(e) => setNewFeed({ ...newFeed, feed_type: e.target.value as "rss" | "scraper" })}
+              className="bg-muted border border-border rounded px-3 py-2 text-sm text-foreground focus:ring-1 focus:ring-primary focus:outline-none">
+              <option value="rss">📡 RSS ফিড</option>
+              <option value="scraper">🔍 স্ক্র্যাপার</option>
             </select>
           </div>
           <div className="flex gap-2">
@@ -250,7 +274,11 @@ export default function RssFeedManager() {
       <div className="flex border-b border-border">
         <button onClick={() => setActiveTab("feeds")}
           className={`px-4 py-2 text-sm font-semibold border-b-2 transition-colors ${activeTab === "feeds" ? "border-primary text-primary" : "border-transparent text-muted-foreground hover:text-foreground"}`}>
-          ফিড তালিকা ({feeds.length})
+          📡 RSS ({feeds.filter((f: any) => (f as any).feed_type !== "scraper").length})
+        </button>
+        <button onClick={() => setActiveTab("scrapers")}
+          className={`px-4 py-2 text-sm font-semibold border-b-2 transition-colors ${activeTab === "scrapers" ? "border-primary text-primary" : "border-transparent text-muted-foreground hover:text-foreground"}`}>
+          🔍 স্ক্র্যাপার ({feeds.filter((f: any) => (f as any).feed_type === "scraper").length})
         </button>
         <button onClick={() => setActiveTab("articles")}
           className={`px-4 py-2 text-sm font-semibold border-b-2 transition-colors ${activeTab === "articles" ? "border-primary text-primary" : "border-transparent text-muted-foreground hover:text-foreground"}`}>
@@ -259,10 +287,10 @@ export default function RssFeedManager() {
       </div>
 
       {/* Feeds List */}
-      {activeTab === "feeds" && (
+      {(activeTab === "feeds" || activeTab === "scrapers") && (
         <div className="space-y-2">
-          {feeds.length === 0 && <p className="text-center text-muted-foreground py-8 text-sm">কোনো ফিড যোগ করা হয়নি।</p>}
-          {feeds.map(feed => (
+          {feeds.filter((f: any) => activeTab === "scrapers" ? f.feed_type === "scraper" : f.feed_type !== "scraper").length === 0 && <p className="text-center text-muted-foreground py-8 text-sm">কোনো {activeTab === "scrapers" ? "স্ক্র্যাপার" : "ফিড"} যোগ করা হয়নি।</p>}
+          {feeds.filter((f: any) => activeTab === "scrapers" ? f.feed_type === "scraper" : f.feed_type !== "scraper").map(feed => (
             <div key={feed.id} className="bg-card border border-border rounded-lg p-3 space-y-2">
               {editingFeed === feed.id ? (
                 <div className="space-y-2">

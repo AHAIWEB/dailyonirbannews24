@@ -186,6 +186,7 @@ export type Database = {
           category: string
           created_at: string
           created_by: string | null
+          feed_type: string
           fetch_interval_seconds: number
           id: string
           is_active: boolean
@@ -198,6 +199,7 @@ export type Database = {
           category?: string
           created_at?: string
           created_by?: string | null
+          feed_type?: string
           fetch_interval_seconds?: number
           id?: string
           is_active?: boolean
@@ -210,6 +212,7 @@ export type Database = {
           category?: string
           created_at?: string
           created_by?: string | null
+          feed_type?: string
           fetch_interval_seconds?: number
           id?: string
           is_active?: boolean
