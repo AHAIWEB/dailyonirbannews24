@@ -324,7 +324,7 @@ export default function LabelPostSection({ label, count, layout = "list" }: Prop
                       <span className="text-[9px]">{new Date(article.published_at).toLocaleDateString("bn-BD")}</span>
                     </div>
                   </div>
-                </a>
+                </Link>
               ))}
             </div>
           </div>
