@@ -202,6 +202,7 @@ serve(async (req) => {
                 source_name: sourceName,
                 category: scraper.category,
                 is_published: true,
+                is_featured: inserted === 0, // First article from each source becomes featured
                 published_at: new Date().toISOString(),
                 fetched_at: new Date().toISOString(),
               }, {
