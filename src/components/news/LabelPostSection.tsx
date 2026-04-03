@@ -384,7 +384,7 @@ export default function LabelPostSection({ label, count, layout = "list" }: Prop
                     {article.title}
                   </h3>
                 </div>
-              </a>
+              </Link>
             ))}
           </div>
         ) : (
