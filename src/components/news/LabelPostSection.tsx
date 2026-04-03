@@ -426,7 +426,7 @@ export default function LabelPostSection({ label, count, layout = "list" }: Prop
                   {rssArticles[0].title}
                 </h3>
               </div>
-            </a>
+            </Link>
           )}
           <div className="grid grid-cols-1 gap-2">
             {rssArticles.slice(1).map((article) => (
