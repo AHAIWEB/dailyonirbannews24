@@ -60,7 +60,8 @@ export default function RssFeedManager() {
     location_division: string; location_district: string; location_upazila: string;
   }>({ title: "", content: "", category: "", sub_category: "", is_editor_pick: false, is_web_story: false, location_division: "", location_district: "", location_upazila: "" });
   const [editingFeed, setEditingFeed] = useState<string | null>(null);
-  const [editFeedData, setEditFeedData] = useState<{ name: string; url: string; category: string }>({ name: "", url: "", category: "" });
+  const [editFeedData, setEditFeedData] = useState<{ name: string; url: string; category: string; feed_type: string }>({ name: "", url: "", category: "", feed_type: "rss" });
+  const [scrapeFetching, setScrapeFetching] = useState(false);
 
   useEffect(() => { loadFeeds(); loadCategories(); }, []);
   useEffect(() => { loadArticles(); }, [articleFilter, dateFrom, dateTo, articlePage]);
