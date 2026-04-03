@@ -34,7 +34,7 @@ export default function PhotoGallerySection() {
             className={`relative overflow-hidden rounded-lg cursor-pointer group ${
               i === 0 ? "col-span-2 row-span-2" : ""
             }`}
-            onClick={() => setLightbox(a.image_url)}
+            onClick={() => setLightbox(a.image_url || null)}
           >
             <div className={`${i === 0 ? "aspect-square" : "aspect-[4/3]"} overflow-hidden`}>
               <img

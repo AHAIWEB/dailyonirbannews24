@@ -26,7 +26,7 @@ export default function EntertainmentGrid() {
   const hasRss = articles.length > 0;
 
   const items = hasRss
-    ? articles.map(a => ({ id: a.id, title: a.title, image: a.image_url || "", url: a.source_url, source: a.source_name || "", date: new Date(a.published_at || Date.now()).toLocaleDateString("bn-BD"), isExternal: true }))
+    ? articles.map(a => ({ id: a.id, title: a.title, image: a.image_url || "", url: `/post/${a.id}`, source: a.source_name || "", date: new Date(a.published_at || Date.now()).toLocaleDateString("bn-BD"), isExternal: false }))
     : mockPosts.map(p => ({ id: String(p.id), title: p.title, image: p.image, url: `/post/${p.id}`, source: p.author, date: p.date, isExternal: false }));
 
   const hero = items[0];
