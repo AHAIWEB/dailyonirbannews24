@@ -294,7 +294,7 @@ export default function LabelPostSection({ label, count, layout = "list" }: Prop
         <SectionLabel label={label} />
         {hasRss ? (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <a href={rssArticles[0]?.source_url} target="_blank" rel="noopener noreferrer"
+            <Link to={`/post/${rssArticles[0]?.id}`}
               className="md:col-span-2 post-card group bg-card rounded-lg overflow-hidden shadow-sm block relative">
               <div className="overflow-hidden aspect-video">
                 {rssArticles[0]?.image_url && <img src={rssArticles[0].image_url} alt={rssArticles[0].title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />}
