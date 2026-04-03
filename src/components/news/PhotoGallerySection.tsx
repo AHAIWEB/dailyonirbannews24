@@ -9,7 +9,8 @@ export default function PhotoGallerySection() {
 
   useEffect(() => {
     const load = async () => {
-      const { data } = await supabase
+      // Try gallery category first
+      let { data } = await supabase
         .from("rss_articles")
         .select("*")
         .eq("is_published", true)
@@ -17,6 +18,18 @@ export default function PhotoGallerySection() {
         .not("image_url", "is", null)
         .order("published_at", { ascending: false })
         .limit(12);
+      
+      // Fallback: any posts with images
+      if (!data || data.length === 0) {
+        const { data: fallback } = await supabase
+          .from("rss_articles")
+          .select("*")
+          .eq("is_published", true)
+          .not("image_url", "is", null)
+          .order("published_at", { ascending: false })
+          .limit(12);
+        data = fallback;
+      }
       setArticles(data || []);
     };
     load();

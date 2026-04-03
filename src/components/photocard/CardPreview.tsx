@@ -120,9 +120,10 @@ function DraggableElement({
   const attach = useCallback(() => {
     if (attached.current) return;
     attached.current = true;
+    const moveOpts = { passive: false } as AddEventListenerOptions;
     window.addEventListener("mousemove", windowHandlers.onMouseMove);
     window.addEventListener("mouseup", () => { windowHandlers.onMouseUp(); detach(); });
-    window.addEventListener("touchmove", windowHandlers.onTouchMove, { passive: false });
+    window.addEventListener("touchmove", windowHandlers.onTouchMove, moveOpts);
     window.addEventListener("touchend", () => { windowHandlers.onTouchEnd(); detach(); });
   }, [windowHandlers]);
 
