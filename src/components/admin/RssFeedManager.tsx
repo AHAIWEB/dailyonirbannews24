@@ -287,10 +287,10 @@ export default function RssFeedManager() {
       </div>
 
       {/* Feeds List */}
-      {activeTab === "feeds" && (
+      {(activeTab === "feeds" || activeTab === "scrapers") && (
         <div className="space-y-2">
-          {feeds.length === 0 && <p className="text-center text-muted-foreground py-8 text-sm">কোনো ফিড যোগ করা হয়নি।</p>}
-          {feeds.map(feed => (
+          {feeds.filter((f: any) => activeTab === "scrapers" ? f.feed_type === "scraper" : f.feed_type !== "scraper").length === 0 && <p className="text-center text-muted-foreground py-8 text-sm">কোনো {activeTab === "scrapers" ? "স্ক্র্যাপার" : "ফিড"} যোগ করা হয়নি।</p>}
+          {feeds.filter((f: any) => activeTab === "scrapers" ? f.feed_type === "scraper" : f.feed_type !== "scraper").map(feed => (
             <div key={feed.id} className="bg-card border border-border rounded-lg p-3 space-y-2">
               {editingFeed === feed.id ? (
                 <div className="space-y-2">
