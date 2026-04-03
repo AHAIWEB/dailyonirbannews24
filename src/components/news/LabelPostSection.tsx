@@ -415,7 +415,7 @@ export default function LabelPostSection({ label, count, layout = "list" }: Prop
       {hasRss ? (
         <div className="space-y-3">
           {rssArticles[0] && (
-            <a href={rssArticles[0].source_url} target="_blank" rel="noopener noreferrer"
+            <Link to={`/post/${rssArticles[0].id}`}
               className="post-card bg-card rounded-lg overflow-hidden shadow-sm block group relative">
               <div className="overflow-hidden aspect-video">
                 {rssArticles[0].image_url && <img src={rssArticles[0].image_url} alt={rssArticles[0].title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />}
