@@ -112,7 +112,7 @@ function extractContent(html: string): string {
   // Return 50% of content
   const words = fullText.split(/\s+/);
   const cutoff = Math.ceil(words.length * 0.5);
-  return words.slice(0, cutoff).join(' ') + (cutoff < words.length ? '...' : '');
+  return words.slice(0, cutoff).join(' ') + (cutoff < words.length ? '\n\n[বিস্তারিত পড়তে মূল সূত্রে যান]' : '');
 }
 
 function extractDescription(html: string): string {
@@ -202,6 +202,7 @@ serve(async (req) => {
                 source_name: sourceName,
                 category: scraper.category,
                 is_published: true,
+                is_featured: inserted === 0, // First article from each source becomes featured
                 published_at: new Date().toISOString(),
                 fetched_at: new Date().toISOString(),
               }, {

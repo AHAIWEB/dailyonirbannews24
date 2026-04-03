@@ -55,16 +55,20 @@ const CLIP_PATHS: Record<ClipShape, string | undefined> = {
   oval: "ellipse(48% 42% at 50% 50%)",
 };
 
-// Hook for drag interactions (mouse + touch)
+// Hook for drag interactions (mouse + touch) — optimized for mobile
 function useDrag(
   onDrag: (dx: number, dy: number) => void
 ) {
   const dragging = useRef(false);
   const lastPos = useRef({ x: 0, y: 0 });
+  const velocity = useRef({ x: 0, y: 0 });
+  const rafId = useRef<number>(0);
 
   const onStart = useCallback((clientX: number, clientY: number) => {
     dragging.current = true;
     lastPos.current = { x: clientX, y: clientY };
+    velocity.current = { x: 0, y: 0 };
+    cancelAnimationFrame(rafId.current);
   }, []);
 
   const onMove = useCallback((clientX: number, clientY: number) => {
@@ -72,22 +76,26 @@ function useDrag(
     const dx = clientX - lastPos.current.x;
     const dy = clientY - lastPos.current.y;
     lastPos.current = { x: clientX, y: clientY };
-    onDrag(dx, dy);
+    velocity.current = { x: dx, y: dy };
+    // Use rAF for smooth updates
+    cancelAnimationFrame(rafId.current);
+    rafId.current = requestAnimationFrame(() => onDrag(dx, dy));
   }, [onDrag]);
 
   const onEnd = useCallback(() => {
     dragging.current = false;
+    cancelAnimationFrame(rafId.current);
   }, []);
 
   const handlers = {
     onMouseDown: (e: React.MouseEvent) => { e.preventDefault(); onStart(e.clientX, e.clientY); },
-    onTouchStart: (e: React.TouchEvent) => { const t = e.touches[0]; onStart(t.clientX, t.clientY); },
+    onTouchStart: (e: React.TouchEvent) => { e.preventDefault(); const t = e.touches[0]; onStart(t.clientX, t.clientY); },
   };
 
   const windowHandlers = {
     onMouseMove: (e: MouseEvent) => onMove(e.clientX, e.clientY),
     onMouseUp: onEnd,
-    onTouchMove: (e: TouchEvent) => { const t = e.touches[0]; onMove(t.clientX, t.clientY); },
+    onTouchMove: (e: TouchEvent) => { e.preventDefault(); const t = e.touches[0]; onMove(t.clientX, t.clientY); },
     onTouchEnd: onEnd,
   };
 
@@ -112,9 +120,10 @@ function DraggableElement({
   const attach = useCallback(() => {
     if (attached.current) return;
     attached.current = true;
+    const moveOpts = { passive: false } as AddEventListenerOptions;
     window.addEventListener("mousemove", windowHandlers.onMouseMove);
     window.addEventListener("mouseup", () => { windowHandlers.onMouseUp(); detach(); });
-    window.addEventListener("touchmove", windowHandlers.onTouchMove, { passive: false });
+    window.addEventListener("touchmove", windowHandlers.onTouchMove, moveOpts);
     window.addEventListener("touchend", () => { windowHandlers.onTouchEnd(); detach(); });
   }, [windowHandlers]);
 

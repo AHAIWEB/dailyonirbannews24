@@ -46,7 +46,7 @@ export default function LabelPostSection({ label, count, layout = "list" }: Prop
   // ===== জাতীয় (National) — Screenshot-matched layout =====
   if (label === "জাতীয়") {
     const items = hasRss
-      ? rssArticles.map(a => ({ id: a.id, title: a.title, image: a.image_url || "", url: a.source_url, date: new Date(a.published_at).toLocaleDateString("bn-BD"), source: a.source_name, excerpt: a.content || "", isExternal: true }))
+      ? rssArticles.map(a => ({ id: a.id, title: a.title, image: a.image_url || "", url: `/post/${a.id}`, date: new Date(a.published_at).toLocaleDateString("bn-BD"), source: a.source_name, excerpt: a.content || "", isExternal: false }))
       : mockPosts.map(p => ({ id: String(p.id), title: p.title, image: p.image, url: `/post/${p.id}`, date: p.date, source: "", excerpt: p.excerpt, isExternal: false }));
 
     const hero = items[0];
@@ -138,7 +138,7 @@ export default function LabelPostSection({ label, count, layout = "list" }: Prop
         {hasRss ? (
           <div className="space-y-4">
             {rssArticles[0] && (
-              <a href={rssArticles[0].source_url} target="_blank" rel="noopener noreferrer"
+              <Link to={`/post/${rssArticles[0].id}`}
                 className="block relative rounded-xl overflow-hidden group">
                 <div className="aspect-[21/9] bg-muted">
                   {rssArticles[0].image_url && (
@@ -159,11 +159,11 @@ export default function LabelPostSection({ label, count, layout = "list" }: Prop
                     {rssArticles[0].title}
                   </h3>
                 </div>
-              </a>
+              </Link>
             )}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               {rssArticles.slice(1).map((article) => (
-                <a key={article.id} href={article.source_url} target="_blank" rel="noopener noreferrer"
+                <Link key={article.id} to={`/post/${article.id}`}
                   className="flex gap-3 bg-card rounded-lg p-3 group border-l-4 border-red-600 hover:shadow-lg transition-all">
                   {article.image_url && (
                     <div className="w-24 h-20 rounded overflow-hidden shrink-0">
@@ -182,7 +182,7 @@ export default function LabelPostSection({ label, count, layout = "list" }: Prop
                       </span>
                     </div>
                   </div>
-                </a>
+                </Link>
               ))}
             </div>
           </div>
@@ -228,7 +228,7 @@ export default function LabelPostSection({ label, count, layout = "list" }: Prop
   // ===== স্বাস্থ্যসেবা (Healthcare) — Screenshot: green accent grid =====
   if (label === "স্বাস্থ্যসেবা") {
     const items = hasRss
-      ? rssArticles.map(a => ({ id: a.id, title: a.title, image: a.image_url || "", url: a.source_url, date: new Date(a.published_at).toLocaleDateString("bn-BD"), source: a.source_name, excerpt: a.content || "", isExternal: true }))
+      ? rssArticles.map(a => ({ id: a.id, title: a.title, image: a.image_url || "", url: `/post/${a.id}`, date: new Date(a.published_at).toLocaleDateString("bn-BD"), source: a.source_name, excerpt: a.content || "", isExternal: false }))
       : mockPosts.map(p => ({ id: String(p.id), title: p.title, image: p.image, url: `/post/${p.id}`, date: p.date, source: "", excerpt: p.excerpt, isExternal: false }));
 
     const ItemLink = ({ item, children, className }: { item: typeof items[0]; children: React.ReactNode; className?: string }) =>
@@ -294,7 +294,7 @@ export default function LabelPostSection({ label, count, layout = "list" }: Prop
         <SectionLabel label={label} />
         {hasRss ? (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <a href={rssArticles[0]?.source_url} target="_blank" rel="noopener noreferrer"
+            <Link to={`/post/${rssArticles[0]?.id}`}
               className="md:col-span-2 post-card group bg-card rounded-lg overflow-hidden shadow-sm block relative">
               <div className="overflow-hidden aspect-video">
                 {rssArticles[0]?.image_url && <img src={rssArticles[0].image_url} alt={rssArticles[0].title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />}
@@ -305,10 +305,10 @@ export default function LabelPostSection({ label, count, layout = "list" }: Prop
                   {rssArticles[0]?.title}
                 </h3>
               </div>
-            </a>
+            </Link>
             <div className="space-y-3">
               {rssArticles.slice(1).map((article) => (
-                <a key={article.id} href={article.source_url} target="_blank" rel="noopener noreferrer"
+                <Link key={article.id} to={`/post/${article.id}`}
                   className="post-card flex gap-3 bg-card rounded-lg p-2 shadow-sm group border border-border/50 hover:border-primary/30 transition-colors">
                   {article.image_url && (
                     <div className="w-24 h-[68px] rounded-md overflow-hidden shrink-0">
@@ -324,7 +324,7 @@ export default function LabelPostSection({ label, count, layout = "list" }: Prop
                       <span className="text-[9px]">{new Date(article.published_at).toLocaleDateString("bn-BD")}</span>
                     </div>
                   </div>
-                </a>
+                </Link>
               ))}
             </div>
           </div>
@@ -373,7 +373,7 @@ export default function LabelPostSection({ label, count, layout = "list" }: Prop
         {hasRss ? (
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
             {rssArticles.map((article) => (
-              <a key={article.id} href={article.source_url} target="_blank" rel="noopener noreferrer"
+              <Link key={article.id} to={`/post/${article.id}`}
                 className="post-card bg-card rounded-lg overflow-hidden shadow-sm block group border border-border/50 hover:border-primary/30 hover:shadow-md transition-all">
                 <div className="overflow-hidden aspect-[4/3] relative">
                   {article.image_url && <img src={article.image_url} alt={article.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />}
@@ -384,7 +384,7 @@ export default function LabelPostSection({ label, count, layout = "list" }: Prop
                     {article.title}
                   </h3>
                 </div>
-              </a>
+              </Link>
             ))}
           </div>
         ) : (
@@ -415,7 +415,7 @@ export default function LabelPostSection({ label, count, layout = "list" }: Prop
       {hasRss ? (
         <div className="space-y-3">
           {rssArticles[0] && (
-            <a href={rssArticles[0].source_url} target="_blank" rel="noopener noreferrer"
+            <Link to={`/post/${rssArticles[0].id}`}
               className="post-card bg-card rounded-lg overflow-hidden shadow-sm block group relative">
               <div className="overflow-hidden aspect-video">
                 {rssArticles[0].image_url && <img src={rssArticles[0].image_url} alt={rssArticles[0].title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />}
@@ -426,11 +426,11 @@ export default function LabelPostSection({ label, count, layout = "list" }: Prop
                   {rssArticles[0].title}
                 </h3>
               </div>
-            </a>
+            </Link>
           )}
           <div className="grid grid-cols-1 gap-2">
             {rssArticles.slice(1).map((article) => (
-              <a key={article.id} href={article.source_url} target="_blank" rel="noopener noreferrer"
+              <Link key={article.id} to={`/post/${article.id}`}
                 className="post-card flex gap-3 bg-card rounded-lg p-2 shadow-sm group border border-border/50 hover:border-primary/30 transition-all">
                 {article.image_url && (
                   <div className="w-28 h-20 rounded-md overflow-hidden shrink-0">
@@ -446,7 +446,7 @@ export default function LabelPostSection({ label, count, layout = "list" }: Prop
                     <span className="text-[9px]">{new Date(article.published_at).toLocaleDateString("bn-BD")}</span>
                   </div>
                 </div>
-              </a>
+              </Link>
             ))}
           </div>
         </div>

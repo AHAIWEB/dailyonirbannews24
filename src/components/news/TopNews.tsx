@@ -57,11 +57,11 @@ export default function TopNews() {
         id: a.id,
         title: a.title,
         image: a.image_url || "",
-        url: a.source_url,
+        url: `/post/${a.id}`,
         date: new Date(a.published_at).toLocaleDateString("bn-BD"),
         source: a.source_name,
         excerpt: a.content || "",
-        isExternal: true,
+        isExternal: false,
         category: a.category,
       }))
     : mockPosts.map(p => ({
