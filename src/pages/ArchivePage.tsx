@@ -51,6 +51,45 @@ export default function ArchivePage() {
   const meta = ARCHIVE_META[type || ""] || ARCHIVE_META.gallery;
   const Icon = meta.icon;
 
+  // SEO: Set document title, meta tags, OG, canonical
+  useEffect(() => {
+    const pageNum = page + 1;
+    const title = `${meta.label} - পৃষ্ঠা ${pageNum} | বেলাভূমি নিউজ`;
+    document.title = title;
+
+    const setMeta = (name: string, content: string, attr = "name") => {
+      let el = document.querySelector(`meta[${attr}="${name}"]`) as HTMLMetaElement;
+      if (!el) {
+        el = document.createElement("meta");
+        el.setAttribute(attr, name);
+        document.head.appendChild(el);
+      }
+      el.content = content;
+    };
+
+    const desc = `${meta.label} - বেলাভূমি নিউজের ${meta.label} বিভাগের সকল পোস্ট। মোট ${total} টি পোস্ট।`;
+    setMeta("description", desc);
+    setMeta("og:title", title, "property");
+    setMeta("og:description", desc, "property");
+    setMeta("og:type", "website", "property");
+    setMeta("og:site_name", "বেলাভূমি নিউজ", "property");
+
+    const canonicalUrl = `https://belabhuminews.lovable.app/archive/${type || "gallery"}${pageNum > 1 ? `?page=${pageNum}` : ""}`;
+    setMeta("og:url", canonicalUrl, "property");
+
+    let link = document.querySelector('link[rel="canonical"]') as HTMLLinkElement;
+    if (!link) {
+      link = document.createElement("link");
+      link.rel = "canonical";
+      document.head.appendChild(link);
+    }
+    link.href = canonicalUrl;
+
+    return () => {
+      document.title = "বেলাভূমি নিউজ";
+    };
+  }, [type, page, total, meta.label]);
+
   useEffect(() => {
     const load = async () => {
       setLoading(true);
