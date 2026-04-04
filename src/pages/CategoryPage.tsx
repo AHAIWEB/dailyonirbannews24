@@ -140,7 +140,7 @@ export default function CategoryPage() {
                           {article.source_name && <span className="flex items-center gap-1"><ExternalLink className="w-2.5 h-2.5" />{article.source_name}</span>}
                         </div>
                       </div>
-                    </a>
+                    </Link>
                   ))}
                 </div>
 

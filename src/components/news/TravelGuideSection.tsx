@@ -15,6 +15,7 @@ export default function TravelGuideSection() {
 
   useEffect(() => {
     const load = async () => {
+      // Try ভ্রমণ category
       let query = supabase
         .from("rss_articles")
         .select("*")
@@ -26,7 +27,19 @@ export default function TravelGuideSection() {
       if (division) query = query.eq("location_division", division);
       if (district) query = query.eq("location_district", district);
 
-      const { data } = await query;
+      let { data } = await query;
+
+      // Fallback if no travel posts
+      if (!data || data.length === 0) {
+        const { data: fallback } = await supabase
+          .from("rss_articles")
+          .select("*")
+          .eq("is_published", true)
+          .not("image_url", "is", null)
+          .order("published_at", { ascending: false })
+          .limit(6);
+        data = fallback;
+      }
       setArticles(data || []);
     };
     load();
