@@ -246,20 +246,39 @@ export default function PhotoCardGenerator() {
 
   const pickQuoteFromArticle = async (article: FetchedArticle) => {
     setCardDate(article.published_at);
-    setQuote(buildArticleQuote(article));
+
+    // Generate local suggestions first
+    const localSuggestions = buildArticleQuoteSuggestions(article, 3);
+    setQuoteSuggestions(localSuggestions);
+    if (localSuggestions.length > 0) setQuote(localSuggestions[0]);
 
     if (article.source_url) {
       const metadata = await loadArticleMetadata(article.source_url);
       if (metadata) {
-        const upgradedQuote = buildArticleQuote({
+        const metaSuggestions = buildArticleQuoteSuggestions({
           title: metadata.title || article.title,
           content: metadata.content || metadata.description || article.content,
-        });
-        if (upgradedQuote) setQuote(upgradedQuote);
+        }, 3);
+
+        // Merge unique suggestions
+        const seen = new Set(localSuggestions.map((s: string) => s.slice(0, 40)));
+        const merged = [...localSuggestions];
+        for (const s of metaSuggestions) {
+          const key = s.slice(0, 40);
+          if (!seen.has(key)) {
+            seen.add(key);
+            merged.push(s);
+          }
+        }
+        const final = merged.slice(0, 3);
+        setQuoteSuggestions(final);
+        if (final.length > 0 && (!localSuggestions.length || final[0] !== localSuggestions[0])) {
+          setQuote(final[0]);
+        }
       }
     }
 
-    toast.success("সংক্ষিপ্ত উক্তি যোগ হয়েছে");
+    toast.success(`${Math.max(localSuggestions.length, 1)}টি উক্তি সাজেশন পাওয়া গেছে`);
   };
 
   const loadFetchedArticles = async () => {
