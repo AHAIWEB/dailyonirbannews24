@@ -50,7 +50,12 @@ export default function TravelGuideSection() {
 
   return (
     <section>
-      <SectionLabel label="ভ্রমণ গাইড" />
+      <div className="flex items-center justify-between mb-1">
+        <SectionLabel label="ভ্রমণ গাইড" />
+        <Link to="/archive/travel" className="text-[10px] font-bold text-primary hover:underline flex items-center gap-1">
+          সব দেখুন <Compass className="w-3 h-3" />
+        </Link>
+      </div>
 
       {/* Location Filter */}
       <div className="flex flex-wrap gap-2 mb-4">
