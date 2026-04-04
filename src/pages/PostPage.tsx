@@ -6,6 +6,7 @@ import SidebarWidget from "@/components/news/SidebarWidget";
 import { Clock, Share2, Facebook, Twitter, MessageCircle, Printer, ChevronRight } from "lucide-react";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { isLikelyGenericArticle, isUuid } from "@/lib/articleUtils";
 
 interface Article {
   id: string;
@@ -28,41 +29,54 @@ export default function PostPage() {
   useEffect(() => {
     const fetchArticle = async () => {
       setLoading(true);
-      // Try to find article by id or by slug in source_url
-      let query = supabase.from("rss_articles").select("*").eq("is_published", true);
+      setArticle(null);
+      setRelatedPosts([]);
 
-      if (id?.startsWith("fotocard-") || id?.includes("-")) {
-        // Search by source_url containing the id
-        const { data } = await query.ilike("source_url", `%${id}%`).limit(1).maybeSingle();
-        if (data) {
-          setArticle(data);
-          // Fetch related posts from same category
-          const { data: related } = await supabase
-            .from("rss_articles")
-            .select("*")
-            .eq("is_published", true)
-            .eq("category", data.category)
-            .neq("id", data.id)
-            .order("created_at", { ascending: false })
-            .limit(4);
-          setRelatedPosts(related || []);
-        }
-      } else {
-        // Try UUID
-        const { data } = await query.eq("id", id).maybeSingle();
-        if (data) {
-          setArticle(data);
-          const { data: related } = await supabase
-            .from("rss_articles")
-            .select("*")
-            .eq("is_published", true)
-            .eq("category", data.category)
-            .neq("id", data.id)
-            .order("created_at", { ascending: false })
-            .limit(4);
-          setRelatedPosts(related || []);
-        }
+      const currentId = id?.trim();
+      if (!currentId) {
+        setLoading(false);
+        return;
       }
+
+      let currentArticle: Article | null = null;
+
+      if (isUuid(currentId)) {
+        const { data } = await supabase
+          .from("rss_articles")
+          .select("*")
+          .eq("is_published", true)
+          .eq("id", currentId)
+          .maybeSingle();
+        currentArticle = data;
+      }
+
+      if (!currentArticle) {
+        const { data } = await supabase
+          .from("rss_articles")
+          .select("*")
+          .eq("is_published", true)
+          .ilike("source_url", `%${currentId}%`)
+          .order("created_at", { ascending: false })
+          .limit(1)
+          .maybeSingle();
+        currentArticle = data;
+      }
+
+      if (currentArticle) {
+        setArticle(currentArticle);
+
+        const { data: related } = await supabase
+          .from("rss_articles")
+          .select("*")
+          .eq("is_published", true)
+          .eq("category", currentArticle.category)
+          .neq("id", currentArticle.id)
+          .order("created_at", { ascending: false })
+          .limit(8);
+
+        setRelatedPosts(((related as Article[] | null) || []).filter((post) => !isLikelyGenericArticle(post)).slice(0, 4));
+      }
+
       setLoading(false);
     };
     if (id) fetchArticle();

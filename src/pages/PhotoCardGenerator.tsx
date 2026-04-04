@@ -7,6 +7,7 @@ import { PRESET_TEMPLATES, type CardTemplate } from "@/components/photocard/Card
 import { Download, Share2, Image, Type, Quote, QrCode, Upload, X, Plus, Palette, LayoutTemplate, Link2, RotateCw, Move, ZoomIn, Layers, Crop } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
+import { buildArticleQuote, isLikelyGenericArticle, normalizeArticleImageUrl } from "@/lib/articleUtils";
 import { toast } from "sonner";
 import { useSearchParams } from "react-router-dom";
 
@@ -42,6 +43,7 @@ export default function PhotoCardGenerator() {
   const [saving, setSaving] = useState(false);
   const [customBgImage, setCustomBgImage] = useState<string>("");
   const [category, setCategory] = useState("বেলাভূমি কণ্ঠ");
+  const [cardDate, setCardDate] = useState<string | null>(null);
   const [bgOpacity, setBgOpacity] = useState(1);
 
   // URL fetch
@@ -103,36 +105,6 @@ export default function PhotoCardGenerator() {
 
   const getMetadataPayload = (payload: any) => payload?.data ?? payload ?? {};
 
-  const stripMarkup = (value: string | null | undefined) =>
-    (value || "")
-      .replace(/<[^>]*>/g, " ")
-      .replace(/&nbsp;/g, " ")
-      .replace(/&amp;/g, "&")
-      .replace(/&quot;/g, '"')
-      .replace(/&#39;/g, "'")
-      .replace(/\s+/g, " ")
-      .trim();
-
-  const buildSmartQuote = (article: Pick<FetchedArticle, "title" | "content">) => {
-    const cleanContent = stripMarkup(article.content)
-      .replace("[বিস্তারিত পড়তে মূল সূত্রে যান]", "")
-      .trim();
-
-    if (!cleanContent) return article.title;
-
-    const sentences = cleanContent
-      .split(/(?<=[।!?])\s+/)
-      .map((sentence) => sentence.trim())
-      .filter((sentence) => sentence.length >= 28);
-
-    const highlighted =
-      sentences.find((sentence) => /[“"❝]/.test(sentence)) ||
-      sentences.find((sentence) => sentence.length <= 180) ||
-      cleanContent.slice(0, 220);
-
-    return highlighted.slice(0, 220).trim();
-  };
-
   const downloadBlob = (blob: Blob, fileName: string) => {
     const objectUrl = URL.createObjectURL(blob);
     const link = document.createElement("a");
@@ -189,7 +161,11 @@ export default function PhotoCardGenerator() {
     setBgOpacity(1);
   };
 
-  const replaceImagesWithArticle = (article: FetchedArticle) => {
+  const replaceImagesWithArticle = (
+    article: FetchedArticle,
+    imageUrl = normalizeArticleImageUrl(article.image_url, article.source_url),
+    caption = article.source_name || article.category
+  ) => {
     setImages((previous) => {
       previous.forEach((image) => {
         if (image.preview.startsWith("blob:")) {
@@ -197,31 +173,86 @@ export default function PhotoCardGenerator() {
         }
       });
 
-      if (!article.image_url) return [];
+      if (!imageUrl) return [];
 
       return [{
-        preview: article.image_url,
-        caption: article.source_name || article.category,
+        preview: imageUrl,
+        caption,
       }];
     });
   };
 
-  const applyFetchedArticle = (article: FetchedArticle, withQuote = true) => {
+  const loadArticleMetadata = async (url: string) => {
+    try {
+      const { data, error } = await supabase.functions.invoke("fetch-url-metadata", {
+        body: { url, extractContent: true },
+      });
+
+      if (error || data?.success === false) return null;
+      return getMetadataPayload(data);
+    } catch {
+      return null;
+    }
+  };
+
+  const applyFetchedArticle = async (article: FetchedArticle, withQuote = true) => {
     setTitle(article.title);
     setFetchUrl(article.source_url);
     setQrUrl(`${window.location.origin}/post/${article.id}`);
     setCategory(article.category);
-    replaceImagesWithArticle(article);
+    setCardDate(article.published_at);
+
+    const resolvedImage = normalizeArticleImageUrl(article.image_url, article.source_url);
+    replaceImagesWithArticle(article, resolvedImage);
+
+    const initialQuote = buildArticleQuote(article);
 
     if (withQuote) {
-      setQuote(buildSmartQuote(article));
+      setQuote(initialQuote);
+    }
+
+    const needsMetadata = Boolean(article.source_url) && (!resolvedImage || !article.content || initialQuote === article.title);
+    if (needsMetadata) {
+      const metadata = await loadArticleMetadata(article.source_url);
+      if (metadata) {
+        const metadataImage = normalizeArticleImageUrl(metadata.image, article.source_url);
+        if (metadataImage) {
+          replaceImagesWithArticle(article, metadataImage, metadata.siteName || article.source_name || article.category);
+        }
+
+        if (withQuote) {
+          const upgradedQuote = buildArticleQuote({
+            title: metadata.title || article.title,
+            content: metadata.content || metadata.description || article.content,
+          });
+
+          if (upgradedQuote) setQuote(upgradedQuote);
+        }
+
+        if (metadata.title && metadata.title.length > article.title.length && !isLikelyGenericArticle({ title: metadata.title, category: article.category, source_url: article.source_url })) {
+          setTitle(metadata.title);
+        }
+      }
     }
 
     toast.success("ফেচ হওয়া পোস্ট কার্ড মেকারে লোড হয়েছে");
   };
 
-  const pickQuoteFromArticle = (article: FetchedArticle) => {
-    setQuote(buildSmartQuote(article));
+  const pickQuoteFromArticle = async (article: FetchedArticle) => {
+    setCardDate(article.published_at);
+    setQuote(buildArticleQuote(article));
+
+    if (article.source_url) {
+      const metadata = await loadArticleMetadata(article.source_url);
+      if (metadata) {
+        const upgradedQuote = buildArticleQuote({
+          title: metadata.title || article.title,
+          content: metadata.content || metadata.description || article.content,
+        });
+        if (upgradedQuote) setQuote(upgradedQuote);
+      }
+    }
+
     toast.success("সংক্ষিপ্ত উক্তি যোগ হয়েছে");
   };
 
@@ -236,7 +267,7 @@ export default function PhotoCardGenerator() {
         .limit(80);
 
       if (error) throw error;
-      setFetchedArticles((data as FetchedArticle[]) || []);
+      setFetchedArticles((((data as FetchedArticle[]) || [])).filter((article) => !isLikelyGenericArticle(article)));
     } catch (err: any) {
       toast.error(err?.message || "ফেচ হওয়া শিরোনাম লোড করা যায়নি");
     } finally {
@@ -255,7 +286,7 @@ export default function PhotoCardGenerator() {
 
     const matchedArticle = fetchedArticles.find((article) => article.id === articleId);
     if (matchedArticle) {
-      applyFetchedArticle(matchedArticle, true);
+      void applyFetchedArticle(matchedArticle, true);
     }
   }, [searchParams, fetchedArticles]);
 
@@ -283,12 +314,16 @@ export default function PhotoCardGenerator() {
       const metadata = getMetadataPayload(data);
 
       if (metadata?.title) setTitle(metadata.title);
+      setCardDate(null);
 
-      const summary = metadata?.content || metadata?.description || "";
-      if (summary) setQuote(summary.slice(0, 220));
+      const summary = buildArticleQuote({ title: metadata?.title, content: metadata?.content || metadata?.description || "" });
+      if (summary) setQuote(summary);
 
       if (metadata?.image) {
-        setImages((prev) => [{ preview: metadata.image, caption: metadata.siteName || "" }, ...prev]);
+        const normalizedImage = normalizeArticleImageUrl(metadata.image, fetchUrl.trim());
+        if (normalizedImage) {
+          setImages((prev) => [{ preview: normalizedImage, caption: metadata.siteName || "" }, ...prev]);
+        }
       }
 
       toast.success("URL থেকে শিরোনাম, সংক্ষিপ্ত ও ছবি লোড হয়েছে!");
@@ -481,7 +516,7 @@ export default function PhotoCardGenerator() {
                     <div key={article.id} className="rounded-lg border border-border bg-muted/30 p-2.5 space-y-2">
                       <button
                         type="button"
-                        onClick={() => applyFetchedArticle(article, true)}
+                        onClick={() => void applyFetchedArticle(article, true)}
                         className="w-full text-left flex gap-2"
                       >
                         {article.image_url && (
@@ -503,10 +538,10 @@ export default function PhotoCardGenerator() {
                       </button>
 
                       <div className="flex flex-wrap gap-2">
-                        <Button type="button" size="sm" variant="secondary" onClick={() => applyFetchedArticle(article, true)}>
+                        <Button type="button" size="sm" variant="secondary" onClick={() => void applyFetchedArticle(article, true)}>
                           ক্যানভাসে নিন
                         </Button>
-                        <Button type="button" size="sm" variant="outline" onClick={() => pickQuoteFromArticle(article)}>
+                        <Button type="button" size="sm" variant="outline" onClick={() => void pickQuoteFromArticle(article)}>
                           উক্তি তুলুন
                         </Button>
                       </div>
@@ -796,6 +831,7 @@ export default function PhotoCardGenerator() {
               title={title}
               quote={quote}
               images={images}
+              displayDate={cardDate}
               showQr={showQr}
               showLogo={showLogo}
               qrUrl={qrUrl}
