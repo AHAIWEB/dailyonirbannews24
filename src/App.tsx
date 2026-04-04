@@ -16,6 +16,7 @@ import ReporterIdCard from "./pages/ReporterIdCard";
 import AdminPanel from "./pages/AdminPanel";
 import CategoryPage from "./pages/CategoryPage";
 import PhotoCardGenerator from "./pages/PhotoCardGenerator";
+import ArchivePage from "./pages/ArchivePage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
