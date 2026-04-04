@@ -7,7 +7,7 @@ import { PRESET_TEMPLATES, type CardTemplate } from "@/components/photocard/Card
 import { Download, Share2, Image, Type, Quote, QrCode, Upload, X, Plus, Palette, LayoutTemplate, Link2, RotateCw, Move, ZoomIn, Layers, Crop } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
-import { buildArticleQuote, isLikelyGenericArticle, normalizeArticleImageUrl } from "@/lib/articleUtils";
+import { buildArticleQuote, buildArticleQuoteSuggestions, isLikelyGenericArticle, normalizeArticleImageUrl } from "@/lib/articleUtils";
 import { toast } from "sonner";
 import { useSearchParams } from "react-router-dom";
 
