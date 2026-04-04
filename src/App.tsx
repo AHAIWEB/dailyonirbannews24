@@ -33,6 +33,7 @@ const App = () => (
             <Route path="/post/:id" element={<PostPage />} />
             <Route path="/category/:name" element={<CategoryPage />} />
             <Route path="/photo-card" element={<PhotoCardGenerator />} />
+            <Route path="/archive/:type" element={<ArchivePage />} />
             <Route path="/quick-post" element={<QuickPost />} />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
