@@ -34,6 +34,11 @@ interface SidebarConfig {
   widgets: { label: string; title: string; position: "left" | "right" }[];
 }
 
+const SECTION_LABEL_ALIASES: Record<string, string> = {
+  "ভ্রমণ গাইড": "ভ্রমণ",
+  "ফটো গ্যালারি": "গ্যালারি",
+};
+
 const DEFAULT_SECTIONS: SectionConfig[] = [
   { label: "হাইলাইটস", count: 6, layout: "highlight", visible: true },
   { label: "জাতীয়", count: 8, layout: "grid", visible: true },
@@ -71,15 +76,34 @@ const DEFAULT_SIDEBAR: SidebarConfig = {
   ],
 };
 
+const REQUIRED_SPECIAL_SECTIONS: SectionConfig[] = [
+  { label: "গ্যালারি", count: 12, layout: "gallery", visible: true },
+  { label: "ভ্রমণ গাইড", count: 6, layout: "grid", visible: true },
+  { label: "চাকরি", count: 5, layout: "list", visible: true },
+];
+
+const getCanonicalLabel = (label: string) => SECTION_LABEL_ALIASES[label] || label;
+
+function ensureSpecialSections(configs: SectionConfig[]) {
+  const existing = new Set(configs.map((section) => getCanonicalLabel(section.label)));
+  const missing = REQUIRED_SPECIAL_SECTIONS.filter(
+    (section) => !existing.has(getCanonicalLabel(section.label))
+  );
+
+  return missing.length > 0 ? [...configs, ...missing] : configs;
+}
+
 // Map of special component labels to their renderers
 const SPECIAL_SECTIONS: Record<string, (config: SectionConfig) => JSX.Element> = {
   "ওয়েব স্টোরি": () => <WebStorySection key="webstory" />,
   "বেলাভূমি কণ্ঠ": () => <FotoCardSection key="fotocard" />,
   "বিনোদন": () => <EntertainmentGrid key="entertainment" />,
   "গ্যালারি": () => <PhotoGallerySection key="gallery" />,
+  "ফটো গ্যালারি": () => <PhotoGallerySection key="gallery-alt" />,
   "দেশ বাংলা": () => <DeshBangla key="deshbangla" />,
   "লাইফস্টাইল": () => <LifestyleSection key="lifestyle" />,
   "ভ্রমণ": () => <TravelGuideSection key="travel" />,
+  "ভ্রমণ গাইড": () => <TravelGuideSection key="travel-guide" />,
   "চাকরি": () => <JobSection key="jobs" />,
   "মতামত": () => <OpinionSection key="opinion" />,
   "ভিডিও": () => <VideoSlider key="video" />,
@@ -89,7 +113,7 @@ function renderSection(config: SectionConfig) {
   if (!config.visible) return null;
 
   // Check if it's a special component
-  const specialRenderer = SPECIAL_SECTIONS[config.label];
+  const specialRenderer = SPECIAL_SECTIONS[getCanonicalLabel(config.label)] || SPECIAL_SECTIONS[config.label];
   if (specialRenderer) {
     return specialRenderer(config);
   }
@@ -121,7 +145,7 @@ const Index = () => {
         if (data?.value) {
           const parsed = JSON.parse(data.value);
           if (Array.isArray(parsed) && parsed.length > 0) {
-            setSections(parsed);
+            setSections(ensureSpecialSections(parsed));
           }
         }
       } catch {}

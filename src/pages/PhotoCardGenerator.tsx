@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import Header from "@/components/news/Header";
 import Footer from "@/components/news/Footer";
@@ -8,6 +8,7 @@ import { Download, Share2, Image, Type, Quote, QrCode, Upload, X, Plus, Palette,
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { useSearchParams } from "react-router-dom";
 
 interface CardImage {
   file?: File;
@@ -15,9 +16,21 @@ interface CardImage {
   caption: string;
 }
 
+interface FetchedArticle {
+  id: string;
+  title: string;
+  content: string | null;
+  image_url: string | null;
+  source_url: string;
+  source_name: string | null;
+  category: string;
+  published_at: string | null;
+}
+
 export default function PhotoCardGenerator() {
   const { user, isAdmin } = useAuth();
   const canvasRef = useRef<HTMLDivElement>(null);
+  const [searchParams] = useSearchParams();
 
   const [selectedTemplate, setSelectedTemplate] = useState<CardTemplate>(PRESET_TEMPLATES[0]);
   const [title, setTitle] = useState("");
@@ -34,6 +47,9 @@ export default function PhotoCardGenerator() {
   // URL fetch
   const [fetchUrl, setFetchUrl] = useState("");
   const [fetching, setFetching] = useState(false);
+  const [fetchedArticles, setFetchedArticles] = useState<FetchedArticle[]>([]);
+  const [headlineSearch, setHeadlineSearch] = useState("");
+  const [headlineLoading, setHeadlineLoading] = useState(false);
 
   // Image transform
   const [imageTransform, setImageTransform] = useState<ImageTransform>({ x: 0, y: 0, scale: 1, rotate: 0 });
@@ -53,6 +69,26 @@ export default function PhotoCardGenerator() {
 
   const isCustom = selectedTemplate.id === "custom";
 
+  const cardCategories = [
+    "বেলাভূমি কণ্ঠ",
+    "জাতীয়",
+    "আন্তর্জাতিক",
+    "রাজনীতি",
+    "দেশ বাংলা",
+    "বিনোদন",
+    "গ্যালারি",
+    "ভ্রমণ",
+    "চাকরি",
+    "ভিডিও",
+    "মতামত",
+    "খেলা",
+    "প্রযুক্তি",
+    "লাইফস্টাইল",
+    "স্বাস্থ্যসেবা",
+    "শিক্ষা",
+    "অর্থনীতি",
+  ];
+
   const activeTemplate: CardTemplate = isCustom
     ? {
         ...selectedTemplate,
@@ -66,6 +102,36 @@ export default function PhotoCardGenerator() {
     : selectedTemplate;
 
   const getMetadataPayload = (payload: any) => payload?.data ?? payload ?? {};
+
+  const stripMarkup = (value: string | null | undefined) =>
+    (value || "")
+      .replace(/<[^>]*>/g, " ")
+      .replace(/&nbsp;/g, " ")
+      .replace(/&amp;/g, "&")
+      .replace(/&quot;/g, '"')
+      .replace(/&#39;/g, "'")
+      .replace(/\s+/g, " ")
+      .trim();
+
+  const buildSmartQuote = (article: Pick<FetchedArticle, "title" | "content">) => {
+    const cleanContent = stripMarkup(article.content)
+      .replace("[বিস্তারিত পড়তে মূল সূত্রে যান]", "")
+      .trim();
+
+    if (!cleanContent) return article.title;
+
+    const sentences = cleanContent
+      .split(/(?<=[।!?])\s+/)
+      .map((sentence) => sentence.trim())
+      .filter((sentence) => sentence.length >= 28);
+
+    const highlighted =
+      sentences.find((sentence) => /[“"❝]/.test(sentence)) ||
+      sentences.find((sentence) => sentence.length <= 180) ||
+      cleanContent.slice(0, 220);
+
+    return highlighted.slice(0, 220).trim();
+  };
 
   const downloadBlob = (blob: Blob, fileName: string) => {
     const objectUrl = URL.createObjectURL(blob);
@@ -122,6 +188,86 @@ export default function PhotoCardGenerator() {
     setFrameAspectRatio(undefined);
     setBgOpacity(1);
   };
+
+  const replaceImagesWithArticle = (article: FetchedArticle) => {
+    setImages((previous) => {
+      previous.forEach((image) => {
+        if (image.preview.startsWith("blob:")) {
+          URL.revokeObjectURL(image.preview);
+        }
+      });
+
+      if (!article.image_url) return [];
+
+      return [{
+        preview: article.image_url,
+        caption: article.source_name || article.category,
+      }];
+    });
+  };
+
+  const applyFetchedArticle = (article: FetchedArticle, withQuote = true) => {
+    setTitle(article.title);
+    setFetchUrl(article.source_url);
+    setQrUrl(`${window.location.origin}/post/${article.id}`);
+    setCategory(article.category);
+    replaceImagesWithArticle(article);
+
+    if (withQuote) {
+      setQuote(buildSmartQuote(article));
+    }
+
+    toast.success("ফেচ হওয়া পোস্ট কার্ড মেকারে লোড হয়েছে");
+  };
+
+  const pickQuoteFromArticle = (article: FetchedArticle) => {
+    setQuote(buildSmartQuote(article));
+    toast.success("সংক্ষিপ্ত উক্তি যোগ হয়েছে");
+  };
+
+  const loadFetchedArticles = async () => {
+    setHeadlineLoading(true);
+    try {
+      const { data, error } = await supabase
+        .from("rss_articles")
+        .select("id, title, content, image_url, source_url, source_name, category, published_at")
+        .eq("is_published", true)
+        .order("published_at", { ascending: false })
+        .limit(80);
+
+      if (error) throw error;
+      setFetchedArticles((data as FetchedArticle[]) || []);
+    } catch (err: any) {
+      toast.error(err?.message || "ফেচ হওয়া শিরোনাম লোড করা যায়নি");
+    } finally {
+      setHeadlineLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (!isAdmin) return;
+    loadFetchedArticles();
+  }, [isAdmin]);
+
+  useEffect(() => {
+    const articleId = searchParams.get("article");
+    if (!articleId || fetchedArticles.length === 0) return;
+
+    const matchedArticle = fetchedArticles.find((article) => article.id === articleId);
+    if (matchedArticle) {
+      applyFetchedArticle(matchedArticle, true);
+    }
+  }, [searchParams, fetchedArticles]);
+
+  const filteredHeadlines = fetchedArticles.filter((article) => {
+    const query = headlineSearch.trim().toLowerCase();
+    if (!query) return true;
+
+    return [article.title, article.category, article.source_name || ""]
+      .join(" ")
+      .toLowerCase()
+      .includes(query);
+  });
 
   // Fetch from URL
   const fetchFromUrl = async () => {
@@ -308,6 +454,65 @@ export default function PhotoCardGenerator() {
                 <Button onClick={fetchFromUrl} size="sm" disabled={fetching} className="gap-1">
                   {fetching ? "লোড..." : "ফেচ"}
                 </Button>
+              </div>
+            </div>
+
+            <div className="rounded-lg border border-border bg-card p-3 space-y-3">
+              <div className="flex items-center justify-between gap-2">
+                <p className="text-xs font-bold text-foreground">ফেচ হওয়া সব শিরোনাম</p>
+                <Button type="button" size="sm" variant="outline" onClick={loadFetchedArticles} disabled={headlineLoading}>
+                  {headlineLoading ? "রিফ্রেশ..." : "রিফ্রেশ"}
+                </Button>
+              </div>
+
+              <input
+                type="text"
+                value={headlineSearch}
+                onChange={(e) => setHeadlineSearch(e.target.value)}
+                placeholder="শিরোনাম / ক্যাটাগরি / সূত্র খুঁজুন"
+                className="w-full bg-muted border border-border rounded px-3 py-2 text-sm text-foreground focus:ring-1 focus:ring-primary focus:outline-none"
+              />
+
+              <div className="max-h-72 overflow-y-auto space-y-2 pr-1">
+                {filteredHeadlines.length === 0 ? (
+                  <p className="text-xs text-muted-foreground text-center py-6">কোনো শিরোনাম পাওয়া যায়নি</p>
+                ) : (
+                  filteredHeadlines.map((article) => (
+                    <div key={article.id} className="rounded-lg border border-border bg-muted/30 p-2.5 space-y-2">
+                      <button
+                        type="button"
+                        onClick={() => applyFetchedArticle(article, true)}
+                        className="w-full text-left flex gap-2"
+                      >
+                        {article.image_url && (
+                          <img
+                            src={article.image_url}
+                            alt={article.title}
+                            className="w-12 h-12 rounded object-cover shrink-0"
+                          />
+                        )}
+                        <div className="min-w-0 flex-1">
+                          <p className="text-xs font-semibold text-foreground line-clamp-2 leading-relaxed hover:text-primary transition-colors">
+                            {article.title}
+                          </p>
+                          <div className="mt-1 flex flex-wrap gap-2 text-[10px] text-muted-foreground">
+                            <span>{article.category}</span>
+                            {article.source_name && <span>{article.source_name}</span>}
+                          </div>
+                        </div>
+                      </button>
+
+                      <div className="flex flex-wrap gap-2">
+                        <Button type="button" size="sm" variant="secondary" onClick={() => applyFetchedArticle(article, true)}>
+                          ক্যানভাসে নিন
+                        </Button>
+                        <Button type="button" size="sm" variant="outline" onClick={() => pickQuoteFromArticle(article)}>
+                          উক্তি তুলুন
+                        </Button>
+                      </div>
+                    </div>
+                  ))
+                )}
               </div>
             </div>
 
@@ -564,7 +769,7 @@ export default function PhotoCardGenerator() {
               <label className="text-[10px] font-bold text-muted-foreground mb-1 block">পোস্ট ক্যাটাগরি</label>
               <select value={category} onChange={e => setCategory(e.target.value)}
                 className="w-full bg-muted border border-border rounded px-3 py-1.5 text-xs text-foreground">
-                {["বেলাভূমি কণ্ঠ", "জাতীয়", "আন্তর্জাতিক", "রাজনীতি", "খেলা", "বিনোদন", "প্রযুক্তি", "লাইফস্টাইল", "স্বাস্থ্যসেবা", "শিক্ষা", "অর্থনীতি"].map(c => (
+                {cardCategories.map(c => (
                   <option key={c} value={c}>{c}</option>
                 ))}
               </select>

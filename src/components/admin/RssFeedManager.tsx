@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
-import { Plus, Trash2, RefreshCw, Rss, Globe, ExternalLink, Eye, EyeOff, Star, Send, Edit3, Save, X, Sparkles, BookOpen, MapPin, Search, Timer } from "lucide-react";
+import { Plus, Trash2, RefreshCw, Rss, Globe, ExternalLink, Eye, EyeOff, Star, Send, Edit3, Save, X, Sparkles, BookOpen, MapPin, Search, Timer, ImagePlus } from "lucide-react";
 import { toast } from "sonner";
 import { getAllDivisions, getDistricts, getUpazilas } from "@/data/bangladeshLocations";
 
@@ -62,6 +62,7 @@ export default function RssFeedManager() {
   const [editingFeed, setEditingFeed] = useState<string | null>(null);
   const [editFeedData, setEditFeedData] = useState<{ name: string; url: string; category: string; feed_type: string }>({ name: "", url: "", category: "", feed_type: "rss" });
   const [scrapeFetching, setScrapeFetching] = useState(false);
+  const [scrapeResults, setScrapeResults] = useState<any[]>([]);
 
   useEffect(() => { loadFeeds(); loadCategories(); }, []);
   useEffect(() => { loadArticles(); }, [articleFilter, dateFrom, dateTo, articlePage]);
@@ -134,9 +135,13 @@ export default function RssFeedManager() {
     try {
       const { data, error } = await supabase.functions.invoke("scrape-website");
       if (error) throw error;
-      toast.success(`${data?.totalInserted || 0} টি নতুন আর্টিকেল স্ক্র্যাপ হয়েছে`);
+      const latestResults = data?.results || [];
+      setScrapeResults(latestResults);
+      const problemCount = latestResults.filter((result: any) => result.error || (result.inserted || 0) === 0).length;
+      toast.success(`${data?.totalInserted || 0} টি নতুন আর্টিকেল স্ক্র্যাপ হয়েছে${problemCount ? ` · ${problemCount} টি সূত্র চেক করুন` : ""}`);
       loadArticles();
     } catch (err: any) {
+      setScrapeResults([{ scraper: "স্ক্র্যাপার", error: err.message }]);
       toast.error("স্ক্র্যাপ করতে সমস্যা: " + err.message);
     }
     setScrapeFetching(false);
@@ -240,6 +245,38 @@ export default function RssFeedManager() {
         <Timer className="w-3 h-3" />
         অটো ফেচ চালু — প্রতি ১ মিনিটে RSS + স্ক্র্যাপার আপডেট হচ্ছে
       </div>
+
+      {scrapeResults.length > 0 && (
+        <div className="bg-card border border-border rounded-lg p-3 space-y-2">
+          <div className="flex items-center justify-between gap-3">
+            <h3 className="text-sm font-bold text-foreground">সর্বশেষ স্ক্র্যাপ রিপোর্ট</h3>
+            <span className="text-[10px] text-muted-foreground">{scrapeResults.length} টি সূত্র</span>
+          </div>
+          <div className="space-y-2 max-h-56 overflow-y-auto pr-1">
+            {scrapeResults.map((result, index) => (
+              <div key={`${result.scraper}-${index}`} className="rounded-lg border border-border bg-muted/30 px-3 py-2">
+                <div className="flex items-center justify-between gap-3">
+                  <p className="text-xs font-semibold text-foreground truncate">{result.scraper}</p>
+                  <span className="text-[10px] text-muted-foreground shrink-0">
+                    {result.error ? "সমস্যা" : `${result.inserted || 0} নতুন`}
+                  </span>
+                </div>
+                {result.error ? (
+                  <p className="text-[10px] text-destructive mt-1">{result.error}</p>
+                ) : (
+                  <div className="mt-1 flex flex-wrap gap-x-3 gap-y-1 text-[10px] text-muted-foreground">
+                    <span>লিংক: {result.links || 0}</span>
+                    <span>নতুন: {result.inserted || 0}</span>
+                    <span>আগেই ছিল: {result.skippedExisting || 0}</span>
+                    <span>জেনেরিক বাদ: {result.skippedGeneric || 0}</span>
+                    <span>ফেইল: {result.failedArticles || 0}</span>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Add Feed/Scraper Form */}
       {showAddForm && (
@@ -492,6 +529,13 @@ export default function RssFeedManager() {
                     <div className="flex items-center gap-1 shrink-0">
                       <button onClick={() => toggleArticleFeatured(article.id, article.is_featured)} className={`p-1 rounded ${article.is_featured ? "text-yellow-500" : "text-muted-foreground hover:text-yellow-500"}`}>
                         <Star className={`w-3.5 h-3.5 ${article.is_featured ? "fill-current" : ""}`} />
+                      </button>
+                      <button
+                        onClick={() => window.open(`/photo-card?article=${article.id}`, "_blank", "noopener,noreferrer")}
+                        className="p-1 rounded text-muted-foreground hover:text-primary"
+                        title="কার্ড মেকারে নিন"
+                      >
+                        <ImagePlus className="w-3.5 h-3.5" />
                       </button>
                       <button onClick={() => toggleArticlePublish(article.id, article.is_published)} className="p-1 rounded text-muted-foreground hover:text-foreground">
                         {article.is_published ? <Eye className="w-3.5 h-3.5" /> : <EyeOff className="w-3.5 h-3.5" />}

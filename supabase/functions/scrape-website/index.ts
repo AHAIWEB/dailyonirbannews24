@@ -6,8 +6,62 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+const GENERIC_PATH_SEGMENTS = new Set([
+  'category', 'categories', 'tag', 'tags', 'author', 'authors', 'page', 'search', 'login', 'register',
+  'contact', 'about', 'privacy', 'terms', 'gallery', 'galleries', 'photos', 'photo', 'videos', 'video',
+  'entertainment', 'lifestyle', 'health', 'national', 'politics', 'world', 'sports', 'business',
+]);
+
+const GENERIC_TITLES = new Set([
+  'বিনোদন', 'রাজনীতি', 'গ্যালারি', 'ফটো গ্যালারি', 'ফটো', 'ছবি', 'স্বাস্থ্য', 'স্বাস্থ্যসেবা', 'ভ্রমণ',
+  'লাইফস্টাইল', 'জীবনধারা', 'শিক্ষা', 'অর্থনীতি', 'আন্তর্জাতিক', 'জাতীয়', 'জাতীয়', 'ভিডিও',
+  'খেলা', 'খেলাধুলা', 'ধর্ম ও জীবন', 'বিজ্ঞান ও প্রযুক্তি', 'মত-দ্বিমত', 'নির্বাচন',
+]);
+
 function stripHtml(html: string): string {
   return html.replace(/<[^>]*>/g, '').replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&#39;/g, "'").replace(/&nbsp;/g, ' ').trim();
+}
+
+function normalizeText(value: string): string {
+  return stripHtml(value)
+    .replace(/[|–—:]+/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .toLowerCase();
+}
+
+function cleanTitle(value: string): string {
+  const raw = stripHtml(value).replace(/\s+/g, ' ').trim();
+  const parts = raw
+    .split(/\s+[|–—]\s+|\s+\|\s+|\s+-\s+/)
+    .map((part) => stripHtml(part).trim())
+    .filter(Boolean);
+
+  return parts.sort((a, b) => b.length - a.length)[0] || raw;
+}
+
+function isLikelyArticlePath(pathname: string): boolean {
+  const path = pathname.toLowerCase().replace(/\/+$/, '');
+  const segments = path.split('/').filter(Boolean);
+  if (segments.length === 0) return false;
+
+  const lastSegment = segments[segments.length - 1];
+  if (lastSegment.length < 4) return false;
+  if (GENERIC_PATH_SEGMENTS.has(lastSegment)) return false;
+  if (segments.length === 1 && GENERIC_PATH_SEGMENTS.has(segments[0])) return false;
+
+  return true;
+}
+
+function isGenericSectionTitle(title: string, category: string): boolean {
+  const normalizedTitle = normalizeText(title);
+  const normalizedCategory = normalizeText(category);
+
+  if (!normalizedTitle || normalizedTitle.length < 5) return true;
+  if (normalizedTitle === normalizedCategory) return true;
+  if (GENERIC_TITLES.has(title.trim()) && normalizedTitle.length <= 16) return true;
+
+  return false;
 }
 
 function extractImage(html: string): string | null {
@@ -41,6 +95,7 @@ function extractArticleLinks(html: string, baseUrl: string): string[] {
       if (path === '/' || path.length < 5) continue;
       if (/\.(css|js|png|jpg|gif|svg|ico|pdf|xml|json|rss|atom)$/i.test(path)) continue;
       if (/\/(tag|author|page|search|login|register|contact|about|privacy|terms|category|#)/i.test(path)) continue;
+      if (!isLikelyArticlePath(path)) continue;
       
       const fullUrl = url.origin + url.pathname;
       if (!seen.has(fullUrl)) {
@@ -79,11 +134,11 @@ async function fetchPage(url: string): Promise<string | null> {
 
 function extractTitle(html: string): string {
   const ogTitle = html.match(/<meta[^>]+property=["']og:title["'][^>]+content=["']([^"']+)["']/i);
-  if (ogTitle) return stripHtml(ogTitle[1]);
+  if (ogTitle) return cleanTitle(ogTitle[1]);
   const titleTag = html.match(/<title[^>]*>([^<]+)<\/title>/i);
-  if (titleTag) return stripHtml(titleTag[1]);
+  if (titleTag) return cleanTitle(titleTag[1]);
   const h1 = html.match(/<h1[^>]*>([^<]+)<\/h1>/i);
-  if (h1) return stripHtml(h1[1]);
+  if (h1) return cleanTitle(h1[1]);
   return '';
 }
 
@@ -157,6 +212,9 @@ serve(async (req) => {
         console.log(`Found ${articleLinks.length} links on ${scraper.url}`);
         
         let inserted = 0;
+        let skippedExisting = 0;
+        let skippedGeneric = 0;
+        let failedArticles = 0;
         const sourceName = scraper.name || new URL(scraper.url).hostname;
 
         for (const link of articleLinks) {
@@ -167,13 +225,19 @@ serve(async (req) => {
               .eq('source_url', link)
               .maybeSingle();
             
-            if (existing) continue;
+            if (existing) {
+              skippedExisting++;
+              continue;
+            }
 
             const articleHtml = await fetchPage(link);
             if (!articleHtml) continue;
 
             const title = extractTitle(articleHtml);
-            if (!title || title.length < 5) continue;
+            if (!title || title.length < 5 || isGenericSectionTitle(title, scraper.category)) {
+              skippedGeneric++;
+              continue;
+            }
 
             const image = extractImage(articleHtml);
             const content = extractContent(articleHtml);
@@ -203,6 +267,7 @@ serve(async (req) => {
               totalInserted++;
             }
           } catch (articleErr: any) {
+            failedArticles++;
             console.error(`Error scraping article ${link}:`, articleErr.message);
           }
         }
@@ -214,7 +279,7 @@ serve(async (req) => {
             .eq('id', scraper.id);
         }
 
-        results.push({ scraper: scraper.name, links: articleLinks.length, inserted });
+        results.push({ scraper: scraper.name, links: articleLinks.length, inserted, skippedExisting, skippedGeneric, failedArticles });
       } catch (scraperErr: any) {
         results.push({ scraper: scraper.name, error: scraperErr.message });
       }
