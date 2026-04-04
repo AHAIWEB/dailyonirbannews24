@@ -114,13 +114,13 @@ export default function CategoryPage() {
                         {articles[0].source_name && <span className="flex items-center gap-1"><ExternalLink className="w-3 h-3" />{articles[0].source_name}</span>}
                       </div>
                     </div>
-                  </a>
+                  </Link>
                 )}
 
                 {/* List */}
                 <div className="space-y-3">
                   {articles.slice(page === 0 ? 1 : 0).map(article => (
-                    <a key={article.id} href={article.source_url} target="_blank" rel="noopener noreferrer"
+                    <Link key={article.id} to={`/post/${article.id}`}
                       className="flex gap-4 bg-card rounded-lg p-3 group border border-border/50 hover:border-primary/30 hover:shadow-md transition-all">
                       {article.image_url && (
                         <div className="w-32 h-24 rounded-lg overflow-hidden shrink-0 bg-muted">
