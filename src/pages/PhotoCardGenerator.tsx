@@ -590,6 +590,27 @@ export default function PhotoCardGenerator() {
               </label>
               <textarea value={quote} onChange={e => setQuote(e.target.value)} placeholder="❝ কোটেশন লিখুন... ❞" rows={2}
                 className="w-full bg-muted border border-border rounded px-3 py-2 text-sm text-foreground focus:ring-1 focus:ring-primary focus:outline-none resize-y" />
+              
+              {/* AI Quote Suggestions */}
+              {quoteSuggestions.length > 1 && (
+                <div className="mt-2 space-y-1.5">
+                  <p className="text-[10px] font-bold text-muted-foreground">✨ AI উক্তি সাজেশন — ক্লিক করে নিন:</p>
+                  {quoteSuggestions.map((suggestion, idx) => (
+                    <button
+                      key={idx}
+                      type="button"
+                      onClick={() => setQuote(suggestion)}
+                      className={`w-full text-left text-[11px] p-2 rounded-lg border transition-all leading-relaxed ${
+                        quote === suggestion
+                          ? "border-primary bg-primary/10 text-primary font-semibold"
+                          : "border-border bg-muted/50 text-foreground hover:border-primary/50 hover:bg-primary/5"
+                      }`}
+                    >
+                      ❝ {suggestion.slice(0, 150)}{suggestion.length > 150 ? "..." : ""} ❞
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
 
             {/* Image Upload */}
