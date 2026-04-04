@@ -27,6 +27,7 @@ interface CardPreviewProps {
   title: string;
   quote: string;
   images: CardImage[];
+  displayDate?: string | null;
   showQr: boolean;
   showLogo: boolean;
   qrUrl: string;
@@ -45,6 +46,40 @@ interface CardPreviewProps {
 
 const defaultImageTransform: ImageTransform = { x: 0, y: 0, scale: 1, rotate: 0 };
 const defaultTextTransform: TextTransform = { x: 0, y: 0 };
+
+function SmartImage({
+  src,
+  alt,
+  className,
+  style,
+}: {
+  src: string;
+  alt: string;
+  className?: string;
+  style?: React.CSSProperties;
+}) {
+  const [crossOriginMode, setCrossOriginMode] = useState<"anonymous" | undefined>(() =>
+    src.startsWith("blob:") || src.startsWith("data:") ? undefined : "anonymous"
+  );
+
+  useEffect(() => {
+    setCrossOriginMode(src.startsWith("blob:") || src.startsWith("data:") ? undefined : "anonymous");
+  }, [src]);
+
+  return (
+    <img
+      src={src}
+      alt={alt}
+      className={className}
+      crossOrigin={crossOriginMode}
+      style={style}
+      draggable={false}
+      onError={() => {
+        if (crossOriginMode === "anonymous") setCrossOriginMode(undefined);
+      }}
+    />
+  );
+}
 
 const CLIP_PATHS: Record<ClipShape, string | undefined> = {
   none: undefined,
@@ -134,7 +169,7 @@ function DraggableElement({
 const CardPreview = forwardRef<HTMLDivElement, CardPreviewProps>(
   (
     {
-      template, title, quote, images, showQr, showLogo, qrUrl,
+      template, title, quote, images, displayDate, showQr, showLogo, qrUrl,
       bgImage, bgOpacity = 1, frameAspectRatio,
       imageTransform, titleTransform, quoteTransform,
       imageOnTop = false, clipShape = "none",
@@ -144,7 +179,10 @@ const CardPreview = forwardRef<HTMLDivElement, CardPreviewProps>(
   ) => {
     const { bgColor, textColor, accentColor, borderStyle, fontStyle, logoText, subtitleText, footerLabel, footerUrl } = template;
 
-    const today = new Date().toLocaleDateString("bn-BD", { day: "numeric", month: "long", year: "numeric" });
+      const parsedDate = displayDate ? new Date(displayDate) : null;
+      const renderedDate = parsedDate && !Number.isNaN(parsedDate.getTime())
+        ? parsedDate.toLocaleDateString("bn-BD", { day: "numeric", month: "long", year: "numeric" })
+        : new Date().toLocaleDateString("bn-BD", { day: "numeric", month: "long", year: "numeric" });
     const fontClass = fontStyle === "serif" || fontStyle === "decorative" ? "font-serif" : "";
     const transform = imageTransform || defaultImageTransform;
     const titlePosition = titleTransform || defaultTextTransform;
@@ -192,7 +230,7 @@ const CardPreview = forwardRef<HTMLDivElement, CardPreviewProps>(
     );
 
     const renderDate = () => (
-      <span className="text-[8px] opacity-70" style={{ color: textColor }}>{today}</span>
+      <span className="text-[8px] opacity-70" style={{ color: textColor }}>{renderedDate}</span>
     );
 
     // Frame mode
@@ -205,8 +243,8 @@ const CardPreview = forwardRef<HTMLDivElement, CardPreviewProps>(
           style={{ backgroundColor: bgColor, border: borderStyle || "none", aspectRatio: String(frameAspectRatio || 4 / 5) }}>
           {images[0] && (
             <DraggableElement onDragDelta={handleImageDrag} className="absolute inset-0 overflow-hidden" style={{ zIndex: imageZ }}>
-              <img src={images[0].preview} alt={title || "ফটো কার্ড"} className="absolute inset-0 w-full h-full object-cover pointer-events-none"
-                crossOrigin="anonymous" style={imageStyle} draggable={false} />
+              <SmartImage src={images[0].preview} alt={title || "ফটো কার্ড"} className="absolute inset-0 w-full h-full object-cover pointer-events-none"
+                style={imageStyle} />
             </DraggableElement>
           )}
           {bgImage && (
@@ -259,13 +297,13 @@ const CardPreview = forwardRef<HTMLDivElement, CardPreviewProps>(
                 </div>
               </div>
             )}
-            <span className="text-[8px] opacity-50" style={{ color: textColor }}>{today}</span>
+            <span className="text-[8px] opacity-50" style={{ color: textColor }}>{renderedDate}</span>
           </div>
           {images[0] && (
             <div className="px-3">
               <DraggableElement onDragDelta={handleImageDrag} className="rounded-xl overflow-hidden aspect-[4/3] relative">
-                <img src={images[0].preview} alt={title || "ফটো কার্ড"} className="absolute inset-0 w-full h-full object-cover pointer-events-none"
-                  crossOrigin="anonymous" style={imageStyle} draggable={false} />
+                <SmartImage src={images[0].preview} alt={title || "ফটো কার্ড"} className="absolute inset-0 w-full h-full object-cover pointer-events-none"
+                  style={imageStyle} />
               </DraggableElement>
               {images[0].caption && <p className="text-[9px] mt-1 opacity-60 text-center" style={{ color: textColor }}>{images[0].caption}</p>}
             </div>
@@ -295,7 +333,7 @@ const CardPreview = forwardRef<HTMLDivElement, CardPreviewProps>(
             <div className="px-3 pb-3 grid grid-cols-3 gap-1.5">
               {images.slice(1, 4).map((img, idx) => (
                 <div key={idx} className="rounded-lg overflow-hidden aspect-square relative">
-                  <img src={img.preview} alt="" className="w-full h-full object-cover" crossOrigin="anonymous" />
+                  <SmartImage src={img.preview} alt="" className="w-full h-full object-cover" />
                   {img.caption && (
                     <div className="absolute bottom-0 left-0 right-0 bg-black/60 px-1 py-0.5">
                       <p className="text-[7px] text-white truncate">{img.caption}</p>

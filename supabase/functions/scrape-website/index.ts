@@ -42,24 +42,41 @@ function cleanTitle(value: string): string {
 
 function isLikelyArticlePath(pathname: string): boolean {
   const path = pathname.toLowerCase().replace(/\/+$/, '');
-  const segments = path.split('/').filter(Boolean);
+  const segments = path.split('/').filter(Boolean).map((segment) => segment.replace(/\.(html?)$/i, ''));
   if (segments.length === 0) return false;
 
   const lastSegment = segments[segments.length - 1];
   if (lastSegment.length < 4) return false;
   if (GENERIC_PATH_SEGMENTS.has(lastSegment)) return false;
   if (segments.length === 1 && GENERIC_PATH_SEGMENTS.has(segments[0])) return false;
+  if (/^(index|home|latest|news|details?)$/.test(lastSegment)) return false;
+
+  const meaningfulSegments = segments.filter((segment) => !GENERIC_PATH_SEGMENTS.has(segment));
+  if (meaningfulSegments.length === 0) return false;
+
+  const articleSegment = meaningfulSegments[meaningfulSegments.length - 1];
+  const hasArticleHint = /[0-9]/.test(articleSegment) || articleSegment.includes('-') || articleSegment.length >= 14;
+  if (segments.length <= 2 && !hasArticleHint) return false;
 
   return true;
 }
 
-function isGenericSectionTitle(title: string, category: string): boolean {
+function isGenericSectionTitle(title: string, category: string, url?: string): boolean {
   const normalizedTitle = normalizeText(title);
   const normalizedCategory = normalizeText(category);
 
   if (!normalizedTitle || normalizedTitle.length < 5) return true;
   if (normalizedTitle === normalizedCategory) return true;
   if (GENERIC_TITLES.has(title.trim()) && normalizedTitle.length <= 16) return true;
+
+  if (url) {
+    try {
+      const path = new URL(url).pathname.toLowerCase().replace(/\/+$/, '');
+      const segments = path.split('/').filter(Boolean);
+      if (segments.length <= 2 && segments.every((segment) => GENERIC_PATH_SEGMENTS.has(segment))) return true;
+      if (/^\/gallery\/(health|entertainment|international|sports|education|economy)$/.test(path)) return true;
+    } catch {}
+  }
 
   return false;
 }
@@ -234,7 +251,7 @@ serve(async (req) => {
             if (!articleHtml) continue;
 
             const title = extractTitle(articleHtml);
-            if (!title || title.length < 5 || isGenericSectionTitle(title, scraper.category)) {
+            if (!title || title.length < 5 || isGenericSectionTitle(title, scraper.category, link)) {
               skippedGeneric++;
               continue;
             }
