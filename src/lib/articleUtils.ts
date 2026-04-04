@@ -13,7 +13,7 @@ const GENERIC_ARTICLE_TITLES = new Set([
   "অর্থনীতি",
   "আন্তর্জাতিক",
   "জাতীয়",
-  "জাতীয়",
+  "জাতীয়",
   "ভিডিও",
   "খেলা",
   "খেলাধুলা",
@@ -98,7 +98,7 @@ function scoreSentence(sentence: string, title: string) {
   const ratio = sentence.length ? digitCount / sentence.length : 1;
   let score = 0;
 
-  if (/[“"❝❞]/.test(sentence)) score += 6;
+  if (/[""❝❞]/.test(sentence)) score += 6;
   if (sentence.length >= 45 && sentence.length <= 150) score += 4;
   if (banglaCount >= 18) score += 3;
   if (sentence.includes(":") || sentence.includes("—")) score += 1;
@@ -133,4 +133,56 @@ export function buildArticleQuote(article: { title?: string | null; content?: st
     .replace(/\s+/g, " ")
     .slice(0, 220)
     .trim();
+}
+
+/**
+ * Generate multiple smart quote suggestions from article content.
+ * Returns up to `count` unique ranked quotes.
+ */
+export function buildArticleQuoteSuggestions(
+  article: { title?: string | null; content?: string | null },
+  count = 3
+): string[] {
+  const title = stripArticleMarkup(article.title);
+  const cleanContent = cleanupArticleText(article.content || "");
+
+  if (!cleanContent) return title ? [title] : [];
+
+  const candidates = cleanContent
+    .split(/(?<=[।!?])\s+|\n+/)
+    .map((s) => s.trim())
+    .filter((s) => s.length >= 28)
+    .filter((s) => !GENERIC_ARTICLE_TITLES.has(s))
+    .filter((s) => s !== title);
+
+  if (candidates.length === 0) {
+    const fallback = cleanContent.slice(0, 220).trim();
+    return fallback ? [fallback] : title ? [title] : [];
+  }
+
+  const scored = candidates
+    .map((sentence) => ({ sentence, score: scoreSentence(sentence, title) }))
+    .sort((a, b) => b.score - a.score);
+
+  const results: string[] = [];
+  const seen = new Set<string>();
+
+  for (const { sentence } of scored) {
+    const clean = sentence
+      .replace(/^[-–—:]+\s*/, "")
+      .replace(/\s+/g, " ")
+      .slice(0, 220)
+      .trim();
+
+    if (clean.length < 20) continue;
+
+    const key = clean.slice(0, 40).toLowerCase();
+    if (seen.has(key)) continue;
+    seen.add(key);
+
+    results.push(clean);
+    if (results.length >= count) break;
+  }
+
+  return results;
 }
