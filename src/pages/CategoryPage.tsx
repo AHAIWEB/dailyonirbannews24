@@ -92,7 +92,7 @@ export default function CategoryPage() {
               <>
                 {/* Hero article */}
                 {page === 0 && articles[0] && (
-                  <a href={articles[0].source_url} target="_blank" rel="noopener noreferrer"
+                  <Link to={`/post/${articles[0].id}`}
                     className="block relative rounded-xl overflow-hidden group mb-4">
                     <div className="aspect-video bg-muted">
                       {articles[0].image_url && (
