@@ -297,7 +297,7 @@ const CardPreview = forwardRef<HTMLDivElement, CardPreviewProps>(
                 </div>
               </div>
             )}
-            <span className="text-[8px] opacity-50" style={{ color: textColor }}>{today}</span>
+            <span className="text-[8px] opacity-50" style={{ color: textColor }}>{renderedDate}</span>
           </div>
           {images[0] && (
             <div className="px-3">
