@@ -7,7 +7,7 @@ import { PRESET_TEMPLATES, type CardTemplate } from "@/components/photocard/Card
 import { Download, Share2, Image, Type, Quote, QrCode, Upload, X, Plus, Palette, LayoutTemplate, Link2, RotateCw, Move, ZoomIn, Layers, Crop } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
-import { buildArticleQuote, isLikelyGenericArticle, normalizeArticleImageUrl } from "@/lib/articleUtils";
+import { buildArticleQuote, buildArticleQuoteSuggestions, isLikelyGenericArticle, normalizeArticleImageUrl } from "@/lib/articleUtils";
 import { toast } from "sonner";
 import { useSearchParams } from "react-router-dom";
 
@@ -26,6 +26,11 @@ interface FetchedArticle {
   source_name: string | null;
   category: string;
   published_at: string | null;
+}
+
+interface QuoteSuggestion {
+  text: string;
+  source: "local" | "metadata";
 }
 
 export default function PhotoCardGenerator() {
@@ -52,6 +57,7 @@ export default function PhotoCardGenerator() {
   const [fetchedArticles, setFetchedArticles] = useState<FetchedArticle[]>([]);
   const [headlineSearch, setHeadlineSearch] = useState("");
   const [headlineLoading, setHeadlineLoading] = useState(false);
+  const [quoteSuggestions, setQuoteSuggestions] = useState<string[]>([]);
 
   // Image transform
   const [imageTransform, setImageTransform] = useState<ImageTransform>({ x: 0, y: 0, scale: 1, rotate: 0 });
@@ -240,20 +246,39 @@ export default function PhotoCardGenerator() {
 
   const pickQuoteFromArticle = async (article: FetchedArticle) => {
     setCardDate(article.published_at);
-    setQuote(buildArticleQuote(article));
+
+    // Generate local suggestions first
+    const localSuggestions = buildArticleQuoteSuggestions(article, 3);
+    setQuoteSuggestions(localSuggestions);
+    if (localSuggestions.length > 0) setQuote(localSuggestions[0]);
 
     if (article.source_url) {
       const metadata = await loadArticleMetadata(article.source_url);
       if (metadata) {
-        const upgradedQuote = buildArticleQuote({
+        const metaSuggestions = buildArticleQuoteSuggestions({
           title: metadata.title || article.title,
           content: metadata.content || metadata.description || article.content,
-        });
-        if (upgradedQuote) setQuote(upgradedQuote);
+        }, 3);
+
+        // Merge unique suggestions
+        const seen = new Set(localSuggestions.map((s: string) => s.slice(0, 40)));
+        const merged = [...localSuggestions];
+        for (const s of metaSuggestions) {
+          const key = s.slice(0, 40);
+          if (!seen.has(key)) {
+            seen.add(key);
+            merged.push(s);
+          }
+        }
+        const final = merged.slice(0, 3);
+        setQuoteSuggestions(final);
+        if (final.length > 0 && (!localSuggestions.length || final[0] !== localSuggestions[0])) {
+          setQuote(final[0]);
+        }
       }
     }
 
-    toast.success("সংক্ষিপ্ত উক্তি যোগ হয়েছে");
+    toast.success(`${Math.max(localSuggestions.length, 1)}টি উক্তি সাজেশন পাওয়া গেছে`);
   };
 
   const loadFetchedArticles = async () => {
@@ -565,6 +590,27 @@ export default function PhotoCardGenerator() {
               </label>
               <textarea value={quote} onChange={e => setQuote(e.target.value)} placeholder="❝ কোটেশন লিখুন... ❞" rows={2}
                 className="w-full bg-muted border border-border rounded px-3 py-2 text-sm text-foreground focus:ring-1 focus:ring-primary focus:outline-none resize-y" />
+              
+              {/* AI Quote Suggestions */}
+              {quoteSuggestions.length > 1 && (
+                <div className="mt-2 space-y-1.5">
+                  <p className="text-[10px] font-bold text-muted-foreground">✨ AI উক্তি সাজেশন — ক্লিক করে নিন:</p>
+                  {quoteSuggestions.map((suggestion, idx) => (
+                    <button
+                      key={idx}
+                      type="button"
+                      onClick={() => setQuote(suggestion)}
+                      className={`w-full text-left text-[11px] p-2 rounded-lg border transition-all leading-relaxed ${
+                        quote === suggestion
+                          ? "border-primary bg-primary/10 text-primary font-semibold"
+                          : "border-border bg-muted/50 text-foreground hover:border-primary/50 hover:bg-primary/5"
+                      }`}
+                    >
+                      ❝ {suggestion.slice(0, 150)}{suggestion.length > 150 ? "..." : ""} ❞
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
 
             {/* Image Upload */}

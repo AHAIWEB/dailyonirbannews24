@@ -38,7 +38,12 @@ export default function JobSection() {
 
   return (
     <section>
-      <SectionLabel label="চাকরি" />
+      <div className="flex items-center justify-between mb-1">
+        <SectionLabel label="চাকরি" />
+        <Link to="/archive/jobs" className="text-[10px] font-bold text-primary hover:underline flex items-center gap-1">
+          সব দেখুন <ArrowRight className="w-3 h-3" />
+        </Link>
+      </div>
 
       {articles.length === 0 ? (
         <div className="text-center py-8 text-muted-foreground text-sm">

@@ -14,9 +14,60 @@ const GENERIC_PATH_SEGMENTS = new Set([
 
 const GENERIC_TITLES = new Set([
   'বিনোদন', 'রাজনীতি', 'গ্যালারি', 'ফটো গ্যালারি', 'ফটো', 'ছবি', 'স্বাস্থ্য', 'স্বাস্থ্যসেবা', 'ভ্রমণ',
-  'লাইফস্টাইল', 'জীবনধারা', 'শিক্ষা', 'অর্থনীতি', 'আন্তর্জাতিক', 'জাতীয়', 'জাতীয়', 'ভিডিও',
+  'লাইফস্টাইল', 'জীবনধারা', 'শিক্ষা', 'অর্থনীতি', 'আন্তর্জাতিক', 'জাতীয়', 'জাতীয়', 'ভিডিও',
   'খেলা', 'খেলাধুলা', 'ধর্ম ও জীবন', 'বিজ্ঞান ও প্রযুক্তি', 'মত-দ্বিমত', 'নির্বাচন',
 ]);
+
+// ── Source-specific rules ──
+// Maps hostname patterns to custom skip-path regexes
+const SOURCE_RULES: Record<string, { skipPaths: RegExp[]; skipTitlePatterns?: RegExp[] }> = {
+  'ntvbd.com': {
+    skipPaths: [
+      /^\/(category|topic|latest|video|photo|live|archive|search|about|contact|author)\b/i,
+      /^\/[a-z-]{2,20}\/?$/i, // single-segment category like /politics/ /entertainment/
+    ],
+    skipTitlePatterns: [/^এনটিভি/i, /ntvbd/i],
+  },
+  'ntv.com.bd': {
+    skipPaths: [
+      /^\/(category|topic|latest|video|photo|live|archive|search|about|contact|author)\b/i,
+      /^\/[a-z-]{2,20}\/?$/i,
+    ],
+    skipTitlePatterns: [/^এনটিভি/i, /ntv/i],
+  },
+  'risingbd.com': {
+    skipPaths: [
+      /^\/(category|news-cat|cat|archive|gallery|video|search|about|contact)\b/i,
+      /^\/[a-z-]{2,20}\/?$/i,
+      /^\/my\//i, // user dashboard paths
+    ],
+    skipTitlePatterns: [/^রাইজিংবিডি/i, /risingbd/i],
+  },
+  'dailynayadiganta.com': {
+    skipPaths: [
+      /^\/(category|post-category|archive|gallery|video|search|about|contact)\b/i,
+      /^\/[a-z-]{2,20}\/?$/i,
+    ],
+    skipTitlePatterns: [/^নয়া দিগন্ত/i, /naya\s*diganta/i],
+  },
+  'nyadiganta.net': {
+    skipPaths: [
+      /^\/(category|post-category|archive|gallery|video|search|about|contact)\b/i,
+      /^\/[a-z-]{2,20}\/?$/i,
+    ],
+    skipTitlePatterns: [/^নয়া দিগন্ত/i],
+  },
+};
+
+function getSourceRules(url: string) {
+  try {
+    const hostname = new URL(url).hostname.replace(/^www\./, '');
+    for (const [pattern, rules] of Object.entries(SOURCE_RULES)) {
+      if (hostname === pattern || hostname.endsWith('.' + pattern)) return rules;
+    }
+  } catch {}
+  return null;
+}
 
 function stripHtml(html: string): string {
   return html.replace(/<[^>]*>/g, '').replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&#39;/g, "'").replace(/&nbsp;/g, ' ').trim();
@@ -40,10 +91,17 @@ function cleanTitle(value: string): string {
   return parts.sort((a, b) => b.length - a.length)[0] || raw;
 }
 
-function isLikelyArticlePath(pathname: string): boolean {
+function isLikelyArticlePath(pathname: string, sourceRules?: { skipPaths: RegExp[] } | null): boolean {
   const path = pathname.toLowerCase().replace(/\/+$/, '');
   const segments = path.split('/').filter(Boolean).map((segment) => segment.replace(/\.(html?)$/i, ''));
   if (segments.length === 0) return false;
+
+  // Source-specific skip rules
+  if (sourceRules) {
+    for (const re of sourceRules.skipPaths) {
+      if (re.test(path)) return false;
+    }
+  }
 
   const lastSegment = segments[segments.length - 1];
   if (lastSegment.length < 4) return false;
@@ -61,13 +119,20 @@ function isLikelyArticlePath(pathname: string): boolean {
   return true;
 }
 
-function isGenericSectionTitle(title: string, category: string, url?: string): boolean {
+function isGenericSectionTitle(title: string, category: string, url?: string, sourceRules?: { skipTitlePatterns?: RegExp[] } | null): boolean {
   const normalizedTitle = normalizeText(title);
   const normalizedCategory = normalizeText(category);
 
   if (!normalizedTitle || normalizedTitle.length < 5) return true;
   if (normalizedTitle === normalizedCategory) return true;
   if (GENERIC_TITLES.has(title.trim()) && normalizedTitle.length <= 16) return true;
+
+  // Source-specific title patterns
+  if (sourceRules?.skipTitlePatterns) {
+    for (const re of sourceRules.skipTitlePatterns) {
+      if (re.test(title.trim())) return true;
+    }
+  }
 
   if (url) {
     try {
@@ -98,6 +163,7 @@ function extractArticleLinks(html: string, baseUrl: string): string[] {
   const links: string[] = [];
   const seen = new Set<string>();
   const base = new URL(baseUrl);
+  const sourceRules = getSourceRules(baseUrl);
   
   const linkRegex = /<a[^>]+href=["']([^"'#]+)["'][^>]*>/gi;
   let match;
@@ -112,7 +178,7 @@ function extractArticleLinks(html: string, baseUrl: string): string[] {
       if (path === '/' || path.length < 5) continue;
       if (/\.(css|js|png|jpg|gif|svg|ico|pdf|xml|json|rss|atom)$/i.test(path)) continue;
       if (/\/(tag|author|page|search|login|register|contact|about|privacy|terms|category|#)/i.test(path)) continue;
-      if (!isLikelyArticlePath(path)) continue;
+      if (!isLikelyArticlePath(path, sourceRules)) continue;
       
       const fullUrl = url.origin + url.pathname;
       if (!seen.has(fullUrl)) {
@@ -219,6 +285,7 @@ serve(async (req) => {
     for (const scraper of scrapers) {
       try {
         console.log(`Scraping: ${scraper.url}`);
+        const sourceRules = getSourceRules(scraper.url);
         const pageHtml = await fetchPage(scraper.url);
         if (!pageHtml) {
           results.push({ scraper: scraper.name, error: 'Failed to fetch page' });
@@ -251,7 +318,7 @@ serve(async (req) => {
             if (!articleHtml) continue;
 
             const title = extractTitle(articleHtml);
-            if (!title || title.length < 5 || isGenericSectionTitle(title, scraper.category, link)) {
+            if (!title || title.length < 5 || isGenericSectionTitle(title, scraper.category, link, sourceRules)) {
               skippedGeneric++;
               continue;
             }
