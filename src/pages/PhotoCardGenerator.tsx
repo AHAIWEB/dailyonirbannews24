@@ -28,6 +28,11 @@ interface FetchedArticle {
   published_at: string | null;
 }
 
+interface QuoteSuggestion {
+  text: string;
+  source: "local" | "metadata";
+}
+
 export default function PhotoCardGenerator() {
   const { user, isAdmin } = useAuth();
   const canvasRef = useRef<HTMLDivElement>(null);
