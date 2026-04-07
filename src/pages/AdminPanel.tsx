@@ -100,6 +100,9 @@ export default function AdminPanel() {
             <TabsTrigger value="customize" className="flex items-center gap-1 text-[10px] md:text-xs px-2 py-1.5">
               <Palette className="w-3 h-3" /> কাস্টমাইজ
             </TabsTrigger>
+            <TabsTrigger value="archive" className="flex items-center gap-1 text-[10px] md:text-xs px-2 py-1.5">
+              <Database className="w-3 h-3" /> আর্কাইভ
+            </TabsTrigger>
             <TabsTrigger value="settings" className="flex items-center gap-1 text-[10px] md:text-xs px-2 py-1.5">
               <Settings className="w-3 h-3" /> সেটিংস
             </TabsTrigger>
