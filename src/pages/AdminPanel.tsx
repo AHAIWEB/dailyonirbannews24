@@ -11,6 +11,7 @@ import RssFeedManager from "@/components/admin/RssFeedManager";
 import AdminDashboardStats from "@/components/admin/AdminDashboardStats";
 import PostManager from "@/components/admin/PostManager";
 import SiteCustomizer from "@/components/admin/SiteCustomizer";
+import { ArchiveHub } from "@/components/archive-hub";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
