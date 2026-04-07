@@ -63,6 +63,10 @@ export default function PhotoCardGenerator() {
   const [externalCardFile, setExternalCardFile] = useState<File | null>(null);
   const [externalCardPreview, setExternalCardPreview] = useState<string>("");
   const [aiReadingCard, setAiReadingCard] = useState(false);
+  const [aiLogoAction, setAiLogoAction] = useState<"none" | "remove" | "replace" | "modify">("none");
+  const [aiLogoProcessing, setAiLogoProcessing] = useState(false);
+  const [replacementLogoText, setReplacementLogoText] = useState("");
+  const [replacementFooterText, setReplacementFooterText] = useState("");
 
   // Image transform
   const [imageTransform, setImageTransform] = useState<ImageTransform>({ x: 0, y: 0, scale: 1, rotate: 0 });
