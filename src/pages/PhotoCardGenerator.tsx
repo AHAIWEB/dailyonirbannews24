@@ -453,12 +453,82 @@ export default function PhotoCardGenerator() {
     }
   };
 
+  const aiProcessLogoFooter = async () => {
+    if (!externalCardFile && !images[0]) return;
+    setAiLogoProcessing(true);
+    try {
+      let imageUrl = "";
+      if (externalCardPreview) {
+        // Upload external card
+        const tempPath = `temp-logo-edit/${Date.now()}-${externalCardFile?.name || "card.png"}`;
+        if (externalCardFile) {
+          await supabase.storage.from("post-images").upload(tempPath, externalCardFile, { contentType: externalCardFile.type, upsert: true });
+        }
+        const { data: urlData } = supabase.storage.from("post-images").getPublicUrl(tempPath);
+        imageUrl = urlData.publicUrl;
+      } else {
+        // Use rendered card
+        const blob = await createCardBlob();
+        const tempPath = `temp-logo-edit/${Date.now()}-rendered.png`;
+        await supabase.storage.from("post-images").upload(tempPath, blob, { contentType: "image/png", upsert: true });
+        const { data: urlData } = supabase.storage.from("post-images").getPublicUrl(tempPath);
+        imageUrl = urlData.publicUrl;
+      }
+
+      const actionPrompt = aiLogoAction === "remove"
+        ? "এই কার্ড ইমেজে লোগো ও ফুটার টেক্সট খুঁজে বের করুন। JSON ফরম্যাটে উত্তর দিন: {\"logo_text\": \"...\", \"footer_text\": \"...\", \"suggestion\": \"লোগো/ফুটার রিমুভ করার জন্য কার্ড টেম্পলেটে showLogo: false সেট করুন এবং footerLabel খালি রাখুন\"}"
+        : aiLogoAction === "replace"
+        ? `এই কার্ড ইমেজে লোগো ও ফুটার কী আছে তা খুঁজুন। নতুন লোগো: "${replacementLogoText}", নতুন ফুটার: "${replacementFooterText}"। JSON: {"logo_text": "পুরাতন লোগো", "footer_text": "পুরাতন ফুটার", "new_logo": "${replacementLogoText}", "new_footer": "${replacementFooterText}", "suggestion": "প্রতিস্থাপন সফল"}`
+        : `এই কার্ড ইমেজের লোগো, ফুটার, ওয়াটারমার্ক ও ব্র্যান্ডিং বিশ্লেষণ করুন। JSON: {"logo_text": "...", "footer_text": "...", "watermark": "...", "brand_colors": ["#hex1", "#hex2"], "suggestion": "কীভাবে মডিফাই করবেন"}`;
+
+      const response = await supabase.functions.invoke("ai-read-card", {
+        body: { imageUrl, customPrompt: actionPrompt },
+      });
+
+      if (response.error) throw response.error;
+      const result = response.data;
+
+      if (aiLogoAction === "remove") {
+        setShowLogo(false);
+        setCustomFooterLabel("");
+        setCustomFooterUrl("");
+        if (!isCustom) {
+          setSelectedTemplate(prev => ({ ...prev, footerLabel: "", footerUrl: "" }));
+        }
+        toast.success("লোগো ও ফুটার রিমুভ হয়েছে");
+      } else if (aiLogoAction === "replace") {
+        const newLogo = replacementLogoText || result?.new_logo || "";
+        const newFooter = replacementFooterText || result?.new_footer || "";
+        if (isCustom) {
+          setCustomLogoText(newLogo);
+          setCustomFooterLabel(newFooter);
+        } else {
+          setSelectedTemplate(prev => ({ ...prev, logoText: newLogo, footerLabel: newFooter }));
+        }
+        setShowLogo(true);
+        toast.success("লোগো ও ফুটার প্রতিস্থাপিত হয়েছে");
+      } else {
+        // Modify - show analysis
+        const info = [
+          result?.logo_text && `লোগো: ${result.logo_text}`,
+          result?.footer_text && `ফুটার: ${result.footer_text}`,
+          result?.watermark && `ওয়াটারমার্ক: ${result.watermark}`,
+          result?.suggestion && `💡 ${result.suggestion}`,
+        ].filter(Boolean).join("\n");
+        toast.success(info || "বিশ্লেষণ সম্পন্ন", { duration: 8000 });
+      }
+    } catch (err: any) {
+      toast.error(err?.message || "AI প্রসেসিং ব্যর্থ");
+    } finally {
+      setAiLogoProcessing(false);
+    }
+  };
+
   const postExternalCardToSite = async () => {
     if (!externalCardPreview) return;
     setSaving(true);
     try {
       const postTitle = title.trim() || "ফটো কার্ড পোস্ট";
-      // Upload the external card image
       const fileName = `external-card-${Date.now()}.png`;
       const path = `photocard/${fileName}`;
       
