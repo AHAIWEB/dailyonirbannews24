@@ -839,6 +839,33 @@ export default function PhotoCardGenerator() {
               </div>
             </div>
 
+            {/* External Card Upload + AI Read */}
+            <div className="p-3 bg-muted rounded-lg border border-border space-y-2">
+              <p className="text-xs font-bold text-foreground flex items-center gap-1">
+                <ImagePlus className="w-3 h-3 text-primary" /> বাহ্যিক ডিজাইন কার্ড আপলোড
+              </p>
+              <p className="text-[10px] text-muted-foreground">বাইরে ডিজাইন করা কার্ড আপলোড করুন — AI শিরোনাম পড়বে ও সাইটে পোস্ট করবে</p>
+              <input type="file" accept="image/*" onChange={handleExternalCardUpload}
+                className="w-full bg-card border border-border rounded px-3 py-1.5 text-xs text-foreground file:mr-2 file:px-2 file:py-0.5 file:rounded file:border-0 file:bg-primary file:text-primary-foreground file:text-xs" />
+              
+              {externalCardPreview && (
+                <div className="space-y-2">
+                  <img src={externalCardPreview} alt="External card" className="w-full rounded-lg border border-border" />
+                  <div className="flex flex-wrap gap-2">
+                    <Button size="sm" variant="outline" onClick={aiReadExternalCard} disabled={aiReadingCard} className="gap-1 text-xs">
+                      {aiReadingCard ? "পড়ছে..." : "🤖 AI দিয়ে পড়ুন"}
+                    </Button>
+                    <Button size="sm" variant="secondary" onClick={postExternalCardToSite} disabled={saving} className="gap-1 text-xs">
+                      <Plus className="w-3 h-3" /> {saving ? "পোস্ট হচ্ছে..." : "সাইটে পোস্ট"}
+                    </Button>
+                    <button onClick={() => { setExternalCardFile(null); setExternalCardPreview(""); }} className="text-destructive text-xs underline">
+                      রিমুভ
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+
             {/* Background Opacity */}
             {customBgImage && (
               <div>
