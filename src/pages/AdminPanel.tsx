@@ -5,7 +5,7 @@ import { getReporterPhotoUrl } from "@/lib/storageUtils";
 import { useAuth } from "@/hooks/useAuth";
 import Header from "@/components/news/Header";
 import Footer from "@/components/news/Footer";
-import { Shield, Users, CheckCircle2, XCircle, FileText, Settings, UserCog, Eye, Trash2, Save, RefreshCw, Rss, LayoutDashboard, Send, Palette, Image } from "lucide-react";
+import { Shield, Users, CheckCircle2, XCircle, FileText, Settings, UserCog, Eye, Trash2, Save, RefreshCw, Rss, LayoutDashboard, Send, Palette, Image, Database } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import RssFeedManager from "@/components/admin/RssFeedManager";
 import AdminDashboardStats from "@/components/admin/AdminDashboardStats";
