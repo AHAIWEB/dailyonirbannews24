@@ -36,6 +36,7 @@ interface QuoteSuggestion {
 
 export default function PhotoCardGenerator() {
   const { user, isAdmin } = useAuth();
+  const { categories: dbCategories } = useSiteConfig();
   const canvasRef = useRef<HTMLDivElement>(null);
   const [searchParams] = useSearchParams();
 
