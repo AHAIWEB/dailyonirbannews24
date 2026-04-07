@@ -5,7 +5,7 @@ import Header from "@/components/news/Header";
 import Footer from "@/components/news/Footer";
 import CardPreview, { type ImageTransform, type TextTransform, type ClipShape } from "@/components/photocard/CardPreview";
 import { PRESET_TEMPLATES, type CardTemplate } from "@/components/photocard/CardTemplates";
-import { Download, Share2, Image, Type, Quote, QrCode, Upload, X, Plus, Palette, LayoutTemplate, Link2, RotateCw, Move, ZoomIn, Layers, Crop, ImagePlus } from "lucide-react";
+import { Download, Share2, Image, Type, Quote, QrCode, Upload, X, Plus, Palette, LayoutTemplate, Link2, RotateCw, Move, ZoomIn, Layers, Crop, ImagePlus, Wand2, EyeOff, Replace } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { buildArticleQuote, buildArticleQuoteSuggestions, isLikelyGenericArticle, normalizeArticleImageUrl } from "@/lib/articleUtils";
@@ -63,6 +63,10 @@ export default function PhotoCardGenerator() {
   const [externalCardFile, setExternalCardFile] = useState<File | null>(null);
   const [externalCardPreview, setExternalCardPreview] = useState<string>("");
   const [aiReadingCard, setAiReadingCard] = useState(false);
+  const [aiLogoAction, setAiLogoAction] = useState<"none" | "remove" | "replace" | "modify">("none");
+  const [aiLogoProcessing, setAiLogoProcessing] = useState(false);
+  const [replacementLogoText, setReplacementLogoText] = useState("");
+  const [replacementFooterText, setReplacementFooterText] = useState("");
 
   // Image transform
   const [imageTransform, setImageTransform] = useState<ImageTransform>({ x: 0, y: 0, scale: 1, rotate: 0 });
@@ -449,12 +453,82 @@ export default function PhotoCardGenerator() {
     }
   };
 
+  const aiProcessLogoFooter = async () => {
+    if (!externalCardFile && !images[0]) return;
+    setAiLogoProcessing(true);
+    try {
+      let imageUrl = "";
+      if (externalCardPreview) {
+        // Upload external card
+        const tempPath = `temp-logo-edit/${Date.now()}-${externalCardFile?.name || "card.png"}`;
+        if (externalCardFile) {
+          await supabase.storage.from("post-images").upload(tempPath, externalCardFile, { contentType: externalCardFile.type, upsert: true });
+        }
+        const { data: urlData } = supabase.storage.from("post-images").getPublicUrl(tempPath);
+        imageUrl = urlData.publicUrl;
+      } else {
+        // Use rendered card
+        const blob = await createCardBlob();
+        const tempPath = `temp-logo-edit/${Date.now()}-rendered.png`;
+        await supabase.storage.from("post-images").upload(tempPath, blob, { contentType: "image/png", upsert: true });
+        const { data: urlData } = supabase.storage.from("post-images").getPublicUrl(tempPath);
+        imageUrl = urlData.publicUrl;
+      }
+
+      const actionPrompt = aiLogoAction === "remove"
+        ? "এই কার্ড ইমেজে লোগো ও ফুটার টেক্সট খুঁজে বের করুন। JSON ফরম্যাটে উত্তর দিন: {\"logo_text\": \"...\", \"footer_text\": \"...\", \"suggestion\": \"লোগো/ফুটার রিমুভ করার জন্য কার্ড টেম্পলেটে showLogo: false সেট করুন এবং footerLabel খালি রাখুন\"}"
+        : aiLogoAction === "replace"
+        ? `এই কার্ড ইমেজে লোগো ও ফুটার কী আছে তা খুঁজুন। নতুন লোগো: "${replacementLogoText}", নতুন ফুটার: "${replacementFooterText}"। JSON: {"logo_text": "পুরাতন লোগো", "footer_text": "পুরাতন ফুটার", "new_logo": "${replacementLogoText}", "new_footer": "${replacementFooterText}", "suggestion": "প্রতিস্থাপন সফল"}`
+        : `এই কার্ড ইমেজের লোগো, ফুটার, ওয়াটারমার্ক ও ব্র্যান্ডিং বিশ্লেষণ করুন। JSON: {"logo_text": "...", "footer_text": "...", "watermark": "...", "brand_colors": ["#hex1", "#hex2"], "suggestion": "কীভাবে মডিফাই করবেন"}`;
+
+      const response = await supabase.functions.invoke("ai-read-card", {
+        body: { imageUrl, customPrompt: actionPrompt },
+      });
+
+      if (response.error) throw response.error;
+      const result = response.data;
+
+      if (aiLogoAction === "remove") {
+        setShowLogo(false);
+        setCustomFooterLabel("");
+        setCustomFooterUrl("");
+        if (!isCustom) {
+          setSelectedTemplate(prev => ({ ...prev, footerLabel: "", footerUrl: "" }));
+        }
+        toast.success("লোগো ও ফুটার রিমুভ হয়েছে");
+      } else if (aiLogoAction === "replace") {
+        const newLogo = replacementLogoText || result?.new_logo || "";
+        const newFooter = replacementFooterText || result?.new_footer || "";
+        if (isCustom) {
+          setCustomLogoText(newLogo);
+          setCustomFooterLabel(newFooter);
+        } else {
+          setSelectedTemplate(prev => ({ ...prev, logoText: newLogo, footerLabel: newFooter }));
+        }
+        setShowLogo(true);
+        toast.success("লোগো ও ফুটার প্রতিস্থাপিত হয়েছে");
+      } else {
+        // Modify - show analysis
+        const info = [
+          result?.logo_text && `লোগো: ${result.logo_text}`,
+          result?.footer_text && `ফুটার: ${result.footer_text}`,
+          result?.watermark && `ওয়াটারমার্ক: ${result.watermark}`,
+          result?.suggestion && `💡 ${result.suggestion}`,
+        ].filter(Boolean).join("\n");
+        toast.success(info || "বিশ্লেষণ সম্পন্ন", { duration: 8000 });
+      }
+    } catch (err: any) {
+      toast.error(err?.message || "AI প্রসেসিং ব্যর্থ");
+    } finally {
+      setAiLogoProcessing(false);
+    }
+  };
+
   const postExternalCardToSite = async () => {
     if (!externalCardPreview) return;
     setSaving(true);
     try {
       const postTitle = title.trim() || "ফটো কার্ড পোস্ট";
-      // Upload the external card image
       const fileName = `external-card-${Date.now()}.png`;
       const path = `photocard/${fileName}`;
       
@@ -866,7 +940,79 @@ export default function PhotoCardGenerator() {
               )}
             </div>
 
-            {/* Background Opacity */}
+            {/* AI Logo/Footer Edit */}
+            <div className="p-3 bg-muted rounded-lg border border-border space-y-2">
+              <p className="text-xs font-bold text-foreground flex items-center gap-1">
+                <Wand2 className="w-3 h-3 text-primary" /> AI লোগো/ফুটার এডিট
+              </p>
+              <p className="text-[10px] text-muted-foreground">কার্ডের লোগো ও ফুটার AI দিয়ে রিমুভ, রিপ্লেস বা বিশ্লেষণ করুন</p>
+
+              <div className="flex gap-1.5 flex-wrap">
+                {([
+                  { value: "remove", label: "🗑️ রিমুভ", icon: EyeOff },
+                  { value: "replace", label: "🔄 রিপ্লেস", icon: Replace },
+                  { value: "modify", label: "🔍 বিশ্লেষণ", icon: Wand2 },
+                ] as { value: typeof aiLogoAction; label: string; icon: any }[]).map((action) => (
+                  <button
+                    key={action.value}
+                    onClick={() => setAiLogoAction(action.value)}
+                    className={`px-2.5 py-1 rounded text-[10px] border transition-all ${
+                      aiLogoAction === action.value
+                        ? "border-primary bg-primary/10 text-primary font-bold"
+                        : "border-border text-muted-foreground hover:border-primary/50"
+                    }`}
+                  >
+                    {action.label}
+                  </button>
+                ))}
+              </div>
+
+              {aiLogoAction === "replace" && (
+                <div className="grid grid-cols-2 gap-2">
+                  <div>
+                    <label className="text-[10px] text-muted-foreground">নতুন লোগো টেক্সট</label>
+                    <input
+                      type="text"
+                      value={replacementLogoText}
+                      onChange={(e) => setReplacementLogoText(e.target.value)}
+                      placeholder="নতুন লোগো নাম"
+                      className="w-full bg-background border border-border rounded px-2 py-1 text-xs"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-[10px] text-muted-foreground">নতুন ফুটার টেক্সট</label>
+                    <input
+                      type="text"
+                      value={replacementFooterText}
+                      onChange={(e) => setReplacementFooterText(e.target.value)}
+                      placeholder="নতুন ফুটার"
+                      className="w-full bg-background border border-border rounded px-2 py-1 text-xs"
+                    />
+                  </div>
+                </div>
+              )}
+
+              {aiLogoAction !== "none" && (
+                <Button
+                  size="sm"
+                  onClick={aiProcessLogoFooter}
+                  disabled={aiLogoProcessing || (aiLogoAction === "replace" && !replacementLogoText && !replacementFooterText)}
+                  className="gap-1 text-xs w-full"
+                >
+                  <Wand2 className="w-3 h-3" />
+                  {aiLogoProcessing
+                    ? "প্রসেসিং..."
+                    : aiLogoAction === "remove"
+                    ? "লোগো/ফুটার রিমুভ করুন"
+                    : aiLogoAction === "replace"
+                    ? "লোগো/ফুটার রিপ্লেস করুন"
+                    : "কার্ড বিশ্লেষণ করুন"
+                  }
+                </Button>
+              )}
+            </div>
+
+
             {customBgImage && (
               <div>
                 <label className="text-[10px] font-bold text-muted-foreground mb-1 block">

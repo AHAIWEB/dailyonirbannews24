@@ -14,6 +14,51 @@ export type Database = {
   }
   public: {
     Tables: {
+      archived_articles: {
+        Row: {
+          author: string | null
+          category: string | null
+          content: string | null
+          created_at: string | null
+          featured_image: string | null
+          html_content: string | null
+          id: string
+          published_date: string | null
+          scraped_at: string | null
+          source_url: string
+          title: string
+          updated_at: string | null
+        }
+        Insert: {
+          author?: string | null
+          category?: string | null
+          content?: string | null
+          created_at?: string | null
+          featured_image?: string | null
+          html_content?: string | null
+          id?: string
+          published_date?: string | null
+          scraped_at?: string | null
+          source_url: string
+          title: string
+          updated_at?: string | null
+        }
+        Update: {
+          author?: string | null
+          category?: string | null
+          content?: string | null
+          created_at?: string | null
+          featured_image?: string | null
+          html_content?: string | null
+          id?: string
+          published_date?: string | null
+          scraped_at?: string | null
+          source_url?: string
+          title?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -219,6 +264,36 @@ export type Database = {
           last_fetched_at?: string | null
           name?: string
           updated_at?: string
+          url?: string
+        }
+        Relationships: []
+      }
+      scrape_schedules: {
+        Row: {
+          created_at: string | null
+          id: string
+          interval: string | null
+          is_active: boolean | null
+          last_run: string | null
+          updated_at: string | null
+          url: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          interval?: string | null
+          is_active?: boolean | null
+          last_run?: string | null
+          updated_at?: string | null
+          url: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          interval?: string | null
+          is_active?: boolean | null
+          last_run?: string | null
+          updated_at?: string | null
           url?: string
         }
         Relationships: []

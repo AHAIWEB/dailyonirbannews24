@@ -5,12 +5,13 @@ import { getReporterPhotoUrl } from "@/lib/storageUtils";
 import { useAuth } from "@/hooks/useAuth";
 import Header from "@/components/news/Header";
 import Footer from "@/components/news/Footer";
-import { Shield, Users, CheckCircle2, XCircle, FileText, Settings, UserCog, Eye, Trash2, Save, RefreshCw, Rss, LayoutDashboard, Send, Palette, Image } from "lucide-react";
+import { Shield, Users, CheckCircle2, XCircle, FileText, Settings, UserCog, Eye, Trash2, Save, RefreshCw, Rss, LayoutDashboard, Send, Palette, Image, Database } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import RssFeedManager from "@/components/admin/RssFeedManager";
 import AdminDashboardStats from "@/components/admin/AdminDashboardStats";
 import PostManager from "@/components/admin/PostManager";
 import SiteCustomizer from "@/components/admin/SiteCustomizer";
+import { ArchiveHub } from "@/components/archive-hub";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -99,6 +100,9 @@ export default function AdminPanel() {
             <TabsTrigger value="customize" className="flex items-center gap-1 text-[10px] md:text-xs px-2 py-1.5">
               <Palette className="w-3 h-3" /> কাস্টমাইজ
             </TabsTrigger>
+            <TabsTrigger value="archive" className="flex items-center gap-1 text-[10px] md:text-xs px-2 py-1.5">
+              <Database className="w-3 h-3" /> আর্কাইভ
+            </TabsTrigger>
             <TabsTrigger value="settings" className="flex items-center gap-1 text-[10px] md:text-xs px-2 py-1.5">
               <Settings className="w-3 h-3" /> সেটিংস
             </TabsTrigger>
@@ -109,6 +113,7 @@ export default function AdminPanel() {
           <TabsContent value="reporters"><ReporterManagement /></TabsContent>
           <TabsContent value="users"><UserManagement /></TabsContent>
           <TabsContent value="customize"><SiteCustomizer /></TabsContent>
+          <TabsContent value="archive"><ArchiveHub showHeader={false} /></TabsContent>
           <TabsContent value="settings"><SiteSettings /></TabsContent>
         </Tabs>
       </div>

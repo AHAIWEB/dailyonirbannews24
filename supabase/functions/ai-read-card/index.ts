@@ -11,7 +11,7 @@ serve(async (req) => {
   }
 
   try {
-    const { imageUrl } = await req.json();
+    const { imageUrl, customPrompt } = await req.json();
     if (!imageUrl) {
       return new Response(JSON.stringify({ error: "imageUrl required" }), {
         status: 400,
@@ -45,7 +45,7 @@ serve(async (req) => {
               },
               {
                 type: 'text',
-                text: `এই নিউজ কার্ড ইমেজটি পড়ুন। নিচের JSON ফরম্যাটে উত্তর দিন:
+                text: customPrompt || `এই নিউজ কার্ড ইমেজটি পড়ুন। নিচের JSON ফরম্যাটে উত্তর দিন:
 {
   "title": "কার্ডের মূল শিরোনাম (বাংলায়)",
   "quote": "কার্ডে থাকা কোটেশন বা সংক্ষিপ্ত বিবরণ (বাংলায়)",
