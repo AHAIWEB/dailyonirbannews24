@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { generatePosts } from "@/data/mockData";
 import { Link } from "react-router-dom";
 import { Zap, AlertTriangle } from "lucide-react";
 
@@ -24,30 +23,47 @@ const widgetStyles: Record<string, { gradient: string; icon: React.ReactNode; ba
 
 export default function SidebarWidget({ label, title }: Props) {
   const [article, setArticle] = useState<any>(null);
-  const mockPost = generatePosts(label, 1)[0];
   const style = widgetStyles[label] || widgetStyles["ভাইরাল"];
 
   useEffect(() => {
     const load = async () => {
-      const { data } = await supabase
+      // Try exact category first
+      let { data } = await supabase
         .from("rss_articles")
         .select("*")
         .eq("is_published", true)
         .eq("category", label)
         .order("published_at", { ascending: false })
         .limit(1);
+
+      // Fallback to latest post with image
+      if (!data || data.length === 0) {
+        const fallback = await supabase
+          .from("rss_articles")
+          .select("*")
+          .eq("is_published", true)
+          .not("image_url", "is", null)
+          .order("published_at", { ascending: false })
+          .limit(1);
+        data = fallback.data;
+      }
+
       if (data && data.length > 0) setArticle(data[0]);
     };
     load();
   }, [label]);
 
-  const hasRss = !!article;
-  const item = hasRss
-    ? { title: article.title, image: article.image_url || "", url: article.source_url, excerpt: article.content || "", isExternal: true }
-    : { title: mockPost.title, image: mockPost.image, url: `/post/${mockPost.id}`, excerpt: mockPost.excerpt, isExternal: false };
+  if (!article) return null;
 
-  const inner = (
-    <>
+  const item = {
+    title: article.title,
+    image: article.image_url || "",
+    url: `/post/${article.id}`,
+    excerpt: article.content?.slice(0, 120) || "",
+  };
+
+  return (
+    <Link to={item.url} className="block rounded-xl overflow-hidden shadow-sm group relative">
       <div className={`bg-gradient-to-r ${style.gradient} text-white px-3 py-2 flex items-center gap-2`}>
         {style.icon}
         <span className="text-sm font-black tracking-wider">❝ {title} ❞</span>
@@ -61,12 +77,6 @@ export default function SidebarWidget({ label, title }: Props) {
           <p className="text-[10px] text-white/60 mt-1 line-clamp-2">{item.excerpt}</p>
         </div>
       </div>
-    </>
-  );
-
-  return item.isExternal ? (
-    <a href={item.url} target="_blank" rel="noopener noreferrer" className="block rounded-xl overflow-hidden shadow-sm group relative">{inner}</a>
-  ) : (
-    <Link to={item.url} className="block rounded-xl overflow-hidden shadow-sm group relative">{inner}</Link>
+    </Link>
   );
 }

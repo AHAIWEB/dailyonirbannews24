@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { generatePosts } from "@/data/mockData";
 import { Link } from "react-router-dom";
 import { Flame, Eye, Sparkles, TrendingUp, MessageCircle, Users } from "lucide-react";
 
@@ -28,29 +27,45 @@ const tabAccents: Record<string, string> = {
 export default function SidebarTabs({ tabs, title }: Props) {
   const [activeTab, setActiveTab] = useState(0);
   const [articles, setArticles] = useState<any[]>([]);
-  const mockPosts = generatePosts(tabs[activeTab].postLabel, tabs[activeTab].count);
 
   useEffect(() => {
     const load = async () => {
-      const { data } = await supabase
+      const tab = tabs[activeTab];
+      // First try exact category match
+      let { data } = await supabase
         .from("rss_articles")
         .select("*")
         .eq("is_published", true)
-        .eq("category", tabs[activeTab].postLabel)
+        .eq("category", tab.postLabel)
         .order("published_at", { ascending: false })
-        .limit(tabs[activeTab].count);
+        .limit(tab.count);
+
+      // Fallback: if no posts for this category, fetch latest posts
+      if (!data || data.length === 0) {
+        const fallback = await supabase
+          .from("rss_articles")
+          .select("*")
+          .eq("is_published", true)
+          .order("published_at", { ascending: false })
+          .limit(tab.count);
+        data = fallback.data;
+      }
+
       setArticles(data || []);
     };
     load();
   }, [activeTab, tabs]);
 
-  const hasRss = articles.length > 0;
   const activeLabel = tabs[activeTab].label;
   const accent = tabAccents[activeLabel] || "from-primary to-primary";
 
-  const items = hasRss
-    ? articles.map(a => ({ id: a.id, title: a.title, image: a.image_url || "", url: a.source_url, date: new Date(a.published_at).toLocaleDateString("bn-BD"), isExternal: true }))
-    : mockPosts.map(p => ({ id: String(p.id), title: p.title, image: p.image, url: `/post/${p.id}`, date: p.date, isExternal: false }));
+  const items = articles.map(a => ({
+    id: a.id,
+    title: a.title,
+    image: a.image_url || "",
+    url: `/post/${a.id}`,
+    date: a.published_at ? new Date(a.published_at).toLocaleDateString("bn-BD") : "",
+  }));
 
   return (
     <div className="bg-card rounded-xl shadow-sm overflow-hidden border border-border/50">
@@ -74,34 +89,21 @@ export default function SidebarTabs({ tabs, title }: Props) {
       )}
 
       <div className="divide-y divide-border/30">
-        {items.map((item, i) => {
-          const inner = (
-            <>
-              <span className={`text-base font-black leading-none mt-1 shrink-0 bg-gradient-to-br ${accent} bg-clip-text text-transparent`}>
-                {"০১২৩৪৫৬৭৮৯"[i + 1] || (i + 1)}
-              </span>
-              <div className="w-14 h-14 rounded-lg overflow-hidden shrink-0 ring-1 ring-border/30">
-                {item.image && <img src={item.image} alt={item.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300" />}
-              </div>
-              <div className="flex-1 min-w-0">
-                <h4 className="text-[11px] font-semibold leading-relaxed text-foreground group-hover:text-primary transition-colors line-clamp-3">{item.title}</h4>
-                <span className="text-[9px] text-muted-foreground mt-0.5 block">{item.date}</span>
-              </div>
-            </>
-          );
-
-          return item.isExternal ? (
-            <a key={item.id} href={item.url} target="_blank" rel="noopener noreferrer"
-              className="flex gap-2.5 p-2.5 group hover:bg-muted/50 transition-colors">
-              {inner}
-            </a>
-          ) : (
-            <Link key={item.id} to={item.url}
-              className="flex gap-2.5 p-2.5 group hover:bg-muted/50 transition-colors">
-              {inner}
-            </Link>
-          );
-        })}
+        {items.map((item, i) => (
+          <Link key={item.id} to={item.url}
+            className="flex gap-2.5 p-2.5 group hover:bg-muted/50 transition-colors">
+            <span className={`text-base font-black leading-none mt-1 shrink-0 bg-gradient-to-br ${accent} bg-clip-text text-transparent`}>
+              {"০১২৩৪৫৬৭৮৯"[i + 1] || (i + 1)}
+            </span>
+            <div className="w-14 h-14 rounded-lg overflow-hidden shrink-0 ring-1 ring-border/30">
+              {item.image && <img src={item.image} alt={item.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300" />}
+            </div>
+            <div className="flex-1 min-w-0">
+              <h4 className="text-[11px] font-semibold leading-relaxed text-foreground group-hover:text-primary transition-colors line-clamp-3">{item.title}</h4>
+              <span className="text-[9px] text-muted-foreground mt-0.5 block">{item.date}</span>
+            </div>
+          </Link>
+        ))}
       </div>
     </div>
   );
