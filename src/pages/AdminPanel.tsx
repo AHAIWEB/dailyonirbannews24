@@ -113,6 +113,7 @@ export default function AdminPanel() {
           <TabsContent value="reporters"><ReporterManagement /></TabsContent>
           <TabsContent value="users"><UserManagement /></TabsContent>
           <TabsContent value="customize"><SiteCustomizer /></TabsContent>
+          <TabsContent value="archive"><ArchiveHub showHeader={false} /></TabsContent>
           <TabsContent value="settings"><SiteSettings /></TabsContent>
         </Tabs>
       </div>
