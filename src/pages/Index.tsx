@@ -1,5 +1,6 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { useSiteConfig } from "@/hooks/useSiteConfig";
 import Header from "@/components/news/Header";
 import BreakingNews from "@/components/news/BreakingNews";
 import TopNews from "@/components/news/TopNews";
@@ -27,53 +28,9 @@ interface SectionConfig {
   visible: boolean;
 }
 
-interface SidebarConfig {
-  left: { label: string; postLabel: string; count: number }[];
-  right: { label: string; postLabel: string; count: number }[];
-  rightExtra: { label: string; postLabel: string; count: number }[];
-  widgets: { label: string; title: string; position: "left" | "right" }[];
-}
-
 const SECTION_LABEL_ALIASES: Record<string, string> = {
   "ভ্রমণ গাইড": "ভ্রমণ",
   "ফটো গ্যালারি": "গ্যালারি",
-};
-
-const DEFAULT_SECTIONS: SectionConfig[] = [
-  { label: "হাইলাইটস", count: 6, layout: "highlight", visible: true },
-  { label: "জাতীয়", count: 8, layout: "grid", visible: true },
-  { label: "ওয়েব স্টোরি", count: 9, layout: "webstory", visible: true },
-  { label: "রাজনীতি", count: 4, layout: "list", visible: true },
-  { label: "আন্তর্জাতিক", count: 5, layout: "highlight", visible: true },
-  { label: "বেলাভূমি কণ্ঠ", count: 6, layout: "fotocard", visible: true },
-  { label: "বিনোদন", count: 8, layout: "grid", visible: true },
-  { label: "গ্যালারি", count: 12, layout: "gallery", visible: true },
-  { label: "দেশ বাংলা", count: 8, layout: "deshbangla", visible: true },
-  { label: "লাইফস্টাইল", count: 6, layout: "highlight", visible: true },
-  { label: "ভ্রমণ", count: 6, layout: "grid", visible: true },
-  { label: "স্বাস্থ্যসেবা", count: 5, layout: "list", visible: true },
-  { label: "চাকরি", count: 5, layout: "list", visible: true },
-  { label: "টপটেন", count: 10, layout: "list", visible: true },
-  { label: "মতামত", count: 4, layout: "grid", visible: true },
-  { label: "ভিডিও", count: 4, layout: "grid", visible: true },
-];
-
-const DEFAULT_SIDEBAR: SidebarConfig = {
-  left: [
-    { label: "পিপল", postLabel: "পিপল", count: 7 },
-    { label: "একটু থামুন", postLabel: "একটু থামুন", count: 7 },
-  ],
-  right: [
-    { label: "আলোচিত", postLabel: "আলোচিত", count: 7 },
-    { label: "স্পট লাইট", postLabel: "স্পট লাইট", count: 7 },
-  ],
-  rightExtra: [
-    { label: "জনপ্রিয়", postLabel: "জনপ্রিয়", count: 7 },
-  ],
-  widgets: [
-    { label: "ভাইরাল", title: "ভাইরাল", position: "left" },
-    { label: "জটিল", title: "জটিল", position: "right" },
-  ],
 };
 
 const REQUIRED_SPECIAL_SECTIONS: SectionConfig[] = [
@@ -85,15 +42,11 @@ const REQUIRED_SPECIAL_SECTIONS: SectionConfig[] = [
 const getCanonicalLabel = (label: string) => SECTION_LABEL_ALIASES[label] || label;
 
 function ensureSpecialSections(configs: SectionConfig[]) {
-  const existing = new Set(configs.map((section) => getCanonicalLabel(section.label)));
-  const missing = REQUIRED_SPECIAL_SECTIONS.filter(
-    (section) => !existing.has(getCanonicalLabel(section.label))
-  );
-
+  const existing = new Set(configs.map((s) => getCanonicalLabel(s.label)));
+  const missing = REQUIRED_SPECIAL_SECTIONS.filter((s) => !existing.has(getCanonicalLabel(s.label)));
   return missing.length > 0 ? [...configs, ...missing] : configs;
 }
 
-// Map of special component labels to their renderers
 const SPECIAL_SECTIONS: Record<string, (config: SectionConfig) => JSX.Element> = {
   "ওয়েব স্টোরি": () => <WebStorySection key="webstory" />,
   "বেলাভূমি কণ্ঠ": () => <FotoCardSection key="fotocard" />,
@@ -111,14 +64,8 @@ const SPECIAL_SECTIONS: Record<string, (config: SectionConfig) => JSX.Element> =
 
 function renderSection(config: SectionConfig) {
   if (!config.visible) return null;
-
-  // Check if it's a special component
   const specialRenderer = SPECIAL_SECTIONS[getCanonicalLabel(config.label)] || SPECIAL_SECTIONS[config.label];
-  if (specialRenderer) {
-    return specialRenderer(config);
-  }
-
-  // Default: render as LabelPostSection with the configured layout/count
+  if (specialRenderer) return specialRenderer(config);
   return (
     <LabelPostSection
       key={config.label}
@@ -129,49 +76,39 @@ function renderSection(config: SectionConfig) {
   );
 }
 
+// Auto-refresh interval: 5 minutes
+const AUTO_REFRESH_MS = 5 * 60 * 1000;
+
 const Index = () => {
-  const [sections, setSections] = useState<SectionConfig[]>(DEFAULT_SECTIONS);
-  const [sidebar, setSidebar] = useState<SidebarConfig>(DEFAULT_SIDEBAR);
+  const { sections: rawSections, sidebar } = useSiteConfig();
+  const sections = ensureSpecialSections(rawSections);
+  const [refreshKey, setRefreshKey] = useState(0);
 
+  // Auto-refresh every 5 minutes
   useEffect(() => {
-    const loadConfig = async () => {
-      try {
-        const { data } = await supabase
-          .from("site_settings")
-          .select("value")
-          .eq("key", "layout_config")
-          .maybeSingle();
+    const interval = setInterval(() => {
+      setRefreshKey(k => k + 1);
+    }, AUTO_REFRESH_MS);
+    return () => clearInterval(interval);
+  }, []);
 
-        if (data?.value) {
-          const parsed = JSON.parse(data.value);
-          if (Array.isArray(parsed) && parsed.length > 0) {
-            setSections(ensureSpecialSections(parsed));
-          }
-        }
-      } catch {}
+  // Subscribe to realtime changes on rss_articles
+  useEffect(() => {
+    const channel = supabase
+      .channel("homepage-articles")
+      .on("postgres_changes", { event: "INSERT", schema: "public", table: "rss_articles" }, () => {
+        setRefreshKey(k => k + 1);
+      })
+      .subscribe();
 
-      try {
-        const { data } = await supabase
-          .from("site_settings")
-          .select("value")
-          .eq("key", "sidebar_config")
-          .maybeSingle();
-        if (data?.value) {
-          const parsed = JSON.parse(data.value);
-          if (parsed && typeof parsed === "object") {
-            setSidebar({ ...DEFAULT_SIDEBAR, ...parsed });
-          }
-        }
-      } catch {}
-    };
-    loadConfig();
+    return () => { supabase.removeChannel(channel); };
   }, []);
 
   const leftWidgets = sidebar.widgets.filter(w => w.position === "left");
   const rightWidgets = sidebar.widgets.filter(w => w.position === "right");
 
   return (
-    <div className="min-h-screen bg-background font-bangla">
+    <div className="min-h-screen bg-background font-bangla" key={refreshKey}>
       <Header />
       <BreakingNews />
 
@@ -188,7 +125,7 @@ const Index = () => {
             <RssNewsWidget />
           </aside>
 
-          {/* Main Content — Dynamic Sections */}
+          {/* Main Content */}
           <main className="lg:col-span-7 space-y-6 order-1 lg:order-2">
             <TopNews />
             <NewsCarousel />

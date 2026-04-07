@@ -1,10 +1,11 @@
 import { useEffect, useState, useRef } from "react";
 import { useAuth } from "@/hooks/useAuth";
+import { useSiteConfig } from "@/hooks/useSiteConfig";
 import Header from "@/components/news/Header";
 import Footer from "@/components/news/Footer";
 import CardPreview, { type ImageTransform, type TextTransform, type ClipShape } from "@/components/photocard/CardPreview";
 import { PRESET_TEMPLATES, type CardTemplate } from "@/components/photocard/CardTemplates";
-import { Download, Share2, Image, Type, Quote, QrCode, Upload, X, Plus, Palette, LayoutTemplate, Link2, RotateCw, Move, ZoomIn, Layers, Crop } from "lucide-react";
+import { Download, Share2, Image, Type, Quote, QrCode, Upload, X, Plus, Palette, LayoutTemplate, Link2, RotateCw, Move, ZoomIn, Layers, Crop, ImagePlus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { buildArticleQuote, buildArticleQuoteSuggestions, isLikelyGenericArticle, normalizeArticleImageUrl } from "@/lib/articleUtils";
