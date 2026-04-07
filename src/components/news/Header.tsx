@@ -2,25 +2,10 @@ import { Search, Menu, X, User, Bell, Home, ChevronDown, LogIn, UserPlus, Shield
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
+import { useSiteConfig } from "@/hooks/useSiteConfig";
 import { getFormattedDates } from "@/lib/banglaDate";
-import { supabase } from "@/integrations/supabase/client";
 import { bangladeshLocations } from "@/data/bangladeshLocations";
 
-interface SectionConfig {
-  label: string;
-  count: number;
-  layout: string;
-  visible: boolean;
-  subcategories?: string[];
-}
-
-const FALLBACK_NAV = [
-  "জাতীয়", "রাজনীতি", "আন্তর্জাতিক", "অর্থনীতি", "বিনোদন",
-  "খেলাধুলা", "প্রযুক্তি", "শিক্ষা", "স্বাস্থ্য", "লাইফস্টাইল",
-  "মতামত", "ভিডিও",
-];
-
-// দেশ বাংলা special — has division/district/upazila
 const DESH_BANGLA_LABEL = "দেশ বাংলা";
 
 export default function Header() {
@@ -28,46 +13,22 @@ export default function Header() {
   const [sticky, setSticky] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
-  const [navItems, setNavItems] = useState<string[]>(FALLBACK_NAV);
-  const [navSubcats, setNavSubcats] = useState<Record<string, string[]>>({});
-  const [hasDeshBangla, setHasDeshBangla] = useState(false);
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
-  // দেশ বাংলা dropdowns
   const [selectedDiv, setSelectedDiv] = useState<string | null>(null);
   const [selectedDist, setSelectedDist] = useState<string | null>(null);
   const { user, isAdmin, isReporter, signOut, loading } = useAuth();
+  const { sections, categories } = useSiteConfig();
   const navigate = useNavigate();
 
-  // Load nav from layout_config
-  useEffect(() => {
-    const loadNav = async () => {
-      try {
-        const { data } = await supabase
-          .from("site_settings")
-          .select("value")
-          .eq("key", "layout_config")
-          .maybeSingle();
-        if (data?.value) {
-          const sections: SectionConfig[] = JSON.parse(data.value);
-          const visible = sections.filter(s => s.visible);
-          const labels = visible.map(s => s.label).filter(l => l !== "শীর্ষ সংবাদ" && l !== "হাইলাইটস" && l !== "ওয়েব স্টোরি" && l !== "বেলাভূমি কণ্ঠ");
-          if (labels.length > 0) {
-            setNavItems(labels);
-            // Build subcategory map
-            const subcatMap: Record<string, string[]> = {};
-            visible.forEach(s => {
-              if (s.subcategories && s.subcategories.length > 0) {
-                subcatMap[s.label] = s.subcategories;
-              }
-            });
-            setNavSubcats(subcatMap);
-            setHasDeshBangla(labels.includes(DESH_BANGLA_LABEL));
-          }
-        }
-      } catch {}
-    };
-    loadNav();
-  }, []);
+  // Build subcategory map from sections
+  const navSubcats: Record<string, string[]> = {};
+  sections.forEach(s => {
+    if (s.subcategories && s.subcategories.length > 0) {
+      navSubcats[s.label] = s.subcategories;
+    }
+  });
+  const navItems = categories;
+  const hasDeshBangla = navItems.includes(DESH_BANGLA_LABEL);
 
   useEffect(() => {
     const onScroll = () => setSticky(window.scrollY > 150);
@@ -225,7 +186,6 @@ export default function Header() {
                       {(hasSub || isDeshBangla) && <ChevronDown className="w-3 h-3" />}
                     </Link>
 
-                    {/* Subcategory dropdown */}
                     {openDropdown === item && hasSub && !isDeshBangla && (
                       <div className="absolute top-full left-0 bg-card border border-border rounded-lg shadow-xl py-1 min-w-[160px] z-[200]">
                         {navSubcats[item].map(sub => (
@@ -236,11 +196,9 @@ export default function Header() {
                       </div>
                     )}
 
-                    {/* দেশ বাংলা mega dropdown */}
                     {openDropdown === item && isDeshBangla && (
                       <div className="absolute top-full left-0 bg-card border border-border rounded-lg shadow-xl p-3 min-w-[400px] z-[200]">
                         <div className="flex gap-3">
-                          {/* Divisions */}
                           <div className="w-1/3 border-r border-border pr-2 max-h-[300px] overflow-y-auto">
                             <p className="text-[10px] font-bold text-muted-foreground mb-1 flex items-center gap-1">
                               <MapPin className="w-3 h-3" /> বিভাগ
@@ -257,8 +215,6 @@ export default function Header() {
                               </button>
                             ))}
                           </div>
-
-                          {/* Districts */}
                           <div className="w-1/3 border-r border-border pr-2 max-h-[300px] overflow-y-auto">
                             <p className="text-[10px] font-bold text-muted-foreground mb-1">জেলা</p>
                             {selectedDiv && Object.keys(bangladeshLocations[selectedDiv]).map(dist => (
@@ -273,18 +229,16 @@ export default function Header() {
                               </button>
                             ))}
                           </div>
-
-                          {/* Upazilas */}
                           <div className="w-1/3 max-h-[300px] overflow-y-auto">
                             <p className="text-[10px] font-bold text-muted-foreground mb-1">উপজেলা</p>
                             {selectedDiv && selectedDist && bangladeshLocations[selectedDiv][selectedDist]?.map(upz => (
-                              <a
+                              <Link
                                 key={upz}
-                                href="#"
+                                to={`/category/${encodeURIComponent(upz)}`}
                                 className="block px-2 py-1.5 text-xs text-foreground hover:bg-muted rounded transition-colors"
                               >
                                 {upz}
-                              </a>
+                              </Link>
                             ))}
                           </div>
                         </div>
@@ -370,19 +324,17 @@ export default function Header() {
                       )}
                     </div>
 
-                    {/* Mobile subcategories */}
                     {isOpen && hasSub && !isDeshBangla && (
                       <div className="bg-muted/50 border-b border-border">
                         {navSubcats[item].map(sub => (
-                          <a key={sub} href="#" onClick={() => setMenuOpen(false)}
+                          <Link key={sub} to={`/category/${encodeURIComponent(sub)}`} onClick={() => setMenuOpen(false)}
                             className="block px-8 py-2 text-xs text-foreground hover:text-primary transition-colors">
                             {sub}
-                          </a>
+                          </Link>
                         ))}
                       </div>
                     )}
 
-                    {/* Mobile দেশ বাংলা */}
                     {isOpen && isDeshBangla && (
                       <div className="bg-muted/50 border-b border-border px-4 py-2 space-y-2">
                         <select
@@ -406,10 +358,10 @@ export default function Header() {
                         {selectedDiv && selectedDist && (
                           <div className="grid grid-cols-2 gap-1">
                             {bangladeshLocations[selectedDiv][selectedDist]?.map(upz => (
-                              <a key={upz} href="#" onClick={() => setMenuOpen(false)}
+                              <Link key={upz} to={`/category/${encodeURIComponent(upz)}`} onClick={() => setMenuOpen(false)}
                                 className="block px-2 py-1.5 text-[10px] text-foreground hover:text-primary bg-card rounded border border-border/50">
                                 {upz}
-                              </a>
+                              </Link>
                             ))}
                           </div>
                         )}
