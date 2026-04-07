@@ -11,7 +11,7 @@ serve(async (req) => {
   }
 
   try {
-    const { imageUrl } = await req.json();
+    const { imageUrl, customPrompt } = await req.json();
     if (!imageUrl) {
       return new Response(JSON.stringify({ error: "imageUrl required" }), {
         status: 400,
