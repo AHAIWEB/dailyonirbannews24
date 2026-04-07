@@ -1,10 +1,11 @@
 import { useEffect, useState, useRef } from "react";
 import { useAuth } from "@/hooks/useAuth";
+import { useSiteConfig } from "@/hooks/useSiteConfig";
 import Header from "@/components/news/Header";
 import Footer from "@/components/news/Footer";
 import CardPreview, { type ImageTransform, type TextTransform, type ClipShape } from "@/components/photocard/CardPreview";
 import { PRESET_TEMPLATES, type CardTemplate } from "@/components/photocard/CardTemplates";
-import { Download, Share2, Image, Type, Quote, QrCode, Upload, X, Plus, Palette, LayoutTemplate, Link2, RotateCw, Move, ZoomIn, Layers, Crop } from "lucide-react";
+import { Download, Share2, Image, Type, Quote, QrCode, Upload, X, Plus, Palette, LayoutTemplate, Link2, RotateCw, Move, ZoomIn, Layers, Crop, ImagePlus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { buildArticleQuote, buildArticleQuoteSuggestions, isLikelyGenericArticle, normalizeArticleImageUrl } from "@/lib/articleUtils";
@@ -35,6 +36,7 @@ interface QuoteSuggestion {
 
 export default function PhotoCardGenerator() {
   const { user, isAdmin } = useAuth();
+  const { categories: dbCategories } = useSiteConfig();
   const canvasRef = useRef<HTMLDivElement>(null);
   const [searchParams] = useSearchParams();
 
@@ -58,6 +60,9 @@ export default function PhotoCardGenerator() {
   const [headlineSearch, setHeadlineSearch] = useState("");
   const [headlineLoading, setHeadlineLoading] = useState(false);
   const [quoteSuggestions, setQuoteSuggestions] = useState<string[]>([]);
+  const [externalCardFile, setExternalCardFile] = useState<File | null>(null);
+  const [externalCardPreview, setExternalCardPreview] = useState<string>("");
+  const [aiReadingCard, setAiReadingCard] = useState(false);
 
   // Image transform
   const [imageTransform, setImageTransform] = useState<ImageTransform>({ x: 0, y: 0, scale: 1, rotate: 0 });
@@ -77,24 +82,10 @@ export default function PhotoCardGenerator() {
 
   const isCustom = selectedTemplate.id === "custom";
 
+  // Dynamic categories from DB + fixed extras
   const cardCategories = [
     "বেলাভূমি কণ্ঠ",
-    "জাতীয়",
-    "আন্তর্জাতিক",
-    "রাজনীতি",
-    "দেশ বাংলা",
-    "বিনোদন",
-    "গ্যালারি",
-    "ভ্রমণ",
-    "চাকরি",
-    "ভিডিও",
-    "মতামত",
-    "খেলা",
-    "প্রযুক্তি",
-    "লাইফস্টাইল",
-    "স্বাস্থ্যসেবা",
-    "শিক্ষা",
-    "অর্থনীতি",
+    ...dbCategories.filter(c => c !== "বেলাভূমি কণ্ঠ"),
   ];
 
   const activeTemplate: CardTemplate = isCustom
@@ -406,6 +397,92 @@ export default function PhotoCardGenerator() {
       toast.success("ফটো কার্ড ডাউনলোড হয়েছে!");
     } catch (err: any) {
       toast.error(err?.message || "ডাউনলোড ব্যর্থ");
+    }
+  };
+
+  // External card upload + AI read
+  const handleExternalCardUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setExternalCardFile(file);
+    if (externalCardPreview.startsWith("blob:")) URL.revokeObjectURL(externalCardPreview);
+    setExternalCardPreview(URL.createObjectURL(file));
+    toast.success("বাহ্যিক কার্ড আপলোড হয়েছে");
+  };
+
+  const aiReadExternalCard = async () => {
+    if (!externalCardFile) return;
+    setAiReadingCard(true);
+    try {
+      // Upload to storage temporarily
+      const tempPath = `temp-card-read/${Date.now()}-${externalCardFile.name}`;
+      const { error: upErr } = await supabase.storage
+        .from("post-images")
+        .upload(tempPath, externalCardFile, { contentType: externalCardFile.type, upsert: true });
+      if (upErr) throw upErr;
+      const { data: urlData } = supabase.storage.from("post-images").getPublicUrl(tempPath);
+      const imageUrl = urlData.publicUrl;
+
+      // Use AI to read the card
+      const response = await supabase.functions.invoke("ai-read-card", {
+        body: { imageUrl },
+      });
+
+      if (response.error) throw response.error;
+      const result = response.data;
+
+      if (result?.title) setTitle(result.title);
+      if (result?.quote) setQuote(result.quote);
+      if (result?.source) {
+        // Try to find content from source
+        const metadata = await loadArticleMetadata(result.source);
+        if (metadata?.content) {
+          setQuote(buildArticleQuote({ title: result.title || metadata.title, content: metadata.content }));
+        }
+      }
+
+      toast.success("AI কার্ড পড়া সম্পন্ন!");
+    } catch (err: any) {
+      toast.error(err?.message || "AI কার্ড পড়তে ব্যর্থ");
+    } finally {
+      setAiReadingCard(false);
+    }
+  };
+
+  const postExternalCardToSite = async () => {
+    if (!externalCardPreview) return;
+    setSaving(true);
+    try {
+      const postTitle = title.trim() || "ফটো কার্ড পোস্ট";
+      // Upload the external card image
+      const fileName = `external-card-${Date.now()}.png`;
+      const path = `photocard/${fileName}`;
+      
+      if (externalCardFile) {
+        const { error: uploadErr } = await supabase.storage
+          .from("post-images")
+          .upload(path, externalCardFile, { contentType: externalCardFile.type, upsert: false });
+        if (uploadErr) throw uploadErr;
+      }
+
+      const { data: urlData } = supabase.storage.from("post-images").getPublicUrl(path);
+      const sourceUrl = `${window.location.origin}/post/external-card-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+
+      const { error } = await supabase.from("rss_articles").upsert({
+        title: postTitle,
+        content: quote || null,
+        image_url: urlData.publicUrl,
+        source_url: sourceUrl,
+        source_name: "বেলাভূমি কণ্ঠ",
+        category,
+        is_published: true,
+      }, { onConflict: "source_url" });
+      if (error) throw error;
+      toast.success("বাহ্যিক কার্ড সাইটে পোস্ট হয়েছে!");
+    } catch (err: any) {
+      toast.error("পোস্ট ব্যর্থ: " + err.message);
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -760,6 +837,33 @@ export default function PhotoCardGenerator() {
                   <button onClick={clearUploadedFrame} className="text-destructive text-xs underline">রিমুভ</button>
                 )}
               </div>
+            </div>
+
+            {/* External Card Upload + AI Read */}
+            <div className="p-3 bg-muted rounded-lg border border-border space-y-2">
+              <p className="text-xs font-bold text-foreground flex items-center gap-1">
+                <ImagePlus className="w-3 h-3 text-primary" /> বাহ্যিক ডিজাইন কার্ড আপলোড
+              </p>
+              <p className="text-[10px] text-muted-foreground">বাইরে ডিজাইন করা কার্ড আপলোড করুন — AI শিরোনাম পড়বে ও সাইটে পোস্ট করবে</p>
+              <input type="file" accept="image/*" onChange={handleExternalCardUpload}
+                className="w-full bg-card border border-border rounded px-3 py-1.5 text-xs text-foreground file:mr-2 file:px-2 file:py-0.5 file:rounded file:border-0 file:bg-primary file:text-primary-foreground file:text-xs" />
+              
+              {externalCardPreview && (
+                <div className="space-y-2">
+                  <img src={externalCardPreview} alt="External card" className="w-full rounded-lg border border-border" />
+                  <div className="flex flex-wrap gap-2">
+                    <Button size="sm" variant="outline" onClick={aiReadExternalCard} disabled={aiReadingCard} className="gap-1 text-xs">
+                      {aiReadingCard ? "পড়ছে..." : "🤖 AI দিয়ে পড়ুন"}
+                    </Button>
+                    <Button size="sm" variant="secondary" onClick={postExternalCardToSite} disabled={saving} className="gap-1 text-xs">
+                      <Plus className="w-3 h-3" /> {saving ? "পোস্ট হচ্ছে..." : "সাইটে পোস্ট"}
+                    </Button>
+                    <button onClick={() => { setExternalCardFile(null); setExternalCardPreview(""); }} className="text-destructive text-xs underline">
+                      রিমুভ
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* Background Opacity */}
