@@ -60,6 +60,9 @@ export default function PhotoCardGenerator() {
   const [headlineSearch, setHeadlineSearch] = useState("");
   const [headlineLoading, setHeadlineLoading] = useState(false);
   const [quoteSuggestions, setQuoteSuggestions] = useState<string[]>([]);
+  const [externalCardFile, setExternalCardFile] = useState<File | null>(null);
+  const [externalCardPreview, setExternalCardPreview] = useState<string>("");
+  const [aiReadingCard, setAiReadingCard] = useState(false);
 
   // Image transform
   const [imageTransform, setImageTransform] = useState<ImageTransform>({ x: 0, y: 0, scale: 1, rotate: 0 });
