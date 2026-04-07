@@ -82,24 +82,10 @@ export default function PhotoCardGenerator() {
 
   const isCustom = selectedTemplate.id === "custom";
 
+  // Dynamic categories from DB + fixed extras
   const cardCategories = [
     "বেলাভূমি কণ্ঠ",
-    "জাতীয়",
-    "আন্তর্জাতিক",
-    "রাজনীতি",
-    "দেশ বাংলা",
-    "বিনোদন",
-    "গ্যালারি",
-    "ভ্রমণ",
-    "চাকরি",
-    "ভিডিও",
-    "মতামত",
-    "খেলা",
-    "প্রযুক্তি",
-    "লাইফস্টাইল",
-    "স্বাস্থ্যসেবা",
-    "শিক্ষা",
-    "অর্থনীতি",
+    ...dbCategories.filter(c => c !== "বেলাভূমি কণ্ঠ"),
   ];
 
   const activeTemplate: CardTemplate = isCustom
