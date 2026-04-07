@@ -1,0 +1,1 @@
+ALTER TABLE public.archived_articles ADD COLUMN IF NOT EXISTS summary TEXT, ADD COLUMN IF NOT EXISTS tags TEXT[] DEFAULT '{}';

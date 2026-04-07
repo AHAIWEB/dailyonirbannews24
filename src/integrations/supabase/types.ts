@@ -26,6 +26,8 @@ export type Database = {
           published_date: string | null
           scraped_at: string | null
           source_url: string
+          summary: string | null
+          tags: string[] | null
           title: string
           updated_at: string | null
         }
@@ -40,6 +42,8 @@ export type Database = {
           published_date?: string | null
           scraped_at?: string | null
           source_url: string
+          summary?: string | null
+          tags?: string[] | null
           title: string
           updated_at?: string | null
         }
@@ -54,6 +58,8 @@ export type Database = {
           published_date?: string | null
           scraped_at?: string | null
           source_url?: string
+          summary?: string | null
+          tags?: string[] | null
           title?: string
           updated_at?: string | null
         }
