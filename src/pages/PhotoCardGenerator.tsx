@@ -400,6 +400,92 @@ export default function PhotoCardGenerator() {
     }
   };
 
+  // External card upload + AI read
+  const handleExternalCardUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setExternalCardFile(file);
+    if (externalCardPreview.startsWith("blob:")) URL.revokeObjectURL(externalCardPreview);
+    setExternalCardPreview(URL.createObjectURL(file));
+    toast.success("বাহ্যিক কার্ড আপলোড হয়েছে");
+  };
+
+  const aiReadExternalCard = async () => {
+    if (!externalCardFile) return;
+    setAiReadingCard(true);
+    try {
+      // Upload to storage temporarily
+      const tempPath = `temp-card-read/${Date.now()}-${externalCardFile.name}`;
+      const { error: upErr } = await supabase.storage
+        .from("post-images")
+        .upload(tempPath, externalCardFile, { contentType: externalCardFile.type, upsert: true });
+      if (upErr) throw upErr;
+      const { data: urlData } = supabase.storage.from("post-images").getPublicUrl(tempPath);
+      const imageUrl = urlData.publicUrl;
+
+      // Use AI to read the card
+      const response = await supabase.functions.invoke("ai-read-card", {
+        body: { imageUrl },
+      });
+
+      if (response.error) throw response.error;
+      const result = response.data;
+
+      if (result?.title) setTitle(result.title);
+      if (result?.quote) setQuote(result.quote);
+      if (result?.source) {
+        // Try to find content from source
+        const metadata = await loadArticleMetadata(result.source);
+        if (metadata?.content) {
+          setQuote(buildArticleQuote({ title: result.title || metadata.title, content: metadata.content }));
+        }
+      }
+
+      toast.success("AI কার্ড পড়া সম্পন্ন!");
+    } catch (err: any) {
+      toast.error(err?.message || "AI কার্ড পড়তে ব্যর্থ");
+    } finally {
+      setAiReadingCard(false);
+    }
+  };
+
+  const postExternalCardToSite = async () => {
+    if (!externalCardPreview) return;
+    setSaving(true);
+    try {
+      const postTitle = title.trim() || "ফটো কার্ড পোস্ট";
+      // Upload the external card image
+      const fileName = `external-card-${Date.now()}.png`;
+      const path = `photocard/${fileName}`;
+      
+      if (externalCardFile) {
+        const { error: uploadErr } = await supabase.storage
+          .from("post-images")
+          .upload(path, externalCardFile, { contentType: externalCardFile.type, upsert: false });
+        if (uploadErr) throw uploadErr;
+      }
+
+      const { data: urlData } = supabase.storage.from("post-images").getPublicUrl(path);
+      const sourceUrl = `${window.location.origin}/post/external-card-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+
+      const { error } = await supabase.from("rss_articles").upsert({
+        title: postTitle,
+        content: quote || null,
+        image_url: urlData.publicUrl,
+        source_url: sourceUrl,
+        source_name: "বেলাভূমি কণ্ঠ",
+        category,
+        is_published: true,
+      }, { onConflict: "source_url" });
+      if (error) throw error;
+      toast.success("বাহ্যিক কার্ড সাইটে পোস্ট হয়েছে!");
+    } catch (err: any) {
+      toast.error("পোস্ট ব্যর্থ: " + err.message);
+    } finally {
+      setSaving(false);
+    }
+  };
+
   const shareCard = async () => {
     try {
       const blob = await createCardBlob();
